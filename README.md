@@ -57,3 +57,5 @@ Later milestones include native mods, controller/keyboard customization, four-pl
 Preserve all upstream notices. [Third-party notices](docs/THIRD_PARTY_NOTICES.txt) describe the currently known source/dependency notices; there is no new blanket license assigned to the Melee source. Aurora retains its MIT license. The release's `notices/` directory preserves available dependency license texts; third-party DLLs are obtained separately through the runtime rebuild instructions.
 
 A daily local Codex publishing check is scheduled. It publishes reviewed changes when available; it does not generate empty daily commits, and requires the local environment and GitHub authorization to remain available.
+
+> Main has newer source than the pinned development binary. Read each release at its own source commit; the old binary is not claimed to include these newer changes.
