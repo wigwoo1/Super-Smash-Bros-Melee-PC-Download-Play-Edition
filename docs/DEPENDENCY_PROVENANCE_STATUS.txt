@@ -1,0 +1,25 @@
+DEPENDENCY PROVENANCE CHECKPOINT - 2026-10-16
+
+Status: VERIFIED for the archive comparisons and rebuild-recipe fixes below. The complete cold-dependency build remains PARTIALLY VERIFIED.
+
+Compared 102,505 files across ten retained upstream source archives with the cached sources used by the successful native rebuild. No archive files were missing. Two files differed:
+- Dawn's Vulkan allocator had an unrecorded one-line change from VK_NULL_HANDLE to VkBuffer{}. The packaged Dawn provider now applies that exact change automatically for the pinned source revision, with before/after SHA-256 guards. Unknown local edits are rejected without being overwritten.
+- zlib-ng's ARM intrinsic-header change was already covered by the existing PatchZlib.cmake. Applying that script to the original archived file reproduced the cached bytes exactly.
+
+Both patches passed repeat-application checks. The first Dawn fixture exposed Windows newline conversion; explicit LF output now reproduces the exact compiled source bytes. The unexpected-input test confirmed that local edits are preserved.
+
+The nod and Corrosion Git source trees have no tracked changes or untracked files. Their checked commits match the expected v2.0.0-alpha.10 and v0.6.1 release tags. Observed commit IDs are recorded in dependency-git-preflight.json.
+
+The old retained SDL archive files were empty. A fresh download from the declared Win32 SDL3 3.4.10 URL matched all 100 working package files. Its SHA-256 is now enforced by the default Win32 package recipe. A fresh CMake fetch, x86 compile and windowless SDL version probe passed. The corrected negative test rejected the actual wrong SHA-256. Its first attempt failed on a Windows file-URI error instead; that attempt is explicitly not counted as hash verification.
+
+A fresh Dawn archive download also matched the retained archive hash. Its source recipe now enforces that hash. The temporary duplicate download was removed only after comparison with the retained original. No source caches were deleted.
+
+The existing runtime core target passed its rebuild/configuration check after recipe updates. No runtime/game algorithm changed: the Dawn source fix exactly matches the bytes already compiled and tested. No game was launched; the installed preview, disc and saves are unchanged. Test probes opened no game window or audio device.
+
+Scope limits: these checks do not cover all Dawn nested Git dependencies, extra files outside the compared archives, Rust registry inputs, or a complete empty-cache toolchain build. The source map has 15 override keys for 14 unique folders, including two GoogleTest aliases; earlier references to15 folders meant overrides rather than unique directories.
+
+Source changes are synchronized in dependencies/aurora/cmake/AuroraSDL3Provider.cmake, AuroraDawnProvider.cmake and patches/PatchDawnWin32Handle.cmake. Evidence, fixture source and scripts are in development/dependency-provenance-20261016. The standalone audit fixtures contain machine-specific cache paths; they are evidence/reproduction aids, not new game launchers.
+
+Custom SDL package URLs may supply AURORA_SDL3_PACKAGE_SHA256 explicitly. The built-in Win32 3.4.10 package is pinned automatically. Experimental dependency revisions are outside this verification scope.
+
+Overall engineering estimate remains 25.55% (about 26%); goal active. Next: audit nested Dawn inputs and Rust lock/cache inputs, then validate a fully cold build. Luna Medium is suitable for read-only provenance work; use Sol Medium for compiler/dependency integration debugging.

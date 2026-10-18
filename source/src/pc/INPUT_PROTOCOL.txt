@@ -1,0 +1,94 @@
+Ordered input protocol, version 1 (development; no live network transport yet)
+
+One host-assembled packet carries all four ports for one consumed controller
+tick. Controller ticks include pause ticks and are distinct from gameplay
+frames. All integers use explicit little-endian bytes, never C struct layout.
+
+Exactly 84 bytes:
+  0..3   ASCII MINP
+  4..5   version = 1 (u16)
+  6..7   packet length = 84 (u16)
+  8..15  nonzero session identifier (u64)
+ 16..19  consumed controller tick identifier (u32)
+ 20..83  four 16-byte port records in port order 0,1,2,3
+
+Each port:
+  0..1   buttons (u16)
+  2..5   stick X/Y, substick X/Y (signed 8-bit, two's complement)
+  6..9   analog left/right trigger, analog A/B (u8)
+ 10      status: 0 connected, 255 disconnected
+ 11      reserved = 0
+ 12..15  native extended buttons (u32)
+
+Decoder validates the entire packet before publishing outputs. Consumer
+accepts only its next tick and rejects duplicate/skipped ticks or overwrite
+of pending input. Session IDs separate matches; they do not authenticate
+peers. The future transport must authenticate senders, negotiate match seed,
+rules, roster/content hashes and port ownership, assemble authorized per-port
+input, buffer/retransmit out-of-order packets, enforce bounded queues, and
+support cancellation/timeouts before feeding this owner-thread consumer.
+
+HSD_PadBeginOrderedInput(session_id, first_tick) now binds the controller to a
+nonzero session ID. It rejects replacement while a session is active; callers
+must explicitly end it. Packet staging also checks the bound ID, so passing a
+foreign packet's own ID cannot bypass the session boundary. A rejected begin
+or foreign buffered packet leaves pending data intact. This is session
+isolation, not proof of an authenticated peer or agreed match configuration.
+
+Tick exhaustion leaves ordered mode waiting until explicit session teardown;
+it cannot fall back to physical input or wrap into tick zero. Session end,
+controller reset/init and scene-loop exit clear staged values. No playable
+P2P/LAN or browser multiplayer acceptance is implied by this codec.
+
+Current owner-thread reorder buffer holds at most 16 consecutive tick slots.
+Validated packets may arrive out of order within that window. Identical
+pending duplicates return a separate duplicate result; conflicting duplicates,
+stale ticks and ticks outside the window are rejected without changing stored
+input. The controller stages only the front tick and removes it only on
+successful staging. Pending controller input leaves the next packet buffered.
+Session teardown clears all packet slots. Transport still needs retransmission,
+timeouts, authentication and negotiated ownership before multiplayer use.
+
+Windows udp_input.h is a development transport component with explicit numeric
+IPv4 bind/peer addresses and nonblocking sockets. Pump inspects at most32
+datagrams per call, validates endpoint and packet before enqueue, and discards
+oversized/truncated datagrams. No socket is opened until the caller explicitly
+opens it. Tests bind only127.0.0.1 on ephemeral ports; no public listener is
+created by normal startup. Endpoint filtering is not authentication, and
+successful UDP send does not prove delivery. The live game/lobby producer,
+retransmission, session negotiation, authenticated peers and NAT handling are
+still unimplemented. Close balances Winsock lifetime and erases input state.
+
+input_retry.h tracks one outstanding authoritative packet per channel with
+caller-supplied monotonic milliseconds, configurable retry interval, timeout
+and attempt cap. It retains exact bytes, changes the send count only after a
+successful send, rejects unsent or different-content confirmation, and clears
+state on confirmation/end. The external echo diagnostic uses20ms/2seconds/
+100attempts and confirms the same packet when it reaches the controller.
+This demonstrates bounded response-loss recovery, not a general ACK protocol.
+Authenticated acknowledgements, multiple peers, loss/reordering/duplicate
+policies and a user-visible disconnect/cancel path remain required.
+
+input_gather.h assembles one tick from four negotiated port-owner assignments.
+Owners0..3 identify peer connections;255 marks an unassigned controller. One
+peer may own multiple local controllers. All assigned ports must submit the
+same session/tick before output becomes ready. Identical duplicates are
+recognized; conflicting values and submissions for another peer's port are
+rejected. Begin rejects an active session until explicit End. Controller
+staging checks the bound session and advances the gather only after successful
+staging. Unassigned ports are disconnected, not fabricated player inputs.
+Peer identity must come from an authenticated connection. A claimed peer ID in
+an incoming packet is insufficient. Per-port wire messages and lobby ownership
+negotiation are not implemented by this assembly component.
+
+CLIENT OWNED-PORT SUBMISSION v1: 88 bytes. MIPS magic replaces MINP; version1, length88, session and tick retain assembled-packet offsets. Four16-byte controller records retain MINP encoding. Offset84 is nonzero four-bit port mask;85..87 reserved zero. Omitted ports must be canonical zero fields with err255. Peer identity comes from authenticated connection context, never payload. Decode validates complete subset into a gather copy and commits only after all ownership/tick/conflict/canonical checks pass. Result1 new,2 all duplicates,0 rejected. Session ID is not authentication. Current UDP transport accepts only assembled MINP packets; MIPS transport and session negotiation are pending.
+
+UDP SUBMISSION ADAPTER: One host socket receives MIPS packets from up to four uniquely mapped numeric IPv4 endpoints. Peer index derives from endpoint mapping, not payload. Nonblocking drain bounded32 datagrams; malformed/oversized/unregistered inputs rejected. Counters separate accepted/duplicates/rejected. Setup mapping must be authenticated by future lobby layer; endpoint filtering alone is not authentication. Adapter accepts current gathered tick only; future submission buffering, ACK/retry/disconnect and gameplay integration pending.
+
+OWNED SUBMISSION WINDOW: Bounded16 upcoming tick gathers per negotiated owner map. Future in-window submissions are validated atomically; incomplete current tick remains blocked even if later ticks complete. Release current complete tick only, then erase its slot; when controller stages it, gather advances before window drop. Reject stale/far-future/exhausted ticks, never wrap. End erases all collected inputs. UDP adapter can pump this window directly. Window does not provide ACK/retry or authentication.
+
+MATCH AGREEMENT v1:124bytes MAGR,versionu16@4,lengthu16@6,nonzerosessionu64@8,firstticku32@16,seedu32@20,4ownerbytes@24,buildSHA256@28,contentSHA256@60,rulesSHA256@92. Numericfields littleendian. Require nonzero32byte digests andatleastoneowner0..3,255unassigned. Requiredpeer mask derived fromowners. Eachauthenticated peer must independentlyconstruct samecanonicalconfiguration andaccept exactagreement; echoalone provesnothing. No inputwindow start untilallrequiredpeers accept. Digests notauthentication. Actual canonical rules/content/build generation and gameconfiguration application pending. Rules digest must cover stage,fighters,costumes,teams,stocks,timer,items,handicaps andall simulation-affecting settings; content digest must cover enabledmods/assets/native gameplay code, notonly filenames.
+
+CONTENT DIGEST v1: SHA256 over ASCII MELEE-CONTENT-v1 (no terminator),u32LEentrycount,thenstrictASCII-ID sorted entries eachu32LEIDlength,IDbytes,fileSHA25632bytes. IDs arelowercaseASCIIlogical paths (a-z0-9_.-/),nonemptysegments,noleadingdotsegment,noabsolute/backslash/colon/duplicates. Filesystempaths/displaynames mayUnicode; absoluteinstallpath nothashed. Caller mustenumerate completeactiveassets/mods/dependencies andprevent changes afteragreement; functioncannot infer omitted dependencies. Max4096entries currently; incomplete enumeration mustnot claim fullcompatibility.
+
+RULES ENCODING v1: MRUL+u32LEversion1; explicitu32LE semanticfields inmatch_rules.h order (44rulebitfields,13scalarfields,itemmask2words,3IEEE754floatwords,7stablecallbackIDs),u32LEGM_MAX_PLAYERS6,then36wordsperPlayerInitData. Signedintegers signextendedtou32; finitefloatbits unchanged; no structpadding/pointers. Total1152bytes. Callbackpresence mustmatch registeredIDpresence; stableIDregistrypending. x54/x58 pointer-backedmodepayloads rejectuntiltypedsemanticconversion. Serializer isnotclaimofcompleteexternalglobalsettings coverage ornetworkstart integration.

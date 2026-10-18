@@ -1,0 +1,21 @@
+# Require the committed Rust resolution for metadata and compilation.
+if (NOT DEFINED NOD_SOURCE_DIR)
+  message(FATAL_ERROR "NOD_SOURCE_DIR is required")
+endif ()
+set(_source "${NOD_SOURCE_DIR}/CMakeLists.txt")
+file(SHA256 "${_source}" _sha)
+if (_sha STREQUAL "ad466b56eaeb03cdb0acc50266bdb792751f5d4a03eccb7a790e22be4eb7b127")
+  return()
+endif ()
+# Git may check out the same source as LF or CRLF on Windows.
+if (NOT _sha STREQUAL "3862f47af50ac84287c93ec7de816b2eb3d190c7151d09958b8e27d07f20bcb5" AND
+    NOT _sha STREQUAL "db5761b41e5d60fa6238b5c948bc488dcadc1a1e3419df7a4b0c1ff46f7515b0")
+  message(FATAL_ERROR "nod CMake source differs from the pinned version; refusing to overwrite local changes")
+endif ()
+file(READ "${_source}" _text)
+string(REPLACE "corrosion_import_crate(\n" "corrosion_import_crate(\n    LOCKED\n" _text "${_text}")
+file(CONFIGURE OUTPUT "${_source}" CONTENT "${_text}" @ONLY NEWLINE_STYLE UNIX)
+file(SHA256 "${_source}" _sha)
+if (NOT _sha STREQUAL "ad466b56eaeb03cdb0acc50266bdb792751f5d4a03eccb7a790e22be4eb7b127")
+  message(FATAL_ERROR "nod lock-mode patch verification failed")
+endif ()

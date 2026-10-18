@@ -1,0 +1,36 @@
+SOURCE-TO-EXECUTABLE REBUILD - VERIFIED SCOPE (2026-10-16)
+
+The desktop game and Aurora source trees now have a verified path through fresh object/library compilation, a complete native executable link, and bounded muted D3D12/Vulkan menu/match tests on this PC. This used15 existing upstream dependency source folders. SDL3's pinned prebuilt import library, the Windows SDK and Microsoft CRT were intentionally reused. A cold dependency download and cross-machine rebuild are still unverified; the build is not yet accepted as a finished playable release.
+
+Open an x86 Visual Studio Developer Command Prompt with CMake, Ninja, Clang/Clang++, Python and Rust available. Rust needs the i686-pc-windows-msvc target. From this desktop package, choose a new, short build root:
+  set "MELEE_BUILD_ROOT=%USERPROFILE%\Documents\Codex\melee-build"
+
+1. Generate the private font inputs from your local disc copy:
+  python source/tools/extract_pc_fonts.py "native-preview/data/melee.nkit.iso" "%MELEE_BUILD_ROOT%\fonts"
+
+2. Build the native runtime:
+  python rebuild-native-runtime.py --build-dir "%MELEE_BUILD_ROOT%\runtime"
+
+3. Build the game library with the same Release configuration:
+  python rebuild-native-library.py --build-type Release --generated-includes "%MELEE_BUILD_ROOT%\fonts" --build-dir "%MELEE_BUILD_ROOT%\game"
+
+4. Link into a new output folder:
+  python link-game-audit.py --runtime-build "%MELEE_BUILD_ROOT%\runtime" --game-library "%MELEE_BUILD_ROOT%\game\melee.lib" --output "%MELEE_BUILD_ROOT%\output\melee.exe" --no-saves
+
+Commands above describe the standard layout. The tested machine-specific command records in development/source-rebuild-20261016 use explicit tool paths and an explicit dependency-source map. Step2 without that map will download dependencies; that cold-fetch path is not yet verified. See RUNTIME_REBUILD.txt for tool overrides and cached-source semantics. The target runner execute-target-for-cmake.py must stay beside the runtime driver.
+
+For an assembled private install, the new executable needs SDL3.dll from runtime/examples, webgpu_dawn.dll from runtime/_deps/dawn-build, nod.dll from runtime/_deps/aurora_nod-build and the matching x86 Microsoft runtime DLLs listed in native-preview/runtime-manifest.json. Put the user's own disc copy at output/data/melee.nkit.iso. An optional authorized texture pack belongs at output/content/hd. Keep credits/notices. No disc or texture artwork is included in the diagnostic runtime below, and generated font data is kept out of the source snapshot. Do not replace an existing working preview merely because compilation passed.
+
+Verified build details:
+- Fresh short output folders: Documents/Codex/mrb for the runtime and mgb for the game.
+- Runtime: complete build passed after declaring the standalone sample's missing aurora::pad link dependency. No game/render algorithm changed.
+- Game: all1011 compile/archive steps passed, including locally regenerated fonts. MELEE_NO_SAVES and MELEE_UNLOCK_ALL are ON. Card library is disabled and absent from the executable link.
+- Link: zero unresolved symbols; the12 Aurora archives resolve inside the fresh runtime tree. The only project-external import library is the pinned SDL3 prebuilt, besides Windows SDK/CRT system libraries.
+- Runtime staging: executable and all6DLLs are x86 PE files and hash-verified.
+- Two muted native tests used the new executable and DLLs with a system-only DLL PATH and explicit existing private disc/art paths. Both selected HD25 in the native menu, entered Yoshi's Story, reached600matchframes, uploaded/bound all4authoredmipchains and shut down cleanly (exit0,no timeout).
+- Captures inspected at427x240. Ready overlays obscure fighters and visual fidelity remains unfinished. Relocated Auto (D3D12 on this PC) and Vulkan checks subsequently passed; see REBUILT_RELOCATION_STATUS.txt. Performance, full roster/stage, physical input and D3D11 acceptance remain open.
+- Compiler warnings remain, including Rust's ignored MSVC-linker --target argument; PE checks confirm the produced files are x86. No retry was needed for that warning.
+
+Evidence, scripts, sanitized logs and a diagnostic runtime are in development/source-rebuild-20261016. The installed native-preview remains unchanged. Original disc and saves were not modified. Relocated Auto/Vulkan checks with these DLLs now passed. Next: audit cold dependency inputs and simplify the multi-step rebuild for modders.
+
+DEPENDENCY FOLLOW-UP (2026-10-16): Known Dawn/SDL archive hashes are now enforced; the cached Win32 Vulkan handle fix is exported as a guarded source patch. See DEPENDENCY_PROVENANCE_STATUS.txt. Complete cold and nested-dependency validation remain open.

@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-15",
+  "kind": "focused-native-unit-test",
+  "component": "src/pc/frame_clock.c",
+  "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/test_frame_clock.ps1",
+  "compiler": "Microsoft Visual C++ Build Tools 18, x64, /std:c11 /W4 /WX",
+  "result": "passed",
+  "assertions": [
+    "60, 120, and 240 Hz all produce exactly 60 simulation steps in one second",
+    "presentation counts equal the selected rate",
+    "fractional phase returns to zero after one second",
+    "nonuniform elapsed-time partitions produce the same counts and phase as one combined interval",
+    "null clock, null outputs, aliased outputs, unsupported rates, and corrupted rate are rejected",
+    "zero elapsed time produces zero work",
+    "UINT64_MAX elapsed nanoseconds do not overflow and match an independent quotient/remainder reference"
+  ],
+  "scope_limitations": [
+    "The frame clock is still not integrated into the game's update/render loop.",
+    "No display cadence, GPU rendering, input sampling, or gameplay behavior was tested.",
+    "This is not evidence that 120/240 FPS gameplay works or that gameplay speed is unchanged in a running match."
+  ],
+  "files": {
+    "test_source": "src/pc/tests/frame_clock_test.c",
+    "runner": "tools/test_frame_clock.ps1"
+  }
+}

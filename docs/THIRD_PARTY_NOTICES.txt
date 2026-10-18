@@ -1,0 +1,18 @@
+THIRD-PARTY AND SOURCE NOTICES
+
+Keep each original notice beside its corresponding files. The following license/notice files were present in this package source at the 2026-10-14 audit:
+
+- source/tools/dat-cli/LICENSE
+- source/tools/doxygen-awesome-css/LICENSE
+- source/tools/flags/LICENSE
+- source/tools/m2ctx/LICENSE
+- source/tools/replace-symbols/LICENSE
+- source/tools/rust-utils/COPYING
+- source/tools/rust-utils/COPYING.LESSER
+- source/tools/table-typer/LICENSE
+- dependencies/aurora/LICENSE (MIT; copyright notice is in that file)
+
+No single top-level LICENSE file was found in the Melee source snapshot. This inventory preserves notices found by filename; it is not a complete audit of every transitive dependency. Aurora's CMake pins external dependencies. The source trees exclude the original image and generated font includes, while the private native-preview/data directory contains a user-image copy and the native executable contains locally compiled fonts. These code notices do not grant rights to distribute original game data.
+
+PRIVATE PREVIEW RUNTIME NOTICES (2026-10-14)
+native-preview/runtime-notices preserves Aurora MIT, Dawn's license/notice file, SDL's supplied licenses, nod MIT/Apache notices and exact Cargo.lock, libpng's license, and the Aurora dependency-version declarations. NATIVE_PREVIEW_EVIDENCE.json inventories these files by SHA-256. The six runtime DLLs and versions/provenance are listed in native-preview/runtime-manifest.json. The three MSVC DLLs came from the installed Microsoft x86 CRT redistributable; a complete public-release redistribution/transitive-notice review remains unfinished.

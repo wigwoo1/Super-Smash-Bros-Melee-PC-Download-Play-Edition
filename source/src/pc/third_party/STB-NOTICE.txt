@@ -1,0 +1,5 @@
+stb_image.h v2.29, SHA256 C54B15A689E6A1F32C75E2EC23AFA442E3E0E37E894B73C1974D08679B20DD5C
+Vendored unchanged from build-aurora-x86/_deps/tracy-src/profiler/src/stb_image.h.
+Upstream project: https://github.com/nothings/stb (Sean Barrett and contributors).
+The full MIT/public-domain dual-license notices are retained at the end of stb_image.h; this package elects the MIT license.
+Native movie_decode.c uses internal baseline JPEG YCbCr planes from this exact pinned snapshot (no RGB conversion). Replacements require rerunning native decoder tests because these are internal interfaces. STBI_ONLY_JPEG, STBI_NO_STDIO, STBI_NO_SIMD and STBI_MAX_DIMENSIONS=640 are local compile definitions, not vendor edits.

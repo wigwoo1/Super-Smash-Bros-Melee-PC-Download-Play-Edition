@@ -1,0 +1,1441 @@
+#include "efasync.h"
+
+#include <stdarg.h>
+#include <stdlib.h>
+
+#include "efdata.h"
+#include "eflib.h"
+#include "efsync.h"
+#include "inlines.h"
+#include "types.h"
+#include <melee/cm/camera.h>
+#include <melee/lb/lb_00B0.h>
+#include <melee/lb/lbarchive.h>
+#include <melee/lb/lbdvd.h>
+#include <sysdolphin/baselib/generator.h>
+#include <sysdolphin/baselib/gobj.h>
+#include <sysdolphin/baselib/gobjproc.h>
+#include <sysdolphin/baselib/particle.h>
+#include <sysdolphin/baselib/psstructs.h>
+#ifdef TARGET_PC
+#include <pc/effect_palette_alias.h>
+#endif
+#include <sysdolphin/baselib/random.h>
+
+HSD_ObjAllocData efAsync_AllocData;
+
+static inline HSD_JObj* efAsync_GetEffectJObj(EF_Effect* effect)
+{
+    return GET_JOBJ(effect->gobj);
+}
+
+static inline void efAsync_SetEffectRandomRotationZ(EF_Effect* effect)
+{
+    HSD_JObjSetRotationZ(GET_JOBJ(effect->gobj), M_TAU * HSD_Randf());
+}
+
+static inline void efAsync_SetStoredAlphaEffect(EF_Effect* effect,
+                                                HSD_GObj* gobj, s32 gfx_id)
+{
+    effect->scale_flags |= EF_SCALE_INHERIT;
+    efLib_SetParamGfxId(gobj, gfx_id);
+    effect->update = efLib_Cb_ApplyStoredAlpha;
+}
+
+void* efAsync_Dispatch(s32 gfx_id, HSD_GObj* gobj, va_list vlist)
+{
+    u32 id;
+    Vec3 translate;
+    Vec3 scale;
+    HSD_Generator* generator;
+    HSD_psAppSRT* psAppSRT;
+    EF_Effect* effect;
+    Vec3* va_pos;
+    HSD_JObj* va_jobj;
+    void* ret_obj;
+    f64 rot_y;
+    f32 f32_2;
+    f32 f32_1;
+    u32 konst;
+    u32 tev0;
+    u32 color;
+    HSD_JObj* jobj_2;
+    HSD_JObj* jobj_1;
+    HSD_JObj* jobj_3;
+    Vec3* va_vec3;
+    s32 count;
+
+    PAD_STACK(8);
+
+    ret_obj = NULL;
+    switch (gfx_id) {
+    case 0x3E8:
+        if (HSD_Randi(8) == 0) {
+            ret_obj = efLib_Create_Attach_Pos(9, gobj, va_arg(vlist, Vec3*));
+        } else {
+            ret_obj = efLib_Create_Attach_Pos(0xA, gobj, va_arg(vlist, Vec3*));
+        }
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            f32_1 = (0.04f * (*va_arg(vlist, f32*))) + 0.3f;
+            if (f32_1 < 0.3f) {
+                f32_1 = 0.3f;
+            }
+            if (f32_1 > 1.5f) {
+                f32_1 = 1.5f;
+            }
+            scale.x = scale.y = scale.z = f32_1;
+            HSD_JObjSetScale(GET_JOBJ(effect->gobj), &scale);
+        }
+        break;
+    case 0x3E9:
+        ret_obj = efLib_CreateGenerator(0xC, va_arg(vlist, Vec3*));
+        break;
+    case 0x3EA:
+        ret_obj = efLib_CreateGenerator(0x14, va_arg(vlist, Vec3*));
+        break;
+    case 0x3EB:
+        ret_obj = efLib_Create_Attach_Pos(7, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x3EC:
+        ret_obj = efLib_Create_Attach_Pos(8, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            efAsync_SetEffectRandomRotationZ(ret_obj);
+        }
+        break;
+    case 0x3ED:
+        va_vec3 = va_arg(vlist, Vec3*);
+        f32_1 = va_vec3->x;
+        translate = *va_vec3;
+        ret_obj = efLib_CreateGenerator(0x50, &translate);
+        if (ret_obj != NULL) {
+            generator = efLib_CreateGenerator_AddAppSRT(0x54);
+            if (generator != NULL) {
+                Effect_SetGeneratorPos(generator, &translate);
+                if (*va_arg(vlist, f32*) < 0.0f) {
+                    rot_y = 0.0;
+                } else {
+                    rot_y = -M_PI;
+                }
+                psAppSRT = generator->appsrt;
+                psAppSRT->rot.y = rot_y;
+            }
+        }
+        break;
+    case 0x3EE:
+        ret_obj = efLib_Create_Attach_Pos(0x27, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            efAsync_SetEffectRandomRotationZ(ret_obj);
+        }
+        break;
+    case 0x3EF:
+    case 0x3F0:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        if (gfx_id == 0x3F0) {
+            f32_1 = *va_arg(vlist, f32*);
+        } else {
+            f32_1 = -*va_arg(vlist, f32*);
+        }
+        ret_obj =
+            efLib_CreateGenerator_Translate_FacingDir(0x42, &translate, f32_1);
+        break;
+    case 0x3F1:
+    case 0x3F2:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        if (gfx_id == 0x3F2) {
+            f32_1 = *va_arg(vlist, f32*);
+        } else {
+            f32_1 = -*va_arg(vlist, f32*);
+        }
+        ret_obj = efLib_CreateGenerator_Translate_FacingDir(0x14B, &translate,
+                                                            f32_1);
+        break;
+    case 0x3F3:
+        ret_obj = efLib_CreateGenerator(0xB, va_arg(vlist, Vec3*));
+        break;
+    case 0x3F4:
+        ret_obj = efLib_CreateGenerator(0x48, va_arg(vlist, Vec3*));
+        break;
+    case 0x3F5:
+        ret_obj = efLib_Create_Attach_Pos(0x10, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x3F6:
+        ret_obj = efLib_Create_Attach_Pos(0x11, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x3F7:
+        ret_obj = efLib_Create_Attach_Pos(0x12, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x3F8:
+        ret_obj = efLib_Create_Attach_Pos(0x13, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x3F9:
+        ret_obj = efLib_Create_Attach_Pos(0x14, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x3FA:
+        ret_obj = efLib_Create_Attach_Pos(0x15, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x3FB:
+        ret_obj = efLib_Create_Attach_Pos(0x16, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x3FC:
+        ret_obj = efLib_Create_Attach_Pos(0x17, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x3FD:
+        ret_obj = efLib_Create_Attach_Pos(3, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x3FE:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        f32_1 = *va_arg(vlist, f32*);
+        ret_obj = efLib_CreateGenerator_Translate_FacingDir(0x107, &translate,
+                                                            f32_1);
+        break;
+    case 0x3FF:
+        ret_obj = efLib_Create_Attach_Pos(5, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetFacingDir(ret_obj, *va_arg(vlist, f32*));
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x400:
+    case 0x401:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        if (gfx_id == 0x401) {
+            f32_1 = *va_arg(vlist, f32*);
+        } else {
+            f32_1 = -*va_arg(vlist, f32*);
+        }
+        ret_obj =
+            efLib_CreateGenerator_Translate_FacingDir(0x5A, &translate, f32_1);
+        break;
+    case 0x402:
+        ret_obj = hsd_8039EFAC(0, 0, 0x59, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x403:
+        ret_obj = hsd_8039EFAC(0, 0, 0x5E, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x404:
+        ret_obj = efLib_Create_Attach_Pos(0x18, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x405:
+        ret_obj = efLib_CreateGenerator(0x2C, va_arg(vlist, Vec3*));
+        break;
+    case 0x406:
+        ret_obj = efLib_Create_Attach_Pos(4, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x407:
+        ret_obj = efLib_CreateGenerator(0x3C, va_arg(vlist, Vec3*));
+        break;
+    case 0x408: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x3E);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            result->appsrt->rot.z = f32_1;
+        }
+        break;
+    }
+    case 0x409:
+        ret_obj = hsd_8039EFAC(0, 0, 0xE2, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x40A: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x241);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            result->appsrt->rot.z = f32_1;
+        }
+        break;
+    }
+    case 0x40B: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x242);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            result->appsrt->rot.z = f32_1;
+        }
+        break;
+    }
+    case 0x40C:
+        ret_obj = efLib_CreateGenerator(0x19, va_arg(vlist, Vec3*));
+        break;
+    case 0x40D: {
+        generator = efLib_CreateGenerator_AddAppSRT(0x19);
+        if (generator != NULL) {
+            Effect_SetGeneratorPos(generator, va_arg(vlist, Vec3*));
+            HSD_JObjGetScale(jobj_1 = GET_JOBJ(gobj), &scale);
+            ret_obj = generator;
+            Effect_SetGeneratorScale(generator, scale.y);
+        }
+        break;
+    }
+    case 0x40E:
+        ret_obj = efLib_CreateGenerator(0x43, va_arg(vlist, Vec3*));
+        break;
+    case 0x40F:
+        ret_obj = efLib_CreateGenerator(0xE3, va_arg(vlist, Vec3*));
+        break;
+    case 0x410:
+        ret_obj = efLib_CreateGenerator(0x22A, va_arg(vlist, Vec3*));
+        break;
+    case 0x411:
+        ret_obj = efLib_CreateGenerator(0x4B, va_arg(vlist, Vec3*));
+        break;
+    case 0x412:
+        ret_obj = hsd_8039EFAC(0, 0, 0x13, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x413:
+        ret_obj = hsd_8039EFAC(0, 0, 0x37, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x414:
+        ret_obj = hsd_8039EFAC(0, 0, 0xE1, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x415:
+        ret_obj =
+            efLib_Create_AttachChild(0x25, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            HSD_JObjSetScale(GET_JOBJ(effect->gobj), &scale);
+        }
+        break;
+    case 0x416:
+        ret_obj = efLib_CreateGenerator(0x196, va_arg(vlist, Vec3*));
+        break;
+    case 0x417:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach(0xB, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_1 = GET_JOBJ(effect->gobj);
+            tev0 = va_arg(vlist, u32);
+            jobj_2 = HSD_JObjGetChild(jobj_1);
+            if (tev0 == 0x606060) {
+                konst = 0x808080;
+            } else {
+                konst = 0xFFFFFF;
+            }
+            efLib_SetTevKonstColor(jobj_2, 1, konst, tev0);
+            efAsync_SetStoredAlphaEffect(effect, gobj, gfx_id);
+        }
+        break;
+    case 0x418:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach(0xC, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_1 = GET_JOBJ(effect->gobj);
+            tev0 = va_arg(vlist, u32);
+            jobj_2 = HSD_JObjGetChild(jobj_1);
+            if (tev0 == 0x606060) {
+                konst = 0x808080;
+            } else {
+                konst = 0xFFFFFF;
+            }
+            efLib_SetTevKonstColor(jobj_2, 0, konst, tev0);
+            efAsync_SetStoredAlphaEffect(effect, gobj, gfx_id);
+        }
+        break;
+    case 0x419: {
+        HSD_JObj* child;
+
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach(0xD, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_1 = efAsync_GetEffectJObj(ret_obj);
+            tev0 = va_arg(vlist, u32);
+            if (tev0 == 0x606060) {
+                color = 0x808080;
+            } else {
+                color = 0xFFFFFF;
+            }
+            konst = color;
+            child = HSD_JObjGetChild(jobj_1);
+            efLib_SetTevKonstColor(child, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(child);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(jobj_1);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(jobj_1);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(jobj_1);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(jobj_1);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            jobj_1 = HSD_JObjGetNext(jobj_1);
+            efLib_SetTevKonstColor(jobj_1, 0, konst, tev0);
+            efAsync_SetStoredAlphaEffect(effect, gobj, gfx_id);
+        }
+        break;
+    }
+    case 0x41A:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach(0xE, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_1 = GET_JOBJ(effect->gobj);
+            tev0 = va_arg(vlist, u32);
+            jobj_2 = HSD_JObjGetChild(jobj_1);
+            if (tev0 == 0x606060) {
+                konst = 0x808080;
+            } else {
+                konst = 0xFFFFFF;
+            }
+            efLib_SetTevKonstColor(jobj_2, 0, konst, tev0);
+            efAsync_SetStoredAlphaEffect(effect, gobj, gfx_id);
+        }
+        break;
+    case 0x41B: {
+        HSD_Generator* result;
+        HSD_JObj* jobj;
+
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        result = efLib_CreateGenerator_AddAppSRT(0x31);
+        if (result != NULL) {
+            jobj = va_arg(vlist, HSD_JObj*);
+            lb_8000B1CC(jobj, NULL, &result->appsrt->translate);
+            HSD_JObjGetScale(jobj, &scale);
+            Effect_SetGeneratorScale(result, scale.y);
+        }
+        break;
+    }
+    case 0x41C:
+        ret_obj = efLib_CreateGenerator(0x5D, va_arg(vlist, Vec3*));
+        break;
+    case 0x41D:
+        ret_obj = efLib_Create_Attach_Pos(0xF, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->state_flags |= EF_STATE_ASYNC;
+        }
+        break;
+    case 0x41E:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x55, vlist);
+        break;
+    case 0x41F:
+        ret_obj = efLib_CreateGenerator(0x5C, va_arg(vlist, Vec3*));
+        break;
+    case 0x420:
+        ret_obj = efLib_CreateGenerator(0x159, va_arg(vlist, Vec3*));
+        break;
+    case 0x421:
+        ret_obj = efLib_CreateGenerator(0x3F, va_arg(vlist, Vec3*));
+        break;
+    case 0x422:
+        ret_obj = hsd_8039EFAC(0, 0, 0x5B, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x423:
+        ret_obj = efLib_Create_Attach(1, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x424:
+        ret_obj = efLib_Create_Attach(2, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            Effect_SetRotationZ(ret_obj, *va_arg(vlist, f32*));
+        }
+        break;
+    case 0x425:
+        ret_obj = efLib_CreateGenerator(0x7E, va_arg(vlist, Vec3*));
+        break;
+    case 0x426:
+        ret_obj = efLib_CreateGenerator(0x7F, va_arg(vlist, Vec3*));
+        break;
+    case 0x427: {
+        EF_Effect* node;
+        s32 i;
+
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        for (i = 0; i < 6; i++) {
+            node = efLib_Create_Attach_Pos(0x1B, gobj, &translate);
+            if (node == NULL) {
+                break;
+            }
+            node->update = efLib_Cb_Fall_FromParamY;
+            node->lifetime = 0x28;
+            node->params.y = (0.4f * HSD_Randf()) + 2.8f;
+            f32_1 = (M_TAU * HSD_Randf());
+            jobj_1 = GET_JOBJ(node->gobj);
+            HSD_JObjSetRotationY(jobj_1, f32_1);
+            if (i != 0) {
+                effect->next = node;
+                effect = effect->next;
+            } else {
+                ret_obj = effect = node;
+            }
+        }
+        break;
+    }
+    case 0x428:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0xCA, vlist);
+        break;
+    case 0x429:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0xCE, vlist);
+        break;
+    case 0x42A:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0xCF, vlist);
+        break;
+    case 0x42B: {
+        HSD_JObj* setter_jobj;
+
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach_Pos(0x19, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_1 = GET_JOBJ(effect->gobj);
+            setter_jobj = jobj_1;
+            f32_2 = *va_arg(vlist, f32*);
+            HSD_JObjSetRotationZ(setter_jobj, f32_2);
+            f32_2 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_2;
+            HSD_JObjSetScale(setter_jobj, &scale);
+            jobj_2 = HSD_JObjGetChild(jobj_1);
+            efLib_SetTevKonstColor(jobj_2, 0, va_arg(vlist, u32),
+                                   va_arg(vlist, u32));
+        }
+        break;
+    }
+    case 0x42C:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach_Pos(0x1A, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            f32_2 = *va_arg(vlist, f32*);
+            HSD_JObjSetRotationZ(jobj_2, f32_2);
+        }
+        break;
+    case 0x42D:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_CreateGenerator(0x121, va_arg(vlist, Vec3*));
+        break;
+    case 0x42E:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        f32_1 = *va_arg(vlist, f32*);
+        ret_obj = efLib_CreateGenerator_Translate_FacingDir(0x13C, &translate,
+                                                            f32_1);
+        break;
+    case 0x42F:
+        ret_obj = efLib_Create_Attach_Pos(0x20, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            if (*va_arg(vlist, f32*) < 0.0f) {
+                rot_y = -M_PI_2;
+            } else {
+                rot_y = M_PI_2;
+            }
+            f32_2 = rot_y;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetRotationY(jobj_2, f32_2);
+        }
+        break;
+    case 0x430:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        f32_1 = *va_arg(vlist, f32*);
+        ret_obj = efLib_CreateGenerator_Translate_FacingDir(0x140, &translate,
+                                                            f32_1);
+        break;
+    case 0x431:
+        ret_obj = efLib_Create_Attach_Pos(0x21, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            if (*va_arg(vlist, f32*) < 0.0f) {
+                rot_y = -M_PI_2;
+            } else {
+                rot_y = M_PI_2;
+            }
+            f32_2 = rot_y;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetRotationY(jobj_2, f32_2);
+        }
+        break;
+    case 0x432: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x145);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x433:
+        ret_obj = hsd_8039EFAC(0, 0, 0x115, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x434:
+        ret_obj = efLib_CreateGenerator(0x14D, va_arg(vlist, Vec3*));
+        break;
+    case 0x435:
+        id = 0x14E;
+        goto set_generator_rotation;
+    case 0x436:
+        id = 0x153;
+        goto set_generator_rotation;
+    case 0x437:
+        id = 0x156;
+    set_generator_rotation: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(id);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            result->appsrt->rot.y = M_PI_2;
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            result->appsrt->rot.z = f32_1;
+        }
+        break;
+    }
+    case 0x438:
+        ret_obj = efLib_Create_Attach(0x22, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            HSD_JObjGetRotationY(jobj_3 = GET_JOBJ(gobj));
+            f32_2 = jobj_3->rotate.y;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetRotationY(jobj_2, f32_2);
+            effect->update = efLib_Cb_SetScale_FromParamX;
+            effect->params.x = *va_arg(vlist, f32*);
+        }
+        break;
+    case 0x439:
+        ret_obj = efLib_Create_Attach(0x23, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_2 = *va_arg(vlist, f32*);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleX(jobj_2, f32_2);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleY(jobj_2, f32_2);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleZ(jobj_2, f32_2);
+        }
+        break;
+    case 0x43A:
+        ret_obj = efLib_CreateGenerator(0x193, va_arg(vlist, Vec3*));
+        break;
+    case 0x43B:
+        ret_obj = efLib_CreateGenerator(0x192, va_arg(vlist, Vec3*));
+        break;
+    case 0x43C:
+        ret_obj = efLib_CreateGenerator(0x1A0, va_arg(vlist, Vec3*));
+        break;
+    case 0x43D:
+        ret_obj = hsd_8039EFAC(0, 0, 0x1AF, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x43E:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach(0x24, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_2 = *va_arg(vlist, f32*);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleX(jobj_2, f32_2);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleY(jobj_2, f32_2);
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScaleZ(jobj_2, f32_2);
+        }
+        break;
+    case 0x43F: {
+        HSD_Generator* result;
+
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        result = efLib_CreateGenerator_AddAppSRT(0xCA);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x440:
+        va_vec3 = va_arg(vlist, Vec3*);
+        translate = *va_vec3;
+        f32_1 = *va_arg(vlist, f32*);
+        ret_obj = efLib_CreateGenerator_Translate_FacingDir(0x1D8, &translate,
+                                                            f32_1);
+        break;
+    case 0x441:
+        ret_obj = efLib_CreateGenerator(0x1FB, va_arg(vlist, Vec3*));
+        break;
+    case 0x442:
+        ret_obj = efLib_CreateGenerator(0x1DC, va_arg(vlist, Vec3*));
+        break;
+    case 0x443: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x1F1);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            f32_1 = *va_arg(vlist, f32*);
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x444:
+        ret_obj = efLib_CreateGenerator(0x1FF, va_arg(vlist, Vec3*));
+        break;
+    case 0x445:
+        ret_obj = efLib_CreateGenerator(0x209, va_arg(vlist, Vec3*));
+        break;
+    case 0x446: {
+        HSD_JObj* source_jobj = va_arg(vlist, HSD_JObj*);
+
+        va_vec3 = va_arg(vlist, Vec3*);
+        ret_obj = efLib_CreateGenerator_AppSRT_SetPos(0x1B, gobj, source_jobj,
+                                                      va_vec3);
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->lifetime = 0x16;
+        }
+        break;
+    }
+    case 0x447:
+        efLib_LoadKind = EF_LOADKIND_SYNC;
+        ret_obj = efLib_Create_Attach_Pos(0x28, gobj, va_arg(vlist, Vec3*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->update = efLib_Cb_ftCo_Bury;
+            if (gfx_id == 0x447) {
+                f32_1 = *va_arg(vlist, f32*);
+                scale.x = scale.y = scale.z = f32_1;
+                jobj_2 = GET_JOBJ(effect->gobj);
+                HSD_JObjSetScale(jobj_2, &scale);
+            }
+        }
+        break;
+    case 0x448:
+        va_jobj = va_arg(vlist, HSD_JObj*);
+        va_pos = va_arg(vlist, Vec3*);
+        ret_obj =
+            efLib_CreateGenerator_AppSRT_SetPos(0x92, gobj, va_jobj, va_pos);
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            effect->lifetime = 0xB4;
+        }
+        break;
+    case 0x449:
+        ret_obj = efLib_Create_Attach(0x26, gobj, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x44A:
+        f32_2 = 0.5f;
+        goto set_generator_scale;
+    case 0x44B:
+        f32_2 = 1.0f;
+        goto set_generator_scale;
+    case 0x44C:
+        f32_2 = 2.0f;
+    set_generator_scale: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x237);
+        if (result != NULL) {
+            Effect_SetGeneratorPos(result, va_arg(vlist, Vec3*));
+            Effect_SetGeneratorScale(result, f32_2);
+        }
+        break;
+    }
+    case 0x44D:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x48, vlist);
+        break;
+    case 0x44E:
+    case 0x457:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetFacingDirScale(0xDA, vlist);
+        break;
+    case 0x44F:
+    case 0x458:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetFacingDirScale(0xDB, vlist);
+        break;
+    case 0x450:
+    case 0x459:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetFacingDirScale(0xDC, vlist);
+        break;
+    case 0x451:
+    case 0x45A:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetFacingDirScale(0xDD, vlist);
+        break;
+    case 0x453: {
+        HSD_Generator* result;
+
+        lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL, &translate);
+        result = efLib_CreateGenerator_Translate_FacingDir(
+            0x234, &translate, *va_arg(vlist, f32*));
+        if (result != NULL) {
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x454: {
+        HSD_Generator* result;
+
+        lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL, &translate);
+        result = efLib_CreateGenerator_Translate_FacingDir(
+            0x235, &translate, *va_arg(vlist, f32*));
+        if (result != NULL) {
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x455: {
+        HSD_Generator* result;
+
+        lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL, &translate);
+        result = efLib_CreateGenerator_Translate_FacingDir(
+            0x236, &translate, *va_arg(vlist, f32*));
+        if (result != NULL) {
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x456: {
+        HSD_Generator* result;
+
+        lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL, &translate);
+        result = efLib_CreateGenerator_Translate_FacingDir(
+            0x23D, &translate, *va_arg(vlist, f32*));
+        if (result != NULL) {
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x452: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x21E);
+        if (result != NULL) {
+            lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL,
+                        &result->appsrt->translate);
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x45B:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x8C, vlist);
+        break;
+    case 0x45C:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x8D, vlist);
+        break;
+    case 0x45D: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x23F);
+        if (result != NULL) {
+            lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL,
+                        &result->appsrt->translate);
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x45E: {
+        HSD_Generator* result;
+
+        result = efLib_CreateGenerator_AddAppSRT(0x240);
+        if (result != NULL) {
+            lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL,
+                        &result->appsrt->translate);
+            f32_1 = *va_arg(vlist, f32*);
+            ret_obj = result;
+            Effect_SetGeneratorScale(result, f32_1);
+        }
+        break;
+    }
+    case 0x45F:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x8E, vlist);
+        break;
+    case 0x460:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x99, vlist);
+        break;
+    case 0x461:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x95, vlist);
+        break;
+    case 0x462:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x219, vlist);
+        break;
+    case 0x463:
+        ret_obj = efLib_Create_Attach(0x29, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x464:
+        ret_obj = efLib_Create_Attach(0x2A, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x465:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x88, vlist);
+        break;
+    case 0x466:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x89, vlist);
+        break;
+    case 0x467:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x8A, vlist);
+        break;
+    case 0x468:
+        ret_obj = efLib_Create_Attach(0x2C, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x469:
+        ret_obj = efLib_Create_Attach(0x2E, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x46A:
+        generator = efLib_CreateGenerator_AddAppSRT(0xAC);
+        if (generator != NULL) {
+            lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL,
+                        &generator->appsrt->translate);
+            f32_1 = *va_arg(vlist, f32*);
+            Effect_SetGeneratorScale(generator, f32_1);
+            f32_2 = HSD_JObjGetRotationY(jobj_3 = GET_JOBJ(gobj));
+            ret_obj = generator;
+            generator->appsrt->rot.y = jobj_3->rotate.y;
+        }
+        break;
+    case 0x46B:
+        ret_obj = efLib_Create_Attach(0x2B, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x46C:
+        generator = efLib_CreateGenerator_AddAppSRT(0x9E);
+        if (generator != NULL) {
+            lb_8000B1CC(va_arg(vlist, HSD_JObj*), NULL,
+                        &generator->appsrt->translate);
+            f32_1 = *va_arg(vlist, f32*);
+            Effect_SetGeneratorScale(generator, f32_1);
+            f32_2 = HSD_JObjGetRotationY(jobj_3 = gobj->hsd_obj);
+            ret_obj = generator;
+            generator->appsrt->rot.y = jobj_3->rotate.y;
+        }
+        break;
+    case 0x46D:
+        ret_obj = efLib_Create_Attach(0x2D, gobj, va_arg(vlist, HSD_JObj*));
+        if (ret_obj != NULL) {
+            effect = ret_obj;
+            f32_1 = *va_arg(vlist, f32*);
+            scale.x = scale.y = scale.z = f32_1;
+            jobj_2 = GET_JOBJ(effect->gobj);
+            HSD_JObjSetScale(jobj_2, &scale);
+        }
+        break;
+    case 0x46E:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0xAE, vlist);
+        break;
+    case 0x46F:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0xA0, vlist);
+        break;
+    case 0x470:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x21B, vlist);
+        break;
+    case 0x471:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x220, vlist);
+        break;
+    case 0x472:
+        ret_obj = efLib_CreateGenerator_AppSRT_SetScale(0x131, vlist);
+        break;
+    case 0x473:
+        ret_obj = hsd_8039EFAC(0, 0, 0x82, va_arg(vlist, HSD_JObj*));
+        break;
+    case 0x477:
+        ret_obj = efLib_CreateGenerator(0x7918, va_arg(vlist, Vec3*));
+        break;
+    case 0x474:
+        ret_obj = efLib_CreateGenerator(0xF7, va_arg(vlist, Vec3*));
+        break;
+    case 0x475:
+        ret_obj = efLib_CreateGenerator(0xFC, va_arg(vlist, Vec3*));
+        break;
+    case 0x476:
+        ret_obj = efLib_CreateGenerator(0xFF, va_arg(vlist, Vec3*));
+        break;
+    }
+    while (efLib_AnimCount != 0) {
+        count = efLib_AnimCount - 1;
+        efLib_AnimCount = count;
+        HSD_JObjAnimAll(efLib_AnimQueue[count]);
+    }
+    return ret_obj;
+}
+
+static char efAsync_803BFD68[] = "EfCoData.dat";
+static char efAsync_803BFD78[] = "effCommonDataTable";
+static char efAsync_803BFD8C[] = "EfMrData.dat";
+static char efAsync_803BFD9C[] = "effMarioDataTable";
+static char efAsync_803BFDB0[] = "EfSsData.dat";
+static char efAsync_803BFDC0[] = "effSamusDataTable";
+static char efAsync_803BFDD4[] = "EfFxData.dat";
+static char efAsync_803BFDE4[] = "effFoxDataTable";
+static char efAsync_803BFDF4[] = "EfCaData.dat";
+static char efAsync_803BFE04[] = "effCaptainDataTable";
+static char efAsync_803BFE18[] = "EfKbData.dat";
+static char efAsync_803BFE28[] = "effKirbyDataTable";
+static char efAsync_803BFE3C[] = "EfLkData.dat";
+static char efAsync_803BFE4C[] = "effLinkDataTable";
+static char efAsync_803BFE60[] = "EfPkData.dat";
+static char efAsync_803BFE70[] = "effPikachuDataTable";
+static char efAsync_803BFE84[] = "EfDkData.dat";
+static char efAsync_803BFE94[] = "effDonkeyDataTable";
+static char efAsync_803BFEA8[] = "EfYsData.dat";
+static char efAsync_803BFEB8[] = "effYoshiDataTable";
+static char efAsync_803BFECC[] = "EfNsData.dat";
+static char efAsync_803BFEDC[] = "effNessDataTable";
+static char efAsync_803BFEF0[] = "EfPrData.dat";
+static char efAsync_803BFF00[] = "effPurinDataTable";
+static char efAsync_803BFF14[] = "EfKpData.dat";
+static char efAsync_803BFF24[] = "effKoopaDataTable";
+static char efAsync_803BFF38[] = "EfMtData.dat";
+static char efAsync_803BFF48[] = "effMewtwoDataTable";
+static char efAsync_803BFF5C[] = "EfIcData.dat";
+static char efAsync_803BFF6C[] = "effIceclimberDataTable";
+static char efAsync_803BFF84[] = "EfPeData.dat";
+static char efAsync_803BFF94[] = "effPeachDataTable";
+static char efAsync_803BFFA8[] = "EfMsData.dat";
+static char efAsync_803BFFB8[] = "effMarsDataTable";
+static char efAsync_803BFFCC[] = "EfZdData.dat";
+static char efAsync_803BFFDC[] = "effZeldaDataTable";
+static char efAsync_803BFFF0[] = "EfLgData.dat";
+static char efAsync_803C0000[] = "effLuigiDataTable";
+static char efAsync_803C0014[] = "EfGnData.dat";
+static char efAsync_803C0024[] = "effGanonDataTable";
+static char efAsync_803C0038[] = "EfKbMs.dat";
+static char efAsync_803C0044[] = "effKirbyMarsDataTable";
+static char efAsync_803C005C[] = "EfKbZd.dat";
+static char efAsync_803C0068[] = "effKirbyZeldaDataTable";
+static char efAsync_803C0080[] = "EfMnData.dat";
+static char efAsync_803C0090[] = "effMenuDataTable";
+static char efAsync_803C00A4[] = "EfKbMr.dat";
+static char efAsync_803C00B0[] = "effKirbyMarioDataTable";
+static char efAsync_803C00C8[] = "EfKbFx.dat";
+static char efAsync_803C00D4[] = "effKirbyFoxDataTable";
+static char efAsync_803C00EC[] = "EfKbSs.dat";
+static char efAsync_803C00F8[] = "effKirbySamusDataTable";
+static char efAsync_803C0110[] = "EfKbPk.dat";
+static char efAsync_803C011C[] = "effKirbyPikachuDataTable";
+static char efAsync_803C0138[] = "EfKbLg.dat";
+static char efAsync_803C0144[] = "effKirbyLuigiDataTable";
+static char efAsync_803C015C[] = "EfKbCa.dat";
+static char efAsync_803C0168[] = "effKirbyCaptainDataTable";
+static char efAsync_803C0184[] = "EfKbDk.dat";
+static char efAsync_803C0190[] = "effKirbyDonkeyDataTable";
+static char efAsync_803C01A8[] = "EfKbKp.dat";
+static char efAsync_803C01B4[] = "effKirbyKoopaDataTable";
+static char efAsync_803C01CC[] = "EfKbIc.dat";
+static char efAsync_803C01D8[] = "effKirbyIceDataTable";
+static char efAsync_803C01F0[] = "EfKbGn.dat";
+static char efAsync_803C01FC[] = "effKirbyGanonDataTable";
+static char efAsync_803C0214[] = "EfKbFe.dat";
+static char efAsync_803C0220[] = "effKirbyEmblemDataTable";
+static char efAsync_803C0238[] = "EfFeData.dat";
+static char efAsync_803C0248[] = "effEmblemDataTable";
+
+/* 3C025C */ EF_DAT_Entry efAsync_DatEntries[51] = {
+    { efAsync_803BFD68, efAsync_803BFD78, NULL },
+    { efAsync_803BFD8C, efAsync_803BFD9C, NULL },
+    { efAsync_803BFDB0, efAsync_803BFDC0, NULL },
+    { efAsync_803BFDD4, efAsync_803BFDE4, NULL },
+    { efAsync_803BFDF4, efAsync_803BFE04, NULL },
+    { efAsync_803BFE18, efAsync_803BFE28, NULL },
+    { efAsync_803BFE3C, efAsync_803BFE4C, NULL },
+    { efAsync_803BFE60, efAsync_803BFE70, NULL },
+    { efAsync_803BFE84, efAsync_803BFE94, NULL },
+    { efAsync_803BFEA8, efAsync_803BFEB8, NULL },
+    { efAsync_803BFECC, efAsync_803BFEDC, NULL },
+    { efAsync_803BFEF0, efAsync_803BFF00, NULL },
+    { efAsync_803BFF14, efAsync_803BFF24, NULL },
+    { efAsync_803BFF38, efAsync_803BFF48, NULL },
+    { efAsync_803BFF5C, efAsync_803BFF6C, NULL },
+    { efAsync_803BFF84, efAsync_803BFF94, NULL },
+    { efAsync_803BFFA8, efAsync_803BFFB8, NULL },
+    { efAsync_803BFFCC, efAsync_803BFFDC, NULL },
+    { efAsync_803BFFF0, efAsync_803C0000, NULL },
+    { efAsync_803C0014, efAsync_803C0024, NULL },
+    { efAsync_803C0038, efAsync_803C0044, NULL },
+    { efAsync_803C005C, efAsync_803C0068, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { efAsync_803C0080, efAsync_803C0090, NULL },
+    { efAsync_803C00A4, efAsync_803C00B0, NULL },
+    { efAsync_803C00C8, efAsync_803C00D4, NULL },
+    { efAsync_803C00EC, efAsync_803C00F8, NULL },
+    { NULL, NULL, NULL },
+    { efAsync_803C0110, efAsync_803C011C, NULL },
+    { efAsync_803C0138, efAsync_803C0144, NULL },
+    { efAsync_803C015C, efAsync_803C0168, NULL },
+    { efAsync_803C0184, efAsync_803C0190, NULL },
+    { NULL, NULL, NULL },
+    { efAsync_803C01A8, efAsync_803C01B4, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { NULL, NULL, NULL },
+    { efAsync_803C01CC, efAsync_803C01D8, NULL },
+    { efAsync_803C01F0, efAsync_803C01FC, NULL },
+    { efAsync_803C0214, efAsync_803C0220, NULL },
+    { efAsync_803C0238, efAsync_803C0248, NULL },
+    { NULL, NULL, NULL },
+};
+
+void efAsync_LoadAsync(int index)
+{
+    EF_DAT_Entry* entry = &efAsync_DatEntries[index];
+    if (index >= 50 || index < 0) {
+        return;
+    }
+
+    if (entry->ef_DAT_file == NULL) {
+        return;
+    }
+
+    lbDvd_800178E8(3, entry->ef_DAT_file, 4, 4, 0, 1U, 4, 4U, index);
+}
+
+void efAsync_OnLoad(HSD_Archive* archive, u8* data, u32 length, int index)
+{
+    EffectDataTable* table;
+
+    lbArchive_InitializeDAT(archive, data, length);
+    table = HSD_ArchiveGetPublicAs(
+        EffectDataTable, archive, efAsync_DatEntries[index].effDataTable_name);
+    if ((uintptr_t) table->cmd_bank | (uintptr_t) table->tex_bank) {
+        psInitDataBankLocate(table->cmd_bank, table->tex_bank, NULL);
+    }
+}
+
+void efAsync_LoadSync(int idx)
+{
+    EffectDataTable* table;
+    EF_DAT_Entry* lookup;
+    if (idx >= 50 || idx < 0) {
+        return;
+    }
+    lookup = &efAsync_DatEntries[idx];
+#ifdef TARGET_PC
+    /* The stock Kirby-copy-Samus particle bank shares its CI8 palette with
+     * Samus's effect bank. Make the source bank resident before resolving the
+     * destination's guarded NULL palette placeholder. */
+    if (idx == 34 && !efAsync_DatEntries[2].data) {
+        efAsync_LoadSync(2);
+    }
+#endif
+    if (!lookup->ef_DAT_file) {
+        return;
+    }
+    if (lookup->data) {
+        return;
+    }
+    {
+        bool chk = lbArchive_80017040(NULL, lookup->ef_DAT_file, &table,
+                                      lookup->effDataTable_name, 0);
+        if ((uintptr_t) table->cmd_bank | (uintptr_t) table->tex_bank) {
+            if (chk) {
+                psInitDataBankLoad(idx, table->cmd_bank, table->tex_bank, NULL,
+                                   NULL);
+            } else {
+                psInitDataBank(idx, table->cmd_bank, table->tex_bank, NULL,
+                               NULL);
+            }
+        }
+#ifdef TARGET_PC
+        if (idx == 34) {
+            HSD_PSTexGroup** dst = psTexGroupArray[34];
+            HSD_PSTexGroup** src = psTexGroupArray[2];
+            if (!dst || !src ||
+                !MeleePc_AliasKirbySamusPalette(dst[0], src[0])) {
+                HSD_ASSERTREPORT(0x4E7U, 0,
+                                 "[EfASync] Kirby/Samus CI8 palette alias refused\n");
+                return;
+            }
+            if (getenv("MELEE_DIAGNOSTIC_KIRBY_SAMUS_COPY_INPUT")) {
+                OSReport("NATIVE_KIRBY_SAMUS_PALETTE_ALIAS_SUCCESS image_bytes=4096 palette_bytes=512\n");
+            }
+        }
+#endif
+        lookup->data = table->descs;
+    }
+}
+
+void efAsync_QueueProcessDeferred(HSD_GObj* gobj,
+                                  EF_QueuedEffect* queued_effect)
+{
+    Vec3 sp4C;
+    Vec3 sp40;
+    Vec3 sp34;
+    Vec3 sp28;
+    Vec3 sp1C;
+    Vec3 sp10;
+    HSD_JObj* jobj;
+    u32 gfx_id;
+    u8 spawn_kind;
+
+    spawn_kind = queued_effect->spawn_kind;
+    gfx_id = queued_effect->gfx_id;
+    jobj = queued_effect->jobj;
+    switch (spawn_kind) {
+    case EF_SPAWN_ATTACH:
+        efSync_Spawn(gfx_id, gobj, jobj);
+        break;
+    case EF_SPAWN_POS:
+        lb_8000B1CC(jobj, NULL, &sp4C);
+        efSync_Spawn(gfx_id, gobj, &sp4C);
+        break;
+    case EF_SPAWN_POS_OFFSET:
+        lb_8000B1CC(jobj, &queued_effect->params, &sp40);
+        efSync_Spawn(gfx_id, gobj, &sp40);
+        break;
+    case EF_SPAWN_ATTACH_PARAM:
+        efSync_Spawn(gfx_id, gobj, jobj, &queued_effect->params);
+        break;
+    case EF_SPAWN_POS_PARAM:
+        lb_8000B1CC(jobj, NULL, &sp34);
+        efSync_Spawn(gfx_id, gobj, &sp34, &queued_effect->params);
+        break;
+    case EF_SPAWN_POS_OFFSET_PARAM:
+        lb_8000B1CC(jobj, &queued_effect->params, &sp28);
+        efSync_Spawn(gfx_id, gobj, &sp28, &queued_effect->extra1);
+        break;
+    case EF_SPAWN_POS_OFFSET_PARAM2:
+        lb_8000B1CC(jobj, &queued_effect->params, &sp1C);
+        efSync_Spawn(gfx_id, gobj, &sp1C, &queued_effect->extra1,
+                     &queued_effect->extra2);
+        break;
+    case EF_SPAWN_ATTACH_OFFSET:
+        efSync_Spawn(gfx_id, gobj, jobj, &queued_effect->params);
+        break;
+    case EF_SPAWN_CAMERA_SHAKE:
+        lb_8000B1CC(jobj, &queued_effect->params, &sp10);
+        Camera_RequestQuake(gfx_id, &sp10);
+        break;
+    default:
+        HSD_ASSERTREPORT(0x7CU, 0, "[EfASync] unknown type %d\n", spawn_kind,
+                         jobj);
+        break;
+    }
+    HSD_ObjFree(&efAsync_AllocData, queued_effect);
+}
+
+void efAsync_QueueFlush(HSD_GObj* gobj, EF_QueuedEffect** head)
+{
+    EF_QueuedEffect* next;
+    EF_QueuedEffect* cur;
+
+    cur = *head;
+    while (cur != NULL) {
+        next = cur->next;
+        efAsync_QueueProcessDeferred(gobj, cur);
+        cur = next;
+    }
+    *head = NULL;
+}
+
+void efAsync_QueueClear(EF_QueuedEffect** head)
+{
+    EF_QueuedEffect* next;
+    EF_QueuedEffect* cur;
+
+    cur = *head;
+    while (cur != NULL) {
+        next = cur->next;
+        HSD_ObjFree(&efAsync_AllocData, cur);
+        cur = next;
+    }
+    *head = NULL;
+}
+
+void efAsync_Spawn(HSD_GObj* gobj, EF_QueuedEffect** queue_head,
+                   u32 spawn_kind, u32 gfx_id, HSD_JObj* jobj, ...)
+{
+    va_list vlist;
+    Vec3* va_vec3;
+    f32* extra1;
+    f32* extra2;
+    EF_QueuedEffect* queued;
+    PAD_STACK(0x4);
+
+    va_start(vlist, jobj);
+    queued = HSD_ObjAlloc(&efAsync_AllocData);
+    queued->spawn_kind = spawn_kind;
+    queued->gfx_id = gfx_id;
+    queued->jobj = jobj;
+    switch (spawn_kind) {
+    case EF_SPAWN_ATTACH:
+    case EF_SPAWN_POS:
+        break;
+    case EF_SPAWN_POS_OFFSET:
+        queued->params = *va_arg(vlist, Vec3*);
+        break;
+    case EF_SPAWN_ATTACH_PARAM:
+        queued->params.x = *va_arg(vlist, f32*);
+        break;
+    case EF_SPAWN_POS_PARAM:
+        queued->params.x = *va_arg(vlist, f32*);
+        break;
+    case EF_SPAWN_POS_OFFSET_PARAM:
+        va_vec3 = va_arg(vlist, Vec3*);
+        extra2 = va_arg(vlist, f32*);
+        queued->params = *va_vec3;
+        queued->extra1 = *extra2;
+        break;
+    case EF_SPAWN_POS_OFFSET_PARAM2:
+        va_vec3 = va_arg(vlist, Vec3*);
+        extra1 = va_arg(vlist, f32*);
+        extra2 = va_arg(vlist, f32*);
+        queued->params = *va_vec3;
+        queued->extra1 = *extra1;
+        queued->extra2 = *extra2;
+        break;
+    case EF_SPAWN_ATTACH_OFFSET:
+        queued->params = *va_arg(vlist, Vec3*);
+        break;
+    case EF_SPAWN_CAMERA_SHAKE:
+        queued->params = *va_arg(vlist, Vec3*);
+        break;
+    default:
+        HSD_ASSERTREPORT(0xF6U, 0, "[EfASync] unknown type %d\n", spawn_kind);
+        break;
+    }
+    va_end(vlist);
+    if ((HSD_GObj_CurrentInvokedProc != NULL) &&
+        (HSD_GObj_CurrentInvokedProc->s_link < 9U))
+    {
+        queued->next = *queue_head;
+        *queue_head = queued;
+        return;
+    }
+    efAsync_QueueProcessDeferred(gobj, queued);
+}
+
+void efAsync_QueueInit(void)
+{
+    HSD_ObjAllocInit(&efAsync_AllocData, sizeof(EF_QueuedEffect),
+                     sizeof(EF_QueuedEffect*));
+}

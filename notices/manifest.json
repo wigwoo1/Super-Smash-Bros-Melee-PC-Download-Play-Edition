@@ -1,0 +1,293 @@
+{
+  "files": [
+    {
+      "path": "aurora_nod/LICENSE-APACHE",
+      "sha256": "6f09f3ce1cc0f51a1176fb606ca18ee7e38e0a380053d6329b20b016ac7997db"
+    },
+    {
+      "path": "aurora_nod/LICENSE-MIT",
+      "sha256": "2baf8f8a34d23a7d525d77d2fa36c91a1784ae169aaa7385c158e72b0ae34e6c"
+    },
+    {
+      "path": "aurora_pinned_googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138"
+    },
+    {
+      "path": "corrosion/LICENSE",
+      "sha256": "64e45fa7b0cc82bd192b2de2fed483fcbdec2c737a4f43dc952cf6864895a0c0"
+    },
+    {
+      "path": "dawn/LICENSE",
+      "sha256": "0493f897193af1796d5054659f45ec7d4c5af648fa67a99f01d30e55cc805abc"
+    },
+    {
+      "path": "dawn/src/emdawnwebgpu/pkg/webgpu_cpp/LICENSE",
+      "sha256": "7e1efc85a78732a13d7ddfc8b52912da7c8f8d3c6d334624b20e3f3a96297de0"
+    },
+    {
+      "path": "dawn/third_party/abseil-cpp/LICENSE",
+      "sha256": "f54fff0b905df5b3464527c652a30e903b172d6dcab4d89b5e6f105d5e4a4603"
+    },
+    {
+      "path": "dawn/third_party/agility-sdk/LICENSE",
+      "sha256": "caf3f489e3959df3605fec3c1f921fe72456c5d3640d998a5e635e8a9505cec5"
+    },
+    {
+      "path": "dawn/third_party/benchmark_shaders/unity_boat_attack/LICENSE.md",
+      "sha256": "7ff3a8e0e49a0141989e4dea4fa92e18f908fe462a19d4b6cb2f1225c857bfa1"
+    },
+    {
+      "path": "dawn/third_party/directx-headers/LICENSE",
+      "sha256": "7c77a44a8acd9b41fdc209864a8016b3d430b5d0e09309818d5b7444336df744"
+    },
+    {
+      "path": "dawn/third_party/directx-headers/src/LICENSE",
+      "sha256": "903df5512f7d02609fed0c780a9b704f5a3eeb6e4d84ebe42a29845c81899a3c"
+    },
+    {
+      "path": "dawn/third_party/directx-shader-compiler/LICENSE",
+      "sha256": "27a49e35d1da96eba18fba54bc882667ff0ff8c0254f16f2b6e165d605ba7df8"
+    },
+    {
+      "path": "dawn/third_party/directx-shader-compiler/src/LICENSE.TXT",
+      "sha256": "05f32c081b3c75cd2cc2a0655b571ba94ebcfc64e9ccca6e5a9e36d6cb67e540"
+    },
+    {
+      "path": "dawn/third_party/directx-shader-compiler/src/lib/DxilCompression/LICENSE.TXT",
+      "sha256": "0115478d567121238cf6cc1c0c361926cf07a49d9e4c9e66da97fac6a01646b3"
+    },
+    {
+      "path": "dawn/third_party/directx-shader-compiler/src/lib/Support/COPYRIGHT.regex",
+      "sha256": "8fce62c1390f1b2c8a761c9729b68665fd826d25893638a63edf93d15bed0540"
+    },
+    {
+      "path": "dawn/third_party/directx-shader-compiler/src/test/YAMLParser/LICENSE.txt",
+      "sha256": "cb65f46df0d9125ba60862117200ec6631fef3a8169cd0b4513ffcad4ef5cb9b"
+    },
+    {
+      "path": "dawn/third_party/EGL-Registry/LICENSE",
+      "sha256": "4782253b8777b2c679544b31b18a52616d3c2ba0515dcf695e262bd318b356f0"
+    },
+    {
+      "path": "dawn/third_party/EGL-Registry/src/sdk/docs/man/copyright.xml",
+      "sha256": "9a66dccb1e5b3bb3cd98afaa95279bb456d68e1c467c292c77a7fdc42b0fe147"
+    },
+    {
+      "path": "dawn/third_party/EGL-Registry/src/sdk/docs/man/xhtml/copyright.inc.xsl",
+      "sha256": "30dfcc9b6e580b5729c8fc7d0d825de9ae15bfd677c0d94d36cda54068198031"
+    },
+    {
+      "path": "dawn/third_party/emdawnwebgpu/LICENSE",
+      "sha256": "2f79bf3699b0870251255b381670237f73f21a04a38c094f791eba39c5fd1df7"
+    },
+    {
+      "path": "dawn/third_party/emdawnwebgpu/pkg/webgpu/src/LICENSE",
+      "sha256": "2f79bf3699b0870251255b381670237f73f21a04a38c094f791eba39c5fd1df7"
+    },
+    {
+      "path": "dawn/third_party/glfw3/LICENSE",
+      "sha256": "149704059b5d0bf551637e50042dd4de9c2cae921021f6636298911e3a5f9462"
+    },
+    {
+      "path": "dawn/third_party/glfw3/src/LICENSE.md",
+      "sha256": "7593ce7c7be05f3a0589ebc78091ba3db70f82c7a4acaea15a0b70230247df2c"
+    },
+    {
+      "path": "dawn/third_party/glslang/LICENSE",
+      "sha256": "23353f4505b1c8ce4f8f72fc3b11dc74b4a8a7bf95921d93ff77f227c171a710"
+    },
+    {
+      "path": "dawn/third_party/glslang/src/license-checker.cfg",
+      "sha256": "0b7c936ff1270fb5089750e326f732ce2f08b18e804dc8847aa44561d0a7a277"
+    },
+    {
+      "path": "dawn/third_party/glslang/src/LICENSE.txt",
+      "sha256": "7d4c1655be3a4d99e8a4859335e28c8950f2e7f72dcf3eed3379846120f5bf47"
+    },
+    {
+      "path": "dawn/third_party/googletest/src/LICENSE",
+      "sha256": "46c35a3c9ac8ef63c16ca69b5cf0166df9fcdb789e318175c92a219de517b8e7"
+    },
+    {
+      "path": "dawn/third_party/google_benchmark/src/LICENSE",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+    },
+    {
+      "path": "dawn/third_party/jinja2/LICENSE.rst",
+      "sha256": "648f89f9f453977f9ad8af2b1f06fb313c49b9b73a33f485ab5b436975a04186"
+    },
+    {
+      "path": "dawn/third_party/libprotobuf-mutator/src/LICENSE",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+    },
+    {
+      "path": "dawn/third_party/markupsafe/LICENSE",
+      "sha256": "b9fb8f552c10a33b6b8c17d61fa5caa357d28a94c9c91a4ed3a7fc9390694b78"
+    },
+    {
+      "path": "dawn/third_party/OpenGL-Registry/LICENSE",
+      "sha256": "d20809e7f3c8116615249bdefdc826c29b0b8332e7ac7ac249fd3949b716e8c5"
+    },
+    {
+      "path": "dawn/third_party/protobuf/LICENSE",
+      "sha256": "f4df8b2457697851385d9ebb93267832c1dfa24e0e61881952f6b0c452663dc9"
+    },
+    {
+      "path": "dawn/third_party/protobuf/src/google/protobuf/compiler/notices.h",
+      "sha256": "985262738f5d52daa9d76dc1df8fd23ad2f7895b129822e9ad9a31144b687973"
+    },
+    {
+      "path": "dawn/third_party/protobuf/third_party/utf8_range/LICENSE",
+      "sha256": "e4501e4b3fd3c46c67ab636d7d72d0a36759a568b3f993ed3e1ec61bb6619a4f"
+    },
+    {
+      "path": "dawn/third_party/renderdoc/LICENSE.md",
+      "sha256": "b921912e9e433291f6010631a0dd41cec76c4a877966ecc22ba86151b2e66718"
+    },
+    {
+      "path": "dawn/third_party/spirv-headers/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "dawn/third_party/spirv-headers/src/LICENSE",
+      "sha256": "841a6e68e16bfc98db8eca98d7002d4f2b508c56ce865fd6f1726be30ed489eb"
+    },
+    {
+      "path": "dawn/third_party/spirv-tools/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "dawn/third_party/spirv-tools/src/LICENSE",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+    },
+    {
+      "path": "dawn/third_party/spirv-tools/src/utils/vscode/src/lsp/LICENSE",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+    },
+    {
+      "path": "dawn/third_party/vulkan-headers/LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "dawn/third_party/vulkan-headers/src/LICENSE.md",
+      "sha256": "a2d4407962c909f84807774cbfe9fad05a1ebe972472c08ed5ad43d482afd288"
+    },
+    {
+      "path": "dawn/third_party/vulkan-loader/src/LICENSE.txt",
+      "sha256": "557bd2cc07eff373f3f26c8d5726fefe8e7fc4add97796c2fbf24f74a200214a"
+    },
+    {
+      "path": "dawn/third_party/vulkan-utility-libraries/src/LICENSE.md",
+      "sha256": "fb0245cd3d866045abba509dc85905a7c2cd1f6642d679d9857e85deb82bfcd5"
+    },
+    {
+      "path": "dawn/third_party/webgpu-headers/LICENSE",
+      "sha256": "17420d366df90c474bd70ad474694956cdb7fc64be70387a49a45458c4152d22"
+    },
+    {
+      "path": "dawn/third_party/webgpu-headers/src/LICENSE",
+      "sha256": "55fdaed683a2d7330a4102faf61f45ec12a0526aada329c4f89f7df0a523116a"
+    },
+    {
+      "path": "dawn/tools/nocompile/LICENSE",
+      "sha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b"
+    },
+    {
+      "path": "fmt/LICENSE",
+      "sha256": "07580f2a3b35709ce703d523f447b242f6dfec7582a8c0df102c7fa2849375f8"
+    },
+    {
+      "path": "freetype/LICENSE.TXT",
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b"
+    },
+    {
+      "path": "freetype/docs/FTL.TXT",
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f"
+    },
+    {
+      "path": "freetype/docs/GPLv2.TXT",
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18"
+    },
+    {
+      "path": "googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138"
+    },
+    {
+      "path": "imgui/LICENSE.txt",
+      "sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+    },
+    {
+      "path": "imgui/examples/libs/glfw/COPYING.txt",
+      "sha256": "da2fb2c802537710cdebe8881b55356d07b88a6dbd7e4b912ac3091f8e6b5f6a"
+    },
+    {
+      "path": "png/LICENSE",
+      "sha256": "bdb0a645ea18c60507d0368379b1ac5474b92255fcc2d115e07486a7672ba526"
+    },
+    {
+      "path": "png/ci/LICENSE_MIT.txt",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    },
+    {
+      "path": "png/contrib/gregbook/COPYING",
+      "sha256": "d6cb0e9e560f51085556949a84af12b79a00f10ab8b66c752537faf7cd665572"
+    },
+    {
+      "path": "png/contrib/gregbook/LICENSE",
+      "sha256": "b6a03c1803eb58ffb1f1278d5c7d4096c4c116e66dce8a7553e8c77d163c3438"
+    },
+    {
+      "path": "png/contrib/pngexif/LICENSE_MIT.txt",
+      "sha256": "508a77d2e7b51d98adeed32648ad124b7b30241a8e70b2e72c99f92d8e5874d1"
+    },
+    {
+      "path": "png/contrib/pngminus/LICENSE.txt",
+      "sha256": "1806f1f10d393e9e377b3a8d1b968452b54f1a90378f14eeef45426946ace330"
+    },
+    {
+      "path": "sdl3_prebuilt/licenses/SDL3/LICENSE.txt",
+      "sha256": "1c040b8271b37e5076359f8fd54240e371114112924d2df81ef87c7d6a1dfdfd"
+    },
+    {
+      "path": "tracy/LICENSE",
+      "sha256": "27ab6b51e57f7e263a6e953d9c8984cd26e69d2f7606bde81e4b3048acf30732"
+    },
+    {
+      "path": "tracy/examples/ToyPathTracer/license.md",
+      "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd"
+    },
+    {
+      "path": "tracy/public/libbacktrace/LICENSE",
+      "sha256": "ef8a9b3247488f8901ca60de9b17b745d7bd67e5ec1e622f80d62364572200d8"
+    },
+    {
+      "path": "xxhash/LICENSE",
+      "sha256": "6ffedbc0f7878612d2b23589f1ff2ab15633e1df7963a5d9fc750ec5500c7e7a"
+    },
+    {
+      "path": "xxhash/cli/COPYING",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "path": "xxhash/tests/bench/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "path": "xxhash/tests/collisions/LICENSE",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    {
+      "path": "zlib/LICENSE.md",
+      "sha256": "6c9f0d975b41afaa34d22f55bb8986ce69e5cb7ad327cb2b28820cd425edf5ee"
+    },
+    {
+      "path": "zstd/COPYING",
+      "sha256": "f9c375a1be4a41f7b70301dd83c91cb89e41567478859b77eef375a52d782505"
+    },
+    {
+      "path": "zstd/LICENSE",
+      "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8"
+    }
+  ],
+  "scope": "Preserved license/notice texts from pinned cached dependency source roots. Public runtime archive omits third-party DLLs and Microsoft CRT; use the runtime rebuild recipe to obtain them."
+}

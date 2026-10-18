@@ -1,0 +1,61 @@
+LOCAL HD TEXTURE IMPORT - DEVELOPMENT TOOL
+Requires Python3.11 or newer. No extra Python packages required.
+
+Inputs: the inspected Melee HD Texture Pack archive and textures-mapping-audit.json
+produced by the native filename parser audit. The tool verifies the archive SHA256.
+Default imports only GALE01/main mappings. Add --include-optional to also import
+approved character, item and casual-stage base textures (5214 mappings total, including
+2949 additions). Main artwork wins12shared-key item alternatives;five conflicting main
+keys remain excluded and identical duplicates are collapsed. Add --include-mips to preserve
+compatible authored mip chains (45sidecar PNGs across5chains in this inspected release).
+Chains must be contiguous and halve dimensions correctly. An identical duplicate base
+may share its mip chain only after full base-file SHA256 equality;output names follow the
+chosen base. Three MushroomKingdomIIchains have incompatible dimensions (640base vs64mip1,
+expected320) and remain excluded without resizing. Another27sidecars depend on unresolved
+base choices. Base images stay usable. Standalone character renders still need UI mappings.
+
+From the project workspace, use Python to run:
+work/melee/tools/import_hd_textures.py ARCHIVE AUDIT NEW_CONTENT_DIRECTORY
+Add --plan-only to write a JSON manifest to a NEW file instead of importing images.
+Destination parent must exist. Existing destination is rejected. Do not point this at
+original game files. A completed import has manifest.json plus credits.txt and textures/.
+If interrupted, preserve the incomplete folder for inspection and use a new destination;
+no automatic recursive deletion is performed. Original game textures remain the fallback.
+
+The audit helpers and sample reports are in desktop package development/hd-pack-mapping-20261015.
+The build script expects Visual Studio C++ Build Tools. Run the parser preparation and
+build scripts from the workspace, then audit-hd-pack-mappings.py against staged archives.
+The tool accepts the supplied audit as local development input; it is not a general
+untrusted-mod installer. Read-only ZIP inventory precedes import.
+
+Native diagnostic builds now offer Texture pack: Original / HD inside the game graphics
+page (Options > Screen Display). Put the completed import at content/hd/ relative to the
+host resources folder (normally alongside the EXE). It contains manifest.json, credits.txt,
+and textures/. For local development, MELEE_HD_TEXTURE_PACK_DIR can point at the import
+root. Restart after installing content; availability is checked at startup. This variable
+provides a path only and does not enable HD automatically. Every session starts Original.
+The menu queues changes until the owner is idle; Applying indicates a pending change.
+Missing packs remain Original only, with an installation explanation on attempted change.
+Texture resolution100/50/25percent remains a separate setting. Original unregisters this
+pack without clearing unrelated replacement registrations or changing original assets.
+D3D12/Vulkan repeated switching and missing-pack cases passed using diagnostic pad input.
+Sample native uploads have matched source PNG dimensions. Native-menu PNG dimensions at100/50/25percent passed for94 shared HD assets on D3D12
+and Vulkan;Original25 also restored correctly in these sampled checks. Full pack visual
+coverage,physical input,other aspects and long-session checks remain open. HD25 also
+persisted from settings throughVS/CSS/stage and600Battlefield match frames onD3D12/Vulkan
+with the normal two-buffer configuration;13Battlefield replacement assets were observed.
+Other matches,stages,qualities and long sessions still require verification.
+The current desktop native-preview has not been replaced by these isolated diagnostics.
+Asset redistribution permission is not established by an import. Source and reports may
+be packaged; these downloaded texture assets remain local staging.
+
+EXPANDED PROFILE CHECK (2026-10-16): All5214base files/hash mappings validated. HD25
+settings-to-match passed onD3D12/Vulkan with54optional character and13Battlefield images
+observed in gameplay. Optional items/casual-stage visuals and custom mip chains remain
+unverified. File names/hashes do not prove every image is used or visually correct.
+
+MIP VALIDATION (2026-10-16): The native CPUfile decoder accepted all5selected chains and
+read exact expected level counts/byte sizes. Both flags together yield5214base textures
+plus45sidecars=5259PNGfiles. GPUupload/LOD/filtering acceptance remains open. For local
+asset tests,set AURORA_TEST_HD_MIP_ROOT to the imported textures/ directory;the native
+asset test explicitly skips when those private/local files are unavailable.

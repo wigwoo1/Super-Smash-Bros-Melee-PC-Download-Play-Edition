@@ -1,0 +1,78 @@
+NATIVE DIAGNOSTIC LIBRARY REBUILD
+
+This entry point builds the modified x86 static library only. It does not
+link a playable executable. Full runtime/package rebuild remains unfinished.
+
+Prerequisites: Windows, an x86 MSVC developer command prompt with Windows SDK,
+Clang on PATH, CMake 3.20 or newer, Ninja, and Python 3. These tools are not
+bundled by this script. Open the x86 developer prompt, change to the package
+folder, then run:
+
+  python rebuild-native-library.py
+
+Paths resolve relative to the script, including when the package is moved.
+The package uses source/ and dependencies/aurora/. The development checkout
+uses melee/ and aurora/. Build output defaults to build-native-library/.
+Use --configure-only to check configuration or --build-dir to choose output.
+--build-type selects Debug (default), Release, or RelWithDebInfo. Select the same
+configuration family as the Aurora runtime: Debug uses a different C++ runtime
+and cannot be mixed with Release dependency outputs.
+
+Without local font includes, the two original font translation units remain
+excluded by the existing CMake configuration. For a library including them,
+extract locally from your own supported USA revision 2 disc image:
+
+  python source/tools/extract_pc_fonts.py "YOUR_DISC_IMAGE" "LOCAL_FONT_FOLDER"
+  python rebuild-native-library.py --generated-includes "LOCAL_FONT_FOLDER"
+
+In the development checkout replace source/tools with melee/tools.
+The extractor reads the image without modifying it and verifies the DOL
+checksum before writing fonts. Generated fonts are original asset data;
+keep them local and do not include them in source distribution packages.
+
+Other historical scripts may still require the original workspace layout.
+Do not use a passing library build as evidence of playable release acceptance.
+Explicit tool paths are supported with --cmake, --ninja and --clang when PATH discovery is unavailable. The Windows SDK and MSVC environment are still required.
+
+Verified 2026-10-07: clean compilation from the desktop packaged source passed all 1008 steps with warnings. Default configuration excludes local disc font translation units. Evidence: native-package-library-build-evidence.json. This does not verify a full executable rebuild or playable release.
+
+Diagnostic link entry point: link-game-audit.py accepts --runtime-build (an existing Aurora Ninja build), --game-library (a compiled game library including the local fonts), and --output (diagnostic executable path). It does not launch the output. It uses the compiler from the selected runtime cache and requires the x86 MSVC/SDK environment. The Aurora build must contain the examples/simple.exe dependency rule. The optional melee_disc_smoke.exe rule supplies DVD dependencies when present; otherwise the configured nod library is resolved from the selected build. A clean packaged Aurora rebuild remains unverified. The default library built without local fonts is not sufficient for a complete original-game link.
+
+RENDERER SOURCE UPDATE (2026-10-07)
+Aurora GX pipeline requests now wait for required compilation using the native
+owner service path; geometry is not skipped while a pipeline is pending.
+Both D3D12 and Vulkan bounded original Corneria tests passed with merging on
+and zero GX draw skips. Cold-cache latency and full scene fidelity remain
+unverified. This library recipe still does not deliver a playable executable.
+
+STAGE SOURCE UPDATE (2026-10-08)
+Current source includes Mushroom Kingdom II (GrI2.dat) conversion. Independent
+body-byte/scalar-claim, production metadata and original archive parser tests
+pass. Workspace native library and diagnostic executable rebuild/link pass.
+Muted D3D12 and Vulkan bounded first matches pass 360 frames; D3D12 observed
+Birdo and egg creation during 3600 frames. See native-inishie2-*-verification.json
+and IMPLEMENTATION_PLAN.txt for scope and unfinished validation. These results
+do not prove that the portable desktop package builds a complete executable,
+or that physical controls, all content and the full release roadmap are ready.
+
+
+INSTALL-LOCAL PRIVATE GAME DATA (2026-10-11)
+
+The diagnostic host's default image lookup is relative to its executable: `data\melee.nkit.iso`. `MELEE_DISC_PATH` is an explicit developer/import override. Current source and diagnostic binaries do not bundle this image; do not describe the package as self-contained until local data is present and a relocated-copy launch passes with the external source unavailable. Keep the supplied image unchanged. Public redistribution remains a separate rights question.
+
+RELEASE RESULTS-FLOW DIAGNOSTIC (2026-10-11)
+
+Reproduce from the diagnostic worktree with `run-native-release-ice-climbers-results.py`, then validate with `verify-native-release-ice-climbers-results.py`. The run is bounded synthetic-input D3D12 testing with audio muted and an explicit read-only developer image override. Passing results/CSS/repeat navigation is not playable-release acceptance. The local-data/relocation test was pending at this historical checkpoint; see the newer preview evidence below.
+
+PRIVATE NATIVE PREVIEW (2026-10-14)
+native-preview/melee.exe now has six matching DLLs and a private local copy of
+the supplied image at data/melee.nkit.iso. The original image is unchanged.
+Relocated Auto/D3D12 and Vulkan 16:9 Corneria matches passed with synthetic
+input, audio muted, only Windows directories on PATH, an unrelated working
+directory, and the original source image exclusively locked against access.
+All six runtime DLLs were observed loading from the relocated preview.
+See NATIVE_PREVIEW_EVIDENCE.json. Physical controls, other machines, full
+gameplay/release acceptance and a clean packaged Aurora rebuild remain open.
+
+SOURCE-TO-EXECUTABLE UPDATE (2026-10-16)
+Fresh cached-source game/runtime compilation, native link and muted D3D12/Vulkan integration passed. See SOURCE_REBUILD.txt and development/source-rebuild-20261016. Cold dependency downloads, new-runtime relocation and complete release acceptance remain open.

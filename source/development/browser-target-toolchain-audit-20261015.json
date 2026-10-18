@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "status": "FEASIBILITY INVENTORY ONLY - NO BROWSER BUILD",
+  "tools_on_path": {
+    "emcc": false,
+    "emcmake": false,
+    "wasm_ld": false,
+    "wasmtime": false,
+    "node": true,
+    "cmake": false,
+    "clang": false
+  },
+  "repository_build_search": {
+    "searched": [
+      "work/melee/CMakeLists.txt",
+      "work/melee/cmake",
+      "work/melee/config",
+      "work/melee/CMakePresets.json",
+      "work/aurora/CMakeLists.txt",
+      "work/aurora/cmake"
+    ],
+    "native_markers": [
+      "TARGET_PC",
+      "Dawn/WebGPU"
+    ],
+    "browser_toolchain_markers": [],
+    "desktop_webgpu_is_not_browser_build": true
+  },
+  "conclusion": "No Emscripten/Wasm build toolchain was found on PATH, and the searched CMake build configuration has native TARGET_PC plus Dawn/WebGPU desktop wiring but no browser-target configuration. This proves only that a browser build is not reproducible from the current PATH/config snapshot; it does not prove browser or ARM Chromebook play is infeasible.",
+  "next_gate": "Prioritize playable native acceptance; before the browser milestone, install and pin a compatible Emscripten SDK/toolchain, add an explicit browser build target, cross-compile the required runtime, then validate low-end x86 and ARM Chromebook devices.",
+  "project_estimate_percent": 25.07,
+  "playable_release_accepted": false,
+  "disc_or_saves_modified": false
+}

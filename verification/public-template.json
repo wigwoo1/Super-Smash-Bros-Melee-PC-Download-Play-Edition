@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "template_restoration_hash": true,
+  "existing_output_refused": true,
+  "muted_native_match_frames": 600,
+  "clean_exit": true,
+  "scope": "Public-template reconstruction and bounded private native smoke; no assets exported publicly, no full release/fidelity acceptance."
+}

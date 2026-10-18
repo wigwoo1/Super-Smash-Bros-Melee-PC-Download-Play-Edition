@@ -1,0 +1,4 @@
+2026-10-17 KIRBY ICE CLIMBERS COPY ARCHIVE - VERIFIED WITHIN SCOPE
+Added bounded source-typed PlKbCpPp.dat conversion: hat, visibility, ice article, hammer joint and auxiliary model directories. All 211 pointers covered; 223 malformed archives refused atomically. Original assets stayed in RAM.
+Release build passed. Muted synthetic original-menu Ice Climbers versus Kirby match passed 600 frames and clean shutdown, resolving the prior unsupported archive startup failure. Copied special acquisition/projectile, visual fidelity and physical controls remain unverified.
+Candidate dcc03a758f6538c7c419ebe74ad9db4f687cfca17246c7ac13fd0bb43cd8d741; matching 19 source overlays delivered separately. Installed default, disc images and saves unchanged. Intermittent visibility crash remains unresolved. Overall approx28%; next Astra Medium for copied ability runtime validation and remaining faults.

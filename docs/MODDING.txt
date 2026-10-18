@@ -1,0 +1,77 @@
+CURRENT PRIVATE PREVIEW UPDATE - 2026-10-17
+The current source/build identity, complete executable rebuild sequence and
+preview limits are summarized in CURRENT_PREVIEW_BUILD.txt. SOURCE_REBUILD.txt
+documents the full game + renderer + executable link recipe; the library-only
+recipe below does not produce a complete game. A fresh cached-source full build
+was verified2026-10-16; the current2026-10-17 preview is an incremental native
+Release build. Full clean/cold current-source release acceptance remains open.
+Native plug-and-play character/stage mods and ACE integration remain planned.
+This private folder includes the user's local data/art separately from source;
+the source notices do not grant rights to redistribute those assets.
+The following dated material is preserved as historical guidance.
+
+MELEE PC PORT - SOURCE, REBUILDING AND MODDING
+
+Current status (2026-10-14): modified native development source and diagnostic
+runtime work. A genuinely playable release has not been delivered.
+Diagnostic matches, results and repeated matches cover subsets of content.
+They do not establish complete gameplay, physical controls or visual fidelity.
+
+PACKAGE CONTENTS
+source/ contains the modified Melee source, tools and build configuration.
+dependencies/aurora/ contains the modified native runtime source.
+development/ contains the development Python and command scripts.
+Root script copies are convenience entry points; development copies must
+remain synchronized with the working checkout.
+Original disc assets, extracted fonts and private game screenshots are not
+part of this source distribution. Preserve the original disc and saves.
+
+The original source snapshot was based on doldecomp/melee commit
+e78dc8349c587ca5d2f97322834b625d3bd1abc3. Current files include later native
+modifications; that commit alone does not identify the modified package.
+Upstream: https://github.com/doldecomp/melee
+
+REBUILDING
+Use NATIVE_REBUILD.txt and rebuild-native-library.py for the package-relative
+x86 static-library recipe. A clean packaged library build was verified on
+2026-10-07; the full portable diagnostic executable rebuild remains unfinished.
+The library recipe requires the listed compiler/SDK/build tools and does not
+produce a playable executable. Font extraction reads a supported local disc
+image and writes separate generated files; it does not modify the image.
+
+The upstream build described in source/docs produces a GameCube main.dol.
+Historical development scripts may depend on the original workspace layout.
+See DIAGNOSTIC_INPUT_AND_RESULTS.txt for current results-test commands and
+their verification limits. IMPLEMENTATION_PLAN.txt and project-completion.json
+record the full roadmap and current evidence. Package audits cover their
+stated files only; they do not prove all dependencies or release acceptance.
+
+MODDING
+Game code: source/src/melee
+Engine code: source/src/sysdolphin
+Native rendering/audio/input runtime: dependencies/aurora
+Build configuration: source/cmake and source/CMakeLists.txt
+
+Source modifications can be rebuilt through the development recipes. Native
+character/stage mod packages, installation UI, enable/disable controls,
+manifest/version compatibility and multiplayer content matching remain on
+the roadmap. There is no accepted drag-and-drop native mod installation flow
+yet. Do not treat strict original-asset decoder profiles as a general mod API.
+
+Future playable deliveries must include matching source, dependency versions,
+notices and full rebuild/mod-installation instructions for native and browser
+builds. Browser host asset transfer must use assets the host is authorized to
+distribute; a working transfer does not establish redistribution permission.
+
+GRAPHICS SETTING NOTE
+The native texture-quality selector applies 100/50/25 percent decoded RGBA mip-chain reduction before GPU allocation for GX static and palette textures. Changing quality invalidates the GX static/content caches so subsequently resolved textures use the selected allocation. Standalone independent rational-area oracles cover odd dimensions, single-pixel axes, mip retention, invalid inputs, and unchanged source buffers. Live GPU allocation after a menu change, visual quality/performance measurements, and full-game acceptance remain unverified; do not claim those from CPU reducer tests. The lighting and fighter shadow controls are render-only and must not be used to alter gameplay collision or simulation.
+
+
+SOURCE PACKAGE SYNC (2026-10-14)
+The modified/staged/untracked working-tree edits have been overlaid into source/ and dependencies/aurora/. SOURCE_SYNC_MANIFEST.json records each copied file's SHA-256. Reproduce this overlay with development/sync-packaged-source.py --workspace "PATH_TO_WORKSPACE" --package "PATH_TO_THIS_PACKAGE". The Release build with private local font includes passed 1,010 steps, linked the native host, and passed a muted 16:9 Corneria match with moving-camera boundary checks. The native-preview/ directory adds the matching DLLs and a private local image copy. Relocated Auto/D3D12 and Vulkan matches passed with the original image unavailable and no developer DLL paths. See BUILDING_AND_DEPENDENCIES.txt, PACKAGE_RELEASE_HOST_EVIDENCE.json and NATIVE_PREVIEW_EVIDENCE.json. Full gameplay/release acceptance and a clean runtime rebuild from packaged source remain open.
+
+
+CURRENT PACKAGE STATUS ADDENDUM — 2026-10-16
+This update supersedes the older status date at the beginning of this guide. The package contains a private WIP native executable at native-preview/melee.exe (SHA-256 43E49376C37980765024B56EF06A6FF07378F6787142167EB8BAFC4BF06EE3B4). Bounded muted tests covered the installed Auto/D3D12 route and relocated D3D12/Vulkan routes, but did not establish complete gameplay, physical-controller acceptance, target performance, or a clean rebuild from the packaged source. The full port is not a release-complete build. See README-NATIVE-STATUS.txt and native-preview/START-HERE.txt for the current evidence and known limits.
+
+The 2026-10-16 source mirror audit found 3,134 Melee and 405 Aurora files with no hash mismatches. The main portable source/build instructions remain in BUILDING_AND_DEPENDENCIES.txt. This package does not grant rights to redistribute the original disc image or community artwork. Host-provided asset transfer remains technically distinct from permission to distribute those files.

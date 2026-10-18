@@ -1,0 +1,22 @@
+{
+  "format": 1,
+  "private_tested_executable_sha256": "adc94a6d0f679d999697a8aae3974ec98b8f8b5c4dcd9ee378c399393424b487",
+  "local_restored_executable_sha256": "48c7fc92c2ad0c4e5e67b4ddf3cefd286ddd9f2078159b537418603e07b9001d",
+  "template_sha256": "a9b88c2c8a7f3dd5e8f216515ea4ce4e6e8083b71166025f71e30098f61424b3",
+  "regions": [
+    {
+      "name": "debug_font",
+      "offset": 11811356,
+      "length": 7168,
+      "sha256": "5ea0892a5de301fe2a55014e081565f7ea56f0adc5ffda23ca2a338ff573b82a"
+    },
+    {
+      "name": "sislib_font",
+      "offset": 11642208,
+      "length": 146944,
+      "sha256": "e8d43d10b000e59a64653e8a1b7726bdf95f9102d3ee3307ed56d7c53cde05c1"
+    }
+  ],
+  "diagnostic_path_strings_normalized": 235,
+  "scope": "Only original font bytes removed; requires the user's own USA revision2 disc. Not runnable until prepared locally. Source path strings normalized; other executable bytes unchanged. Overall port incomplete, opponent hit not verified."
+}

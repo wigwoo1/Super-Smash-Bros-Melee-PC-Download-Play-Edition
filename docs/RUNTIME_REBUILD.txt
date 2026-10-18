@@ -1,0 +1,32 @@
+NATIVE RUNTIME REBUILD - WINDOWS X86
+
+This companion to rebuild-native-library.py configures/builds Aurora, the renderer/runtime. It does not link Melee, launch a game, or establish a playable port.
+
+Prerequisites: a Windows x86 Visual Studio Developer Command Prompt, Windows SDK, Clang/Clang++, CMake 3.25+, Ninja, a real Python 3 interpreter, and Rust with the i686-pc-windows-msvc target installed. Existing dependency versions are pinned in dependencies/aurora/cmake/AuroraDependencyVersions.cmake and the renderer CMake files. Tested tools: Python3.14.7, Clang22.1.3, Rust1.99.0. The current package's runtime notices still apply.
+
+From the desktop package folder, first configure:
+  python rebuild-native-runtime.py --configure-only --build-dir "%USERPROFILE%\Documents\Codex\mrb"
+
+Then configure/build using the same options without --configure-only:
+  python rebuild-native-runtime.py --build-dir "%USERPROFILE%\Documents\Codex\mrb"
+
+Use a short output path: the preflight's long workspace path triggered Dawn object-path warnings. A shorter output folder was subsequently built successfully; see SOURCE_REBUILD.txt. The default is build-native-runtime-release beside the script. The script does not delete existing build folders; CMake will reject incompatible existing caches.
+
+Explicit --cmake, --ninja, --clang, --clangxx, --cargo and --rustc paths are supported when PATH discovery fails. --source can select another Aurora source tree. With no --source, the script finds dependencies/aurora in the desktop package or aurora in the development work folder. --jobs defaults to4.
+
+The recipe selects Release, i686 Windows C/C++, shared Dawn/SDL/nod and disables the memory-card backend. It passes the actual running Python interpreter to CMake, avoiding Windows Store launcher stubs. Keep execute-target-for-cmake.py beside the driver: it lets CMake run Windows x86 generated-code tools on this Windows host. It does not emulate gameplay or implement a console emulator.
+
+Without a source map, upstream dependency downloads are required. Optional --dependency-source-map FILE takes a JSON object such as {"DAWN":"C:/cache/dawn-source"}. Keys are FetchContent names; values must be existing dependency source folders. In this explicit cached-source mode the script disables both FetchContent downloads and Dawn's separate dependency fetcher. A complete, consistent cache is required; missing sources are errors. Never describe this mode as a clean download or a fully self-contained source bundle.
+
+Evidence: development/runtime-rebuild-preflight-20261016.
+- New output tree configured successfully against the desktop renderer source, using15 explicit existing dependency-source locations.
+- Fresh aurora_mtx compilation passed all7 steps. All6 archive members are x86 COFF objects.
+- Zero-job and source-as-output arguments are rejected before configuration.
+- Full runtime compilation and game link subsequently passed using cached dependency sources; muted D3D12/Vulkan integration also passed. See SOURCE_REBUILD.txt for the precise scope. Cold dependency downloads remain unverified.
+- runtime-rebuild-record.json records configuration/build status separately; configure_passed=true is not build_passed=true.
+
+Next: verify cold dependency inputs and a relocated install of the newly compiled runtime. The cached-source build, generated host tools, game link and bounded integration checks passed; see SOURCE_REBUILD.txt. See NATIVE_REBUILD.txt for the existing game-library recipe. The installed preview, original disc and saves are preserved.
+
+RELOCATION FOLLOW-UP (2026-10-16): The freshly rebuilt runtime passed muted Auto/D3D12 and Vulkan local-disc/local-HD checks without asset or developer DLL overrides. See REBUILT_RELOCATION_STATUS.txt. Cold dependency fetching and complete release acceptance remain open.
+
+DEPENDENCY FOLLOW-UP (2026-10-16): Known Dawn/SDL archive hashes are now enforced; the cached Win32 Vulkan handle fix is exported as a guarded source patch. See DEPENDENCY_PROVENANCE_STATUS.txt. Complete cold and nested-dependency validation remain open.
