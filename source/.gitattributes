@@ -19,3 +19,6 @@ Doxyfile text
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
+
+# Public snapshot preserves exact source bytes used by the native build.
+* -text

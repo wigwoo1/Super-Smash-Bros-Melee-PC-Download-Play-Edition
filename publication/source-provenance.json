@@ -42,7 +42,9 @@
     },
     {
       "path": "source/.gitattributes",
-      "sha256": "4abb255423460e7f57e10c74d48f446a407e435216bcee8845ca01ef87adc5d3"
+      "sha256": "388504db0863c3510577e8aa5aca3872d4800cee905c586b814fdeb1abf123f5",
+      "upstream_working_copy_sha256": "4abb255423460e7f57e10c74d48f446a407e435216bcee8845ca01ef87adc5d3",
+      "publication_only_change": "Disable automatic line-ending conversion so compiled source bytes remain exact."
     },
     {
       "path": "source/.github/CONTRIBUTING.md",
