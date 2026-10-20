@@ -25,6 +25,7 @@ static HSD_CObj* current;
 #include <pc/render_projection.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <dolphin/os.h>
 static HSD_CObj* native_gameplay_camera;
 static HSD_CObj* native_hud_cameras[2];
 static int nativeWidescreenEnabled(void)
@@ -267,10 +268,31 @@ static void widenNativeGameplayProjection(HSD_CObj* cobj, Mtx44 projection)
     GXRenderModeObj* rmode;
     Mtx44 adjusted;
     int hud=cobj==native_hud_cameras[0] || cobj==native_hud_cameras[1];
+    static int query_profile = -1;
+    static u64 query_ticks[3];
+    static unsigned query_calls[3];
+    OSTime query_start = 0;
+    int target_valid;
     if((cobj!=native_gameplay_camera && !hud) ||
        (cobj->projection_type!=PROJ_PERSPECTIVE && !(hud && cobj->projection_type==PROJ_ORTHO)) ||
-       !nativeWidescreenEnabled() ||
-       !aurora_diagnostic_render_target(&width,&height,&offscreen) || offscreen) return;
+       !nativeWidescreenEnabled()) return;
+    if (query_profile < 0) {
+        const char* value = getenv("MELEE_DIAGNOSTIC_CAMERA_PROFILE");
+        query_profile = value != NULL && value[0] == '1';
+    }
+    if (query_profile) query_start = OSGetTime();
+    target_valid = aurora_diagnostic_render_target(&width,&height,&offscreen);
+    if (query_profile) {
+        unsigned slot = hud ? (cobj == native_hud_cameras[0] ? 0 : 1) : 2;
+        query_ticks[slot] += OSGetTime() - query_start;
+        if (++query_calls[slot] == 120) {
+            OSReport("NATIVE_CAMERA_TARGET_QUERY slot=%u calls=120 total_us=%llu\n",
+                     slot, (unsigned long long)OSTicksToMicroseconds(query_ticks[slot]));
+            query_calls[slot] = 0;
+            query_ticks[slot] = 0;
+        }
+    }
+    if (!target_valid || offscreen) return;
     rmode=HSD_VIGetRenderMode();
     if(!rmode || !rmode->fbWidth || !rmode->efbHeight || !height) return;
     if(MeleePc_WidenPerspective(projection,adjusted,(float)rmode->fbWidth/rmode->efbHeight,

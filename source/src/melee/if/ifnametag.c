@@ -2,6 +2,7 @@
 #ifdef TARGET_PC
 #include <stdio.h>
 #include <stdlib.h>
+#include <dolphin/os.h>
 #endif
 
 #include "forward.h"
@@ -173,6 +174,17 @@ static void NameTag_RenderCallback(HSD_GObj* gobj, intptr_t pass)
 
 void fn_802FCAC4(HSD_GObj* gobj, intptr_t pass)
 {
+#ifdef TARGET_PC
+    static int profile = -1;
+    static unsigned samples;
+    static u64 setup_ticks, draw_ticks, end_ticks;
+    OSTime start = 0, draw_start = 0, end_start = 0;
+    if (profile < 0) {
+        const char* value = getenv("MELEE_DIAGNOSTIC_CAMERA_PROFILE");
+        profile = value != NULL && value[0] == '1';
+    }
+    if (profile) start = OSGetTime();
+#endif
     if (ifAll_IsHUDHidden() || un_804D6D6C) {
         int i;
         for (i = 0; i < Gm_Player_NumMax; i++) {
@@ -182,8 +194,33 @@ void fn_802FCAC4(HSD_GObj* gobj, intptr_t pass)
             }
         }
     } else if (HSD_CObjSetCurrent(gobj->hsd_obj)) {
+#ifdef TARGET_PC
+        if (profile) {
+            draw_start = OSGetTime();
+            setup_ticks += draw_start - start;
+        }
+#endif
         HSD_GObj_80390ED0(gobj, 7);
+#ifdef TARGET_PC
+        if (profile) {
+            end_start = OSGetTime();
+            draw_ticks += end_start - draw_start;
+        }
+#endif
         HSD_CObjEndCurrent();
+#ifdef TARGET_PC
+        if (profile) {
+            end_ticks += OSGetTime() - end_start;
+            if (++samples == 120) {
+                OSReport("NATIVE_NAMETAG_CAMERA_PROFILE calls=120 setup_us=%llu draw_us=%llu end_us=%llu\n",
+                    (unsigned long long)OSTicksToMicroseconds(setup_ticks),
+                    (unsigned long long)OSTicksToMicroseconds(draw_ticks),
+                    (unsigned long long)OSTicksToMicroseconds(end_ticks));
+                samples = 0;
+                setup_ticks = draw_ticks = end_ticks = 0;
+            }
+        }
+#endif
     }
 }
 

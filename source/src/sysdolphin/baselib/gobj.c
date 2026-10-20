@@ -6,6 +6,43 @@
 #include "lobj.h"
 #ifdef TARGET_PC
 #include <dolphin/os.h>
+extern char* getenv(const char*);
+static int pc_camera_profile = -1;
+static struct {
+    void (*callback)(HSD_GObj*, int);
+    u64 ticks;
+    unsigned calls;
+} pc_camera_times[64];
+static OSTime pc_camera_profile_begin(void)
+{
+    if (pc_camera_profile < 0) {
+        const char* value = getenv("MELEE_DIAGNOSTIC_CAMERA_PROFILE");
+        pc_camera_profile = value != NULL && value[0] == '1';
+    }
+    return pc_camera_profile ? OSGetTime() : 0;
+}
+static void pc_camera_profile_end(void (*callback)(HSD_GObj*, int), OSTime start)
+{
+    unsigned i;
+    OSTime elapsed;
+    if (!pc_camera_profile) return;
+    elapsed = OSGetTime() - start;
+    for (i = 0; i < 64; i++) {
+        if (pc_camera_times[i].callback == NULL ||
+            pc_camera_times[i].callback == callback) {
+            pc_camera_times[i].callback = callback;
+            pc_camera_times[i].ticks += elapsed;
+            if (++pc_camera_times[i].calls == 120) {
+                OSReport("NATIVE_CAMERA_PROFILE callback=%p calls=120 total_us=%llu\n",
+                         (void*)callback, (unsigned long long)
+                         OSTicksToMicroseconds(pc_camera_times[i].ticks));
+                pc_camera_times[i].calls = 0;
+                pc_camera_times[i].ticks = 0;
+            }
+            return;
+        }
+    }
+}
 static unsigned pc_render_trace_count;
 static int pc_render_trace_enabled;
 void MeleePc_SetRenderCallbackTrace(int enabled){pc_render_trace_enabled=enabled;pc_render_trace_count=0;}
@@ -189,8 +226,15 @@ void HSD_GObj_80390FC0(void)
             saved = HSD_GObj_804D7818;
             HSD_GObj_804D7818 = cur;
             pc_render_trace("camera_begin",cur,0);
-    cur->render_cb(cur, 0);
-    pc_render_trace("camera_end",cur,0);
+#ifdef TARGET_PC
+            void (*profile_callback)(HSD_GObj*, int) = cur->render_cb;
+            OSTime profile_start = pc_camera_profile_begin();
+#endif
+            cur->render_cb(cur, 0);
+#ifdef TARGET_PC
+            pc_camera_profile_end(profile_callback, profile_start);
+#endif
+            pc_render_trace("camera_end",cur,0);
             HSD_GObj_804D7818 = saved;
         }
         cur = cur->next_gx;

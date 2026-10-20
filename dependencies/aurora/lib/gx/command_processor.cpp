@@ -87,6 +87,7 @@ CommandDiagnostics& diagnostics() noexcept {
 }
 
 void refresh_dynamic_diagnostic_flags() noexcept {
+  refresh_uniform_diagnostic_flags();
   auto& value = diagnostics();
   value.drawUv.store(std::getenv("AURORA_DIAGNOSTIC_DRAW_UV") != nullptr, std::memory_order_relaxed);
   value.uniformUpload.store(std::getenv("AURORA_DIAGNOSTIC_UNIFORM_UPLOAD") != nullptr,

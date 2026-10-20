@@ -2044,7 +2044,7 @@
     },
     {
       "path": "source/src/melee/ft/fighter.c",
-      "sha256": "5b429ca650dbcd4d343af10b151198a640462c329b04f15d4d1ae69d66ebcc02"
+      "sha256": "a3721cd9d4bc60bde8fcde9ecf252871275f8539011806495aefdcdff76b7fd9"
     },
     {
       "path": "source/src/melee/ft/fighter.h",
@@ -2424,7 +2424,7 @@
     },
     {
       "path": "source/src/melee/ft/ftcoll.c",
-      "sha256": "c3ee1e30915ec5db76b876b3a8011f266d935e10fda6399ef0f504c0a0d1d113"
+      "sha256": "185c766683b71fc26f1af46002f3ef37bfb1a814fae3f0120331158bec19a929"
     },
     {
       "path": "source/src/melee/ft/ftcoll.h",
@@ -2524,7 +2524,7 @@
     },
     {
       "path": "source/src/melee/ft/ftparts.c",
-      "sha256": "8ff8fbf01fd48267edad2c606619094b39a6723b622d18a232e74496d11b2f0f"
+      "sha256": "807ae45b4de4c668dece5a980fc47231420efd1522bd61d81ae84f8b277522e2"
     },
     {
       "path": "source/src/melee/ft/ftparts.h",
@@ -5860,7 +5860,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.c",
-      "sha256": "356fc11fa0ae5bfffb05d82c3d251f5a0299f4c78d4c752cfc03c8303e58c3d6"
+      "sha256": "221b273087c6c03ae25469d0d46636c7776d5152f8dc0abf6aaec775af990e85"
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.h",
@@ -6196,7 +6196,7 @@
     },
     {
       "path": "source/src/melee/gm/gmscene.c",
-      "sha256": "084ede9139f73ae226f46b383451916928c08442c7dc8224d1fe654174f45bce"
+      "sha256": "c61c4b1cd6749fb021b44e39f895a2fbb60c2ebc8484bbf7bdd077bad2f8153c"
     },
     {
       "path": "source/src/melee/gm/gmscene.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "6fa61949b52d9116a5bb71e4fc3cbb4205caa6a6524b61ab4d7227fac7c9d68c"
+      "sha256": "58c711bf4c1ae514b8625891e38080fcbf139c1fb0711a02f6bfa18cb7e5adb1"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -7088,7 +7088,7 @@
     },
     {
       "path": "source/src/melee/if/ifnametag.c",
-      "sha256": "1e0c1f2bd1dac119a160a781be119a84923764449f9a234d1346a1cef2d74cf2"
+      "sha256": "21dd48d61c6789b80ce043fce0d704a397cfbbb6ee900200077c177f57d5beaa"
     },
     {
       "path": "source/src/melee/if/ifnametag.h",
@@ -7240,7 +7240,7 @@
     },
     {
       "path": "source/src/melee/it/itcoll.c",
-      "sha256": "7726a6adf5134c0ff02a0d6dbb83012076a71c3ef3248909ec17d5027aa19f49"
+      "sha256": "57e0c5de14af2cc4f7b7fcca7a71d415e8beecac582f2e75c14211c678376f5b"
     },
     {
       "path": "source/src/melee/it/itcoll.h",
@@ -11716,7 +11716,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/cobj.c",
-      "sha256": "0af5d974101201f9259119a0e98471b0cf3bdcc2764328127acc393f8a715757"
+      "sha256": "c892ff6ce9cb883bd7cbcd914ec2cc3fb2836c01d57edead4046a9c82e15771c"
     },
     {
       "path": "source/src/sysdolphin/baselib/cobj.h",
@@ -11812,7 +11812,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/gobj.c",
-      "sha256": "80af0644d7c3f13791566f738e0eb9d25c492ed51ea936f318d5ce27b6d156c9"
+      "sha256": "5f4e9de4c0b7ae3b6554c1185a995a3108d57781320d7c6b1fc88ed536df3b57"
     },
     {
       "path": "source/src/sysdolphin/baselib/gobj.h",
@@ -14052,7 +14052,7 @@
     },
     {
       "path": "dependencies/aurora/lib/gx/command_processor.cpp",
-      "sha256": "a9902217fafcd61043d88212555be4a9b49cb233d954d09f154b32d89eff7f58"
+      "sha256": "17e24e40f9451326f836e60b6dc45c95b79e780034f679cca23ce90c68f589bb"
     },
     {
       "path": "dependencies/aurora/lib/gx/command_processor.hpp",
@@ -14112,11 +14112,11 @@
     },
     {
       "path": "dependencies/aurora/lib/gx/shader_info.cpp",
-      "sha256": "66a6910767eaec990c37eac54b9db718ddd9b5e3738e60f5c44c00f00fba6a6b"
+      "sha256": "68c4c9462ddea0bb45e1606f52717502b6d4287529b98d573c7e90fe5a97e3bd"
     },
     {
       "path": "dependencies/aurora/lib/gx/shader_info.hpp",
-      "sha256": "9aa9234b90f969669dca3a2fdf4cc79178b8bc8b45b7fa0345c81686f2306a73"
+      "sha256": "091e87f292b8be91ec33df46de8e4478eb4f541d400e014dfbff777bb5a2ebee"
     },
     {
       "path": "dependencies/aurora/lib/gx/tev_compare_wgsl.hpp",

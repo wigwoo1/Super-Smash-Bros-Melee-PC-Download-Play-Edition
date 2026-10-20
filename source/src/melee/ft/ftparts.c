@@ -815,6 +815,25 @@ u32 ftParts_8007506C(enum FighterKind ftkind, int part)
 void ftParts_800750C8(Fighter* fp, enum_t arg1, bool arg2)
 {
 #ifdef TARGET_PC
+    /* Kirby exposes the Game & Watch hat table here as a render-presence
+     * signal. Its rows and DObjs belong to the hat, not Kirby's body.
+     * The body has two model rows while this hat table has only one. */
+    if (arg1 == 4 && fp->kind == Ft_Kind_Kirby &&
+        fp->x5AC.xC[4] != NULL &&
+        fp->x5AC.xC[4] == fp->u.kb.hat.x24.xC[4] &&
+        fp->u.kb.hat.x14.data != NULL) {
+        static unsigned traced;
+        if (arg2)
+            ftParts_80074CA0(&fp->u.kb.hat.x24, 4, &fp->u.kb.hat.x14);
+        else
+            ftParts_80074D7C(&fp->u.kb.hat.x24, 4, &fp->u.kb.hat.x14);
+        fp->x5AC.cleared[4] = fp->u.kb.hat.x24.cleared[4];
+        if (getenv("MELEE_DIAGNOSTIC_VISIBILITY_TRACE") && traced++ < 16)
+            OSReport("NATIVE_KIRBY_HAT_VISIBILITY group=4 shown=%d body_models=%u hat_models=%u dobjs=%u\n",
+                     arg2, fp->x5AC.model_num, fp->u.kb.hat.x24.model_num,
+                     fp->u.kb.hat.x14.count);
+        return; /* Hat visibility already applied; do not dispatch it twice. */
+    }
     pc_trace_parts_visibility(fp, arg1, arg2);
     /* Group 2 also dispatches group 3 below, against the main DObj list. */
     if (arg1 == 2) pc_trace_parts_visibility(fp, 3, arg2);

@@ -1862,6 +1862,8 @@ void gm_Scene_Vs_OnFrame(void)
                       getenv("MELEE_DIAGNOSTIC_KIRBY_DONKEY_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_Pikachu &&
                       getenv("MELEE_DIAGNOSTIC_KIRBY_PIKACHU_COPY_INPUT")) ||
+                     (mario->kind == Ft_Kind_GameWatch &&
+                      getenv("MELEE_DIAGNOSTIC_KIRBY_GAMEWATCH_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_Popo &&
                       getenv("MELEE_DIAGNOSTIC_KIRBY_POPO_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_Peach &&
@@ -1899,6 +1901,7 @@ void gm_Scene_Vs_OnFrame(void)
                     /* This paired test starts on opposite Yoshi platforms.
                      * Drop through using ordinary pad input before approaching. */
                     if ((getenv("MELEE_DIAGNOSTIC_KIRBY_PEACH_COPY_INPUT") ||
+                         getenv("MELEE_DIAGNOSTIC_KIRBY_GAMEWATCH_COPY_INPUT") ||
                          getenv("MELEE_DIAGNOSTIC_KIRBY_POPO_COPY_INPUT")) &&
                         frame >= 120 && frame < 128) {
                         input.stickY = -80;

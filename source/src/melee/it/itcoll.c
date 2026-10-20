@@ -509,6 +509,14 @@ static inline void it_802706D0_sub3(Item* item, Item* arg_item,
     }
     item->xCB8_outDamageDirection = dir;
     dmg = hit->damage;
+#ifdef TARGET_PC
+    {
+        extern char* getenv(const char*);
+        extern unsigned int HSD_JObjDiagnosticMatchFrame;
+        if (item->kind == It_Kind_Kirby_IceClimberIce && getenv("MELEE_DIAGNOSTIC_ICE_SHOT"))
+            OSReport("NATIVE_KIRBY_ICE_ITEM_TARGET frame=%u item=%p victim=%p kind=%d damage=%f\n", HSD_JObjDiagnosticMatchFrame, item->entity, arg_item->entity, arg_item->kind, dmg);
+    }
+#endif
     item->xC34_damageDealt = dmg;
     item->xCF4_fighterGObjUnk = NULL;
     item->xC38 = arg_item->kind;

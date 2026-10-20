@@ -6,6 +6,7 @@
 #include <absl/container/flat_hash_set.h>
 #include <cstdio>
 #include <cstdlib>
+#include <atomic>
 
 #include <cmath>
 
@@ -14,6 +15,19 @@
 namespace aurora::gx {
 namespace {
 constexpr Module Log{"aurora::gx"};
+enum UniformDiagnosticFlag : unsigned {
+  MatrixTrace = 1, LayoutTrace = 2, ContentTrace = 4, UvTrace = 8,
+};
+unsigned read_uniform_diagnostic_flags() noexcept {
+  return (std::getenv("AURORA_DIAGNOSTIC_TEXTURE_MATRICES") ? MatrixTrace : 0u) |
+         (std::getenv("AURORA_DIAGNOSTIC_UNIFORM_LAYOUT") ? LayoutTrace : 0u) |
+         (std::getenv("AURORA_DIAGNOSTIC_TEXTURE_CONTENT") ? ContentTrace : 0u) |
+         (std::getenv("AURORA_DIAGNOSTIC_DRAW_UV") ? UvTrace : 0u);
+}
+std::atomic<unsigned>& uniform_diagnostic_flags() noexcept {
+  static std::atomic<unsigned> flags{read_uniform_diagnostic_flags()};
+  return flags;
+}
 
 bool is_alpha_bump_channel(GXChannelID id) { return id == GX_ALPHA_BUMP || id == GX_ALPHA_BUMPN; }
 
@@ -391,9 +405,9 @@ struct UniformDiagnosticWriter {
                             static_cast<unsigned long long>(hash), slot++, offset, storage.size() - offset);
   }
 };
-static void fill_uniform(ByteBuffer& storage, const ShaderInfo& info) noexcept {
+static void fill_uniform(ByteBuffer& storage, const ShaderInfo& info, unsigned diagnosticFlags) noexcept {
   // Read only, recording owner; arm at original match entry to exclude menus.
-  if (std::getenv("AURORA_DIAGNOSTIC_TEXTURE_MATRICES")) {
+  if (diagnosticFlags & MatrixTrace) {
     static absl::flat_hash_set<uint64_t> matrixSnapshots;
     Hasher hash;
     hash.update(g_gxState.texMtxs.data(), sizeof(g_gxState.texMtxs));
@@ -459,7 +473,7 @@ static void fill_uniform(ByteBuffer& storage, const ShaderInfo& info) noexcept {
   }
   // Recording owner only; report each shader once and preserve append semantics.
   static absl::flat_hash_set<uint64_t> seen;
-  const bool trace = std::getenv("AURORA_DIAGNOSTIC_UNIFORM_LAYOUT") &&
+  const bool trace = (diagnosticFlags & LayoutTrace) &&
                      seen.insert(info.diagnosticShaderHash).second;
   UniformDiagnosticWriter buf{storage, info.diagnosticShaderHash, trace};
   buf.reserve_extra(info.uniformSize);
@@ -548,8 +562,7 @@ static void fill_uniform(ByteBuffer& storage, const ShaderInfo& info) noexcept {
     }
     // Inspect the packed bytes, rather than reprinting the source matrix.
     // Match-armed, bounded, recording-owner only; no uniform mutation.
-    if (std::getenv("AURORA_DIAGNOSTIC_TEXTURE_CONTENT") &&
-        std::getenv("AURORA_DIAGNOSTIC_DRAW_UV")) {
+    if ((diagnosticFlags & (ContentTrace | UvTrace)) == (ContentTrace | UvTrace)) {
       static unsigned records = 0;
       static bool limitReported = false;
       static_assert(sizeof(g_gxState.ptTexMtxs[0]) == 48);
@@ -620,11 +633,31 @@ static void fill_uniform(ByteBuffer& storage, const ShaderInfo& info) noexcept {
                           static_cast<unsigned long long>(info.diagnosticShaderHash), storage.size(), info.uniformSize);
 }
 
+void refresh_uniform_diagnostic_flags() noexcept {
+  uniform_diagnostic_flags().store(read_uniform_diagnostic_flags(), std::memory_order_relaxed);
+}
+
 gfx::Range build_uniform(const ShaderInfo& info) noexcept {
   ZoneScoped;
   static ByteBuffer buf;
   buf.clear();
-  fill_uniform(buf, info);
+  const unsigned flags = uniform_diagnostic_flags().load(std::memory_order_relaxed);
+  fill_uniform(buf, info, flags);
+  static const bool verify = std::getenv("AURORA_DIAGNOSTIC_VERIFY_UNIFORM_FLAGS") != nullptr;
+  if (verify) {
+    const unsigned freshFlags = read_uniform_diagnostic_flags();
+    AURORA_ASSERT(flags == freshFlags, "Cached uniform diagnostic flags are stale");
+    static ByteBuffer reference;
+    reference.clear();
+    fill_uniform(reference, info, freshFlags);
+    AURORA_ASSERT(reference.size() == buf.size() &&
+                  std::memcmp(reference.data(), buf.data(), buf.size()) == 0,
+                  "Cached diagnostic flags changed uniform bytes");
+    static uint64_t checks = 0;
+    if (++checks % 4096 == 0)
+      std::fprintf(stderr, "NATIVE_UNIFORM_FLAGS_VERIFIED checks=%llu flags=%u bytes_equal=1\n",
+                   static_cast<unsigned long long>(checks), flags);
+  }
   return gfx::push_uniform(buf.data(), buf.size());
 }
 } // namespace aurora::gx

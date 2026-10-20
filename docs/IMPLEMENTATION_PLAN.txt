@@ -9321,3 +9321,45 @@ Stopped runtime attempts after two focused hit checks. Next collision attributio
 Candidate adc94a6d0f679d999697a8aae3974ec98b8f8b5c4dcd9ee378c399393424b487 with matching20 source overlays preserved separately. Default executable, discs and saves unchanged. Intermittent visibility crash remains unresolved; overall approx28%. No visual, physical input, full collision fidelity or performance acceptance.
 
 2026-10-18 GITHUB PUBLICATION VERIFIED: public repository wigwoo1/Super-Smash-Bros-Melee-PC-Download-Play-Edition, prerelease development-2026-10-18, source archive/Git tree and downloaded SHA-256 verified. Asset-free template local restoration plus muted600-frame native match cleanexit passed. Daily reviewed publication active; no empty commits. Source3609files, original assets/private font-containing executables/DLLs excluded. No gameplay advancement; approx28%; collision attribution still awaits Astra Low. See GITHUB_PUBLICATION.txt.
+
+2026-10-18 KIRBY ICE SHOT OPPONENT HIT - VERIFIED (focused diagnostic)
+Built v6 native library and host successfully. Muted 1500-frame D3D12 test passed with clean exit and no detected runtime fault. Kirby acquired the copy through scripted ordinary pad input; no damage/state injection.
+At frame1231 projectile2DB38300 hit fighter2DA74840 player1 kind10 sub0 (Popo), logged before8 and damage5. Same frame/victim damage application was5 and after13. Projectile releasedframe1218 at1.5 units/frame and traveled16.815432 world units. This proves opponent damage in v6. Older untraced v5 recipient remains unknown; test timing differed. Nana also logged5 damage that frame but is not needed for acceptance.
+Only opt-in attribution logs changed; no collision/gameplay fix was necessary. No physical-controller, visual fidelity, performance or full-port acceptance. Existing intermittent visibility crash remains unresolved. Overall project approximately28%.
+Next model: Luna Low for routine documentation/publication upkeep; Sol High for further gameplay/rendering integration. Astra no longer needed for this resolved attribution task.
+
+2026-10-18 VERIFIED focused Kirby GameWatch hat visibility correction. v8 build passed; muted1200-frame test acquired hat24, exercised shown0/1 with body_models2 hat_models1 dobjs21, clean exit and no visibility/fatal marker. Corrects demonstrated special-table overread; broader visual/all-stage acceptance remains pending. Source overlays match candidate. Overall approximately28%. Next Sol High for broader regression; Luna Low for packaging upkeep.
+
+2026-10-18 performance next gate: phase profile identifies snapshot_draw (~18.096ms/call) as largest measured region. Subdivide GX invalidation, HSD_StartRender, HSD_GObj_80390FC0, and draw finalization with opt-in profiling; preserve default behavior. Build and run muted matched workload; do not infer GPU bottleneck from CPU wall time. Evidence: development/kirby-popo-copy-20261017/d3d12-v8-phase-profile/phase-analysis.json.
+
+2026-10-18 completed draw subdivision: v9 isolates almost all snapshot_draw time in HSD_GObj_80390FC0 (19.584ms of19.606ms). Next measure camera callbacks and waits within that routine; do not optimize invalidation/start/finalization based on current data. Candidate remains internal, default Desktop executable unchanged.
+
+2026-10-18 next performance gate: v10 camera-analysis identifies fn_800301D0 and fn_802FCAC4 as dominant wall-time callbacks. Split camera set-current, GX-link rendering and end-current before optimization; investigate blocking/shared work rather than removing HUD or required boundary lines.
+
+2026-10-18 performance finding: v11 shows name-tag camera cost is setup (~7.057ms), not tag rendering (~0.159ms). Next isolate Z-list cleanup versus viewport/projection/viewing matrix in HSD_CObjSetCurrent. Preserve all HUD content and boundaries.
+
+2026-10-18 refine performance next action: measure HUD aurora_diagnostic_render_target duration. Source confirms it synchronizes FIFO before reading target size/offscreen state. Preserve correctness across shadow/copy transitions; do not cache stale targets or drop required drain without equivalent ordering.
+
+2026-10-18 v12 confirms HUD render-target query accounts for99.758% of measured setup. Stop subdividing matrix/setup code. Next optimize preceding FIFO processing or establish correctly ordered target metadata; validate shadows, HUD and offscreen passes before accepting any synchronization change.
+
+2026-10-18 prefer reducing FIFO processing costs before ownership changes: v12 submission measurements identify pipeline47.51% and uniform40.17% within measured submission work. Analyze pipeline metadata selection and fill_uniform/push_uniform; preserve shader and frame-resource validity. Do not rerun existing shader-info cache experiment unchanged.
+
+2026-10-18 next bounded optimization candidate: cache uniform diagnostic flag reads with explicit refresh via existing Aurora command-flag hook; add refresh to late texture-matrix arming. Verify diagnostic output and uniform-byte equivalence, then matched muted timing. Prior dedup/cache experiments remain opt-in without repeated unchanged tests.
+
+2026-10-18 v13 uniform flag caching implemented, compiled and late-arm runtime verified. Next compare serialized uniform bytes/layout and matched control/candidate timing before promotion; retain source overlays and no original asset exports.
+
+2026-10-18 v13 first matched timing pair +5.415% presentation, both muted runs passed. Next reverse-order matched pair to assess repeatability and validate rendering before promotion. Source construction unchanged beyond diagnostic predicates; runtime byte equivalence remains unverified.
+
+2026-10-18 opposite-order timing gate collected: candidate faster in both pairs, magnitude5.4%-37.2% varies substantially. No stable performance guarantee. Next validate rendering and uniform diagnostic equivalence before delivery; avoid additional identical timing loops.
+
+2026-10-18 v13 GPU screenshot reviewed with stage/fighters/HUD/boundaries intact; runtime checks pass. Remaining candidate acceptance: shader data equivalence before packaging/promotion, broader workloads remain unfinished.
+
+2026-10-18 uniform correctness gate passed for v14 workload (540672 byte comparisons, startup and late-refresh states). Next synchronize internal candidate/source package and evidence; retain optional verifier off normally. Broader playability, renderer and all-content acceptance remain outstanding.
+
+2026-10-18 v14 Vulkan visual/runtime regression passed on current host. Next D3D11 candidate check; broader stage and physical-controller acceptance remain open.
+
+2026-10-18 D3D11 v14 warmed visual/runtime check passed after initial cold capture missed delay400. Preserve failure record. Cold-start scheduling/presentation remains a limitation; all-renderer focused checks do not establish release playability.
+
+2026-10-18 diagnostic pacing baseline aligned with independent clock in v15; muted cold D3D11 run passed near60Hz simulation. Earlier first-sample cold metrics are not steady-state evidence. Preserve separation of timing/reporting fix from gameplay scheduler acceptance.
+
+2026-10-18 unscripted muted v15 startup/attract process test clean182.5s. Stop repeating bounded Kirby tests; remaining playability gate includes normal input/menu path, repeated matches and broader content fidelity. No release acceptance.

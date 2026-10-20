@@ -2873,6 +2873,13 @@ void Fighter_TakeDamage_8006CC7C(Fighter* fp, float damage_amount)
 {
     if (!fp->x2226_b4 || fp->x2226_b3) {
         fp->dmg.x1830_percent += damage_amount;
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_ICE_SHOT")) {
+            extern unsigned int HSD_JObjDiagnosticMatchFrame;
+            OSReport("NATIVE_ICE_DAMAGE_APPLIED frame=%u victim=%p player=%d kind=%d sub=%d amount=%f after=%f\n", HSD_JObjDiagnosticMatchFrame, fp->gobj, fp->player_idx, fp->kind, fp->is_sub_fighter, damage_amount, fp->dmg.x1830_percent);
+        }
+#endif
+
         if (fp->metal_timer != 0) {
             fp->metal_health -= damage_amount;
         }

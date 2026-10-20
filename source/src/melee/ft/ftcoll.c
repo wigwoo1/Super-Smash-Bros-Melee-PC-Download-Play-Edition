@@ -1007,6 +1007,12 @@ bool ftColl_80077C60(Item* item, HitCapsule* hit, Fighter* fp,
             if (scaled_dmg > (float) item->xC34_damageDealt) {
                 float vel_x, vel_x_mag, dir;
 
+#ifdef TARGET_PC
+                if (item->kind == It_Kind_Kirby_IceClimberIce && getenv("MELEE_DIAGNOSTIC_ICE_SHOT")) {
+                    extern unsigned int HSD_JObjDiagnosticMatchFrame;
+                    OSReport("NATIVE_KIRBY_ICE_FIGHTER_TARGET frame=%u item=%p victim=%p player=%d kind=%d sub=%d before=%f damage=%f\n", HSD_JObjDiagnosticMatchFrame, item->entity, fp->gobj, fp->player_idx, fp->kind, fp->is_sub_fighter, fp->dmg.x1830_percent, scaled_dmg);
+                }
+#endif
                 item->xC34_damageDealt = (int) scaled_dmg;
                 item->xCF4_fighterGObjUnk = fp->gobj;
 #ifdef TARGET_PC

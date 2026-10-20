@@ -6,12 +6,13 @@ An unfinished native Windows PC port research project based on [doldecomp/melee]
 
 ## Current diagnostic checkpoint
 
-- Native menus and bounded matches have run with D3D12 and Vulkan in earlier checks; D3D11 remains less thoroughly verified.
-- Latest candidate: Kirby can inhale Ice Climbers, acquire their ability, and create Ice Shot. Muted 1,500-frame native tests exited cleanly.
-- Ice Shot launched at its loaded speed of 1.5 units/frame and traveled forward. A 5-damage callback occurred, but the actual target was not identified and Popo's damage did not increase. **Opponent-hit verification is incomplete.**
-- An intermittent visibility-related memory crash is unresolved. Full roster/stage fidelity, physical controllers, performance, online play, and release readiness are not accepted.
+- Newer source includes focused Kirby Ice Shot collision tracing: a muted 1,500-frame native test followed one projectile through a Popo hit and verified damage increasing from 8% to 13%. Scripted pad input was used; no damage was injected. This does not establish all-match or physical-controller acceptance.
+- Kirby's Game & Watch hat visibility now uses the hat's own model table. Focused renderer checks passed; broader stability remains unaccepted.
+- Cached uniform diagnostic flags passed over 540,000 live byte-equivalence comparisons in one workload. Timing comparisons favored the candidate but varied substantially; no stable percentage speedup is claimed.
+- Bounded muted D3D12, Vulkan and D3D11 checks passed on the test machine. The latest D3D11 timing check kept simulation near 60 Hz; older hardware is not verified.
+- Full roster/stage fidelity, physical controls, performance, multiplayer and release readiness remain unfinished. Overall estimate remains approximately 28%.
 
-See [verification](verification/), [the implementation plan](docs/IMPLEMENTATION_PLAN.txt), and [progress notes](docs/PORT_PROGRESS.txt). Historical notes describe experiments; they are not a feature checklist of completed work.
+These results concern newer private diagnostic candidates and current source. The October 18 prerelease remains pinned to its original source and does not contain these newer changes. See [progress notes](docs/PORT_PROGRESS.txt) for scoped evidence; older verification files describe historical candidates.
 
 ## Downloads and private setup
 
@@ -57,3 +58,5 @@ Later milestones include native mods, controller/keyboard customization, four-pl
 Preserve all upstream notices. [Third-party notices](docs/THIRD_PARTY_NOTICES.txt) describe the currently known source/dependency notices; there is no new blanket license assigned to the Melee source. Aurora retains its MIT license. The release's `notices/` directory preserves available dependency license texts; third-party DLLs are obtained separately through the runtime rebuild instructions.
 
 A daily local Codex publishing check is scheduled. It publishes reviewed changes when available; it does not generate empty daily commits, and requires the local environment and GitHub authorization to remain available.
+
+> Main has newer source than the pinned development binary. Read each release at its own source commit; the old binary is not claimed to include these newer changes.

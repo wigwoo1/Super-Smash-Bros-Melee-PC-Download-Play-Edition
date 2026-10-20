@@ -308,6 +308,7 @@ void gm_801A4014(GameMode* mode)
     }
     if (kind == 2 && getenv("MELEE_DIAGNOSTIC_MATCH_TEXTURE_MATRICES")) {
         if (_putenv_s("AURORA_DIAGNOSTIC_TEXTURE_MATRICES", "1") == 0) {
+            aurora_diagnostic_refresh_command_flags();
             OSReport("NATIVE_SCENE texture_matrices_armed kind=2\n");
         }
     }

@@ -88,12 +88,17 @@ enum NativePacingPhaseId {
     NATIVE_PACING_SNAPSHOT_COPY,
     NATIVE_PACING_SNAPSHOT_END,
     NATIVE_PACING_SNAPSHOT_OWNER,
+    NATIVE_PACING_DRAW_INVALIDATE,
+    NATIVE_PACING_DRAW_START,
+    NATIVE_PACING_DRAW_GOBJS,
+    NATIVE_PACING_DRAW_FINISH,
     NATIVE_PACING_PHASE_COUNT,
 };
 static const char* native_pacing_phase_names[NATIVE_PACING_PHASE_COUNT] = {
     "scene_callback", "gobj_procs", "xfb_slot_wait", "host_surface_acquire",
     "render_callbacks", "xfb_copy", "host_end_frame", "repeat_present",
     "snapshot_begin", "snapshot_draw", "snapshot_copy", "snapshot_end", "snapshot_owner",
+    "draw_invalidate", "draw_start", "draw_gobjs", "draw_finish",
 };
 static struct {
     u64 total_ticks;
@@ -527,14 +532,28 @@ static bool native_present_current_scene_state(void)
         native_pacing_profile_add(NATIVE_PACING_SNAPSHOT_BEGIN, snapshot_phase);
         snapshot_phase = OSGetTime();
     }
+    OSTime draw_phase = profile_snapshot ? OSGetTime() : 0;
     GXInvalidateVtxCache();
     GXInvalidateTexAll();
+    if (profile_snapshot) {
+        native_pacing_profile_add(NATIVE_PACING_DRAW_INVALIDATE, draw_phase);
+        draw_phase = OSGetTime();
+    }
     HSD_StartRender(HSD_RP_SCREEN);
+    if (profile_snapshot) {
+        native_pacing_profile_add(NATIVE_PACING_DRAW_START, draw_phase);
+        draw_phase = OSGetTime();
+    }
     HSD_GObj_80390FC0();
+    if (profile_snapshot) {
+        native_pacing_profile_add(NATIVE_PACING_DRAW_GOBJS, draw_phase);
+        draw_phase = OSGetTime();
+    }
     native_pacing_scene_draws++;
     HSD_Init_803755A8();
     HSD_PerfSetDrawTime();
     if (profile_snapshot) {
+        native_pacing_profile_add(NATIVE_PACING_DRAW_FINISH, draw_phase);
         native_pacing_profile_add(NATIVE_PACING_SNAPSHOT_DRAW, snapshot_phase);
         snapshot_phase = OSGetTime();
     }
@@ -1357,6 +1376,10 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
             native_presentation_origin = OSGetTime();
             HSD_ASSERT(1, MeleePc_PresentationClockInit(&native_presentation_clock, native_presentation_hz));
             native_presentation_ready = true;
+            /* Start timing at the same boundary as the independent clock.
+             * Otherwise its first sample can include bootstrap work. */
+            native_pacing_previous_presented = 0;
+            native_log_pacing_sample();
             OSReport("NATIVE_PRESENTATION_CLOCK initialized=1 target=%u simulation_hz=60 bootstrap_drained=1\n", native_presentation_hz);
         }
         if (native_repeat_render_hz != 0) {
