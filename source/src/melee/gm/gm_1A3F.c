@@ -312,8 +312,8 @@ void gm_801A4014(GameMode* mode)
             OSReport("NATIVE_SCENE texture_matrices_armed kind=2\n");
         }
     }
-    if ((kind == 0 || kind == 2 || kind == 4 || kind == 1 || kind == 8 || kind == 9 || kind == 5 || kind == 39) && getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
-        const char* capture = getenv(kind == 0 ? "MELEE_DIAGNOSTIC_TITLE_SCENE_CAPTURE" : kind == 39 ? "MELEE_DIAGNOSTIC_PRIZE_SCENE_CAPTURE" : kind == 5 ? "MELEE_DIAGNOSTIC_RESULTS_SCENE_CAPTURE" : kind == 9 ? "MELEE_DIAGNOSTIC_STAGE_SCENE_CAPTURE" : kind == 8 ? "MELEE_DIAGNOSTIC_CSS_SCENE_CAPTURE" : kind == 1 ? "MELEE_DIAGNOSTIC_MENU_SCENE_CAPTURE" : "MELEE_DIAGNOSTIC_GAME_SCENE_CAPTURE");
+    if ((kind == 0 || kind == 2 || kind == 4 || kind == 1 || kind == 8 || kind == 9 || kind == 5 || kind == 39 || kind == GS_GAMEOVER) && getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
+        const char* capture = getenv(kind == 0 ? "MELEE_DIAGNOSTIC_TITLE_SCENE_CAPTURE" : kind == GS_GAMEOVER ? "MELEE_DIAGNOSTIC_GAMEOVER_SCENE_CAPTURE" : kind == 39 ? "MELEE_DIAGNOSTIC_PRIZE_SCENE_CAPTURE" : kind == 5 ? "MELEE_DIAGNOSTIC_RESULTS_SCENE_CAPTURE" : kind == 9 ? "MELEE_DIAGNOSTIC_STAGE_SCENE_CAPTURE" : kind == 8 ? "MELEE_DIAGNOSTIC_CSS_SCENE_CAPTURE" : kind == 1 ? "MELEE_DIAGNOSTIC_MENU_SCENE_CAPTURE" : "MELEE_DIAGNOSTIC_GAME_SCENE_CAPTURE");
         if (capture && capture[0]) {
             /* Arm the existing GPU readback only after original game entry. */
             if (_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0) {

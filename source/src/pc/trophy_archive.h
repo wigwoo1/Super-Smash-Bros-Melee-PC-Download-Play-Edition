@@ -42,4 +42,23 @@ static int MeleePc_TrophyBody(unsigned char* bytes,uint32_t body,size_t roots,si
     }
     return 0;
 }
+/* ToyModelFile (ty/types.h) is an id followed by inline char[32]/char[48],
+ * not a pointer table. Toy_8030813C scans293 entries and five US overrides. */
+static int MeleePc_TrophyFilesBody(unsigned char* bytes,uint32_t body,size_t roots,size_t strings){
+    if(body!=25032 || MeleePc_DatBe32(bytes+roots)!=0 ||
+       MeleePc_DatBe32(bytes+roots+8)!=24612 ||
+       strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"tyModelFileTbl") ||
+       strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12),"tyModelFileUsTbl"))return -2;
+    for(unsigned table=0;table<2;++table){
+        unsigned char ids[293]={0};
+        uint32_t start=table?24612:0,end=table?25032:24612;
+        for(uint32_t at=start;at<end;at+=84){
+            uint32_t id=MeleePc_DatBe32(bytes+32+at);
+            if(id>=293 || ids[id]++ || !bytes[32+at+4] || !bytes[32+at+36] ||
+               !memchr(bytes+32+at+4,0,32) || !memchr(bytes+32+at+36,0,48))return -1;
+        }
+    }
+    for(uint32_t at=0;at<body;at+=84)MeleePc_DatSwap32(bytes+32+at);
+    return 0;
+}
 #endif

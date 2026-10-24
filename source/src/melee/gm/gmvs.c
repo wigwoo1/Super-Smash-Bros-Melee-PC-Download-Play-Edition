@@ -1716,6 +1716,34 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT") &&
+        gm_GetCurrentGameMode() == GM_CLASSIC) {
+        PADStatus input = { 0 };
+        unsigned frame = controller.state.frame_count;
+        int stocks = Player_GetStocks(0);
+        HSD_GObj* entity = Player_GetEntity(0);
+        static int previous_stocks = -1;
+        /* Natural off-stage movement only; original KO/stock/Game Over rules
+         * choose the outcome. No damage, stocks, outcome or route writes. */
+        if (frame >= 180) input.stickX = -80;
+        if (entity && ftLib_GetMotionId(entity) == ftCo_MS_CliffWait) {
+            /* Original CliffWait requires a neutral sample before a drop.
+             * Keep Down out of grounded movement so it cannot crouch. */
+            input.stickX = 0;
+            if (frame % 30 >= 6) input.stickY = -80;
+        }
+        if (!HSD_PadStageDiagnosticInput(Player_GetPadPort(0), &input))
+            OSReport("NATIVE_CLASSIC_DEFEAT input_refused=1 frame=%u\n", frame);
+        if (stocks != previous_stocks || frame % 120 == 0) {
+            Vec3 position = { 0 };
+            if (entity) ftLib_GetPos(entity, &position);
+            OSReport("NATIVE_CLASSIC_DEFEAT frame=%u stocks=%d result=%d motion=%d x=%f y=%f\n",
+                     frame, stocks, controller.state.match_result,
+                     entity ? ftLib_GetMotionId(entity) : -1,
+                     position.x, position.y);
+            previous_stocks = stocks;
+        }
+    }
     /* Test only: exercise the original pause/no-contest input path without
      * assigning match outcome, damage, stocks or scene routing. Use calls for
      * the release delay because simulation frame_count stops while paused. */

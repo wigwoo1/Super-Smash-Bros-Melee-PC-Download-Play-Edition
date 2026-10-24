@@ -9458,6 +9458,13 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    if(!externs && MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings)){
+        int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     /* The All-Star stage's standalone render-map archive reuses the scene
      * root symbol without the 27 embedded motion roots. Admit that one typed
      * SceneDesc entry, then retain the same strict graph/relocation checks. */
@@ -9483,6 +9490,13 @@ static int MeleePc_DatDecode(void* data,size_t length){
     }
     if(publics==13 && !externs){
         int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    if(length==25112 && body==25032 && publics==2 && !externs && !relocs){
+        int result=MeleePc_TrophyFilesBody(bytes,body,roots,strings);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);

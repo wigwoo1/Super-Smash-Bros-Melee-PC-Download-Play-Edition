@@ -5836,7 +5836,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_19EF.c",
-      "sha256": "ce5c3d348f564db6908d455891d2043919f047694d78398dd7a0f66d555ad49b"
+      "sha256": "054a19975c6a16ce750372033afd47d172056790ef3fee974a14b175cafc5292"
     },
     {
       "path": "source/src/melee/gm/gm_19EF.h",
@@ -5860,7 +5860,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.c",
-      "sha256": "793162a45225a3f7f0c43c3af2c04d75e328baf21c0f708cdef604ea30587ec3"
+      "sha256": "d68c93a3353d28b91b923b4f5a8d0f00eab37c382249c4e8299394b6a6cb184c"
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "c7955d054926649114bd0b985530ac1b17a5b7d77bc80c143f2bf1c2f553bd48"
+      "sha256": "398e60b9877622e4b2bb2b21475b3fb6750da25133e67130af41e893d8656db2"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "dec41a624134d23ab19f63997d42bf85c9ac7221874ebce83914749f86f79f10"
+      "sha256": "8c0a3ffc4c3b759dedc597db53e6a1f2dd673d555fe4ba7bfa83f0a12cb4860c"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10647,6 +10647,10 @@
       "sha256": "ed64b9800931946acd937303fae0c856e628636748abd1db3010c0b3ea94fd09"
     },
     {
+      "path": "source/src/pc/game_over_scene_profile.h",
+      "sha256": "e0f5c9d93ff5c385c892fcd56d392fc300a0fe8223010078f7d8fc28ee7ba1b1"
+    },
+    {
       "path": "source/src/pc/gamewatch_animation_profiles.h",
       "sha256": "decbd90279f8eeb7d61d03b036aad0a737951f11d12a015084052fafc35dad9a"
     },
@@ -11700,7 +11704,7 @@
     },
     {
       "path": "source/src/pc/title_archive.h",
-      "sha256": "d0f8f6723e1f89bb310cb205e42d736464984a7d446bccba89c0dfa4c3721d35"
+      "sha256": "600387a832add41529a5c544db60eb56ff7eb0bd1aa8b1537d95fb44ebcf1f75"
     },
     {
       "path": "source/src/pc/title_layouts.h",
@@ -11716,7 +11720,7 @@
     },
     {
       "path": "source/src/pc/trophy_archive.h",
-      "sha256": "00255ec69fcb3f836b9be62137b160ba481b0f8bb3f3ddb29dcfc7b6075b9c07"
+      "sha256": "370105606dcf562bb2d81dac47b18f28f510420a4ce731933cf86603cf3b5af4"
     },
     {
       "path": "source/src/pc/udp_input.h",

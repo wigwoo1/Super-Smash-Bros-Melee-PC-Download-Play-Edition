@@ -5,6 +5,10 @@
 #include "gm_1A3F.h"
 #include "gm_unsplit.h"
 #include "gmscene.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 #include <dolphin/pad.h>
 #include <melee/lb/lb_00B0.h>
 #include <melee/lb/lbarchive.h>
@@ -684,6 +688,11 @@ void gm_Scene_GOver_OnEnter(void* arg0_)
     }
     lbl_80479A98.x4_u.x0.x15 = arg0->slot;
     fn_8019F9C4(arg0->ckind);
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT"))
+        OSReport("NATIVE_CLASSIC_GAMEOVER initialized=1 kind=%d affordable=%u coins=%u\n",
+                 arg0->ckind, lbl_80479A98.x4_u.x0.x20 == 0, arg0->x18);
+#endif
 }
 
 void gm_Scene_GOver_OnExit(void* arg0_)
@@ -692,6 +701,10 @@ void gm_Scene_GOver_OnExit(void* arg0_)
     arg0->x4 = lbl_80479A98.x4_u.x0.x8;
     arg0->xC = lbl_80479A98.x4_u.x0.x18;
     arg0->x18 = lbl_80479A98.x4_u.x0.x22;
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT"))
+        OSReport("NATIVE_CLASSIC_GAMEOVER exit=1 continue=%d\n", arg0->xC);
+#endif
     lbAudioAx_800236DC();
     lbArchive_80016EFC(lbl_804D6698);
 }

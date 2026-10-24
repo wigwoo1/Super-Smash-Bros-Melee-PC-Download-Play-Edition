@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "title_layouts.h"
+#include "game_over_scene_profile.h"
 /* Original offsets remain immutable until every typed claim is validated.
  * Packed GX/animation streams are byte payloads, never scalar arrays. */
 typedef struct { uint32_t at; unsigned type; } MeleePc_TitleNode;
@@ -452,6 +453,7 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(!strcmp(name,"ScTitle_scene_lights")){title_array(&p,at,TITLE_LightList,0,1);continue;}
         else if(!strcmp(name,"TitleMark_sobjdesc"))type=TITLE_HSD_SObjDesc;
         else if(!strcmp(name,"ScItrAllstar_scene_data"))type=TITLE_SceneDesc;
+        else if(MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_SceneDesc;
         else if(strlen(name)>=9 && !strcmp(name+strlen(name)-9,"_figatree"))type=TITLE_FigaTree;
         else if(!strncmp(name,"ftDemoIntroMotionFile",21)){
             title_nested_archive(&p,at);continue;
@@ -469,6 +471,19 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
                 else if(!strcmp(suffix,"_matanim_joint"))type=TITLE_HSD_MatAnimJoint;
                 else if(!strcmp(suffix,"_shapeanim_joint"))type=TITLE_HSD_ShapeAnimJoint;}}
         if(!type){p.error=-2;break;}title_enqueue(&p,at,type);
+    }
+    /* GmRegClr's AVERAGE shape set consumes ids0..10 in pobj.c. Its export
+     * retains an unused twelfth index directory entry for both vertex and
+     * normal tables. Pin those entries; do not increase the runtime count or
+     * infer arbitrary adjacent pointer arrays for other archives. */
+    if(!p.error && body==183304 && relocs==579 &&
+       MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings)){
+        if(title_u16(&p,76216)!=5 || title_u16(&p,76218)!=11 ||
+           title_u32(&p,76220)!=441 || title_u32(&p,76228)!=66396 ||
+           title_u32(&p,76232)!=441 || title_u32(&p,76240)!=76168 ||
+           title_pointer(&p,66440)!=65512 || title_pointer(&p,76212)!=75284)
+            p.error=-1;
+        if(!p.error){title_payload(&p,65512,882,1);title_payload(&p,75284,882,1);}
     }
     title_finish_plan(&p,0);
     free(p.claims);free(p.relocs);free(p.seen);free(p.nodes);return p.error;
