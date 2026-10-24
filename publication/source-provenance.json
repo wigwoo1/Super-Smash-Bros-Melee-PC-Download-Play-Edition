@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "643cb72cd695b61a8c157707cd9fb546655eb764688f9c84cd70a99db220724e"
+      "sha256": "5ab77328c4096145c4286fdbcf21fbae0f347100d920a2811b18eca30d994d7c"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11037,6 +11037,14 @@
     {
       "path": "source/src/pc/kirby_copy_sword_plan.h",
       "sha256": "8fac903b737414c8bca66a2c5c2849a24bea205a92e13eccc92c0a998dbb01a4"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_zelda_archive.h",
+      "sha256": "fd0883a7da5c862231b59f5f4ac33a5175497d8b6a91f8f05f8338a8048100c4"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_zelda_plan.h",
+      "sha256": "3d838c20612af474baafd6b8539654b47a442f4bbcf8db3ff5b579763b69f8f5"
     },
     {
       "path": "source/src/pc/kirby_results_motion.h",
