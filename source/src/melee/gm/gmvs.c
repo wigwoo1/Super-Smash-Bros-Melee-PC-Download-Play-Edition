@@ -1856,6 +1856,8 @@ void gm_Scene_Vs_OnFrame(void)
             getenv("MELEE_DIAGNOSTIC_KIRBY_CAPTAIN_COPY_INPUT") ||
             getenv("MELEE_DIAGNOSTIC_KIRBY_KOOPA_COPY_INPUT") ||
             getenv("MELEE_DIAGNOSTIC_KIRBY_DONKEY_COPY_INPUT") ||
+            getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT") ||
+            getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT") ||
             getenv("MELEE_DIAGNOSTIC_KIRBY_PIKACHU_COPY_INPUT") ||
             getenv("MELEE_DIAGNOSTIC_KIRBY_LUIGI_COPY_INPUT") ||
             getenv("MELEE_DIAGNOSTIC_KIRBY_NESS_COPY_INPUT") ||
@@ -1886,6 +1888,10 @@ void gm_Scene_Vs_OnFrame(void)
                       getenv("MELEE_DIAGNOSTIC_KIRBY_KOOPA_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_Donkey &&
                       getenv("MELEE_DIAGNOSTIC_KIRBY_DONKEY_COPY_INPUT")) ||
+                     (mario->kind == Ft_Kind_Yoshi &&
+                      getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT")) ||
+                     (mario->kind == Ft_Kind_Purin &&
+                      getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_Pikachu &&
                       getenv("MELEE_DIAGNOSTIC_KIRBY_PIKACHU_COPY_INPUT")) ||
                      (mario->kind == Ft_Kind_GameWatch &&
@@ -1968,6 +1974,20 @@ void gm_Scene_Vs_OnFrame(void)
                         if (frame >= 708 && b.y > a.y + 8.0f) other.stickY = -80;
                     }
                     if (frame >= 420 && frame < 700) input.button = PAD_BUTTON_B;
+                    /* Extend copy coverage using ordinary opponent movement.
+                     * No hat, position, move or damage state is written. */
+                    if ((getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT") ||
+                         getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT")) &&
+                        frame >= 700 && frame < 860) {
+                        float front = getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT")
+                                          ? 18.0f : 40.0f;
+                        float dx = a.x + kirby->facing_dir * front - b.x;
+                        if (frame < 708) other.button = PAD_BUTTON_X;
+                        if (dx > 2.0f) other.stickX = 35;
+                        if (dx < -2.0f) other.stickX = -35;
+                        if (frame >= 708 && b.y > a.y + 8.0f)
+                            other.stickY = -80;
+                    }
                     /* Ordinary movement places Popo in front after the late
                      * partner-assisted inhale, before the copied shot at1200. */
                     if (getenv("MELEE_DIAGNOSTIC_KIRBY_POPO_ICE_HIT") &&
@@ -2001,6 +2021,9 @@ void gm_Scene_Vs_OnFrame(void)
                         input.stickY = -80;
                     if ((frame >= 900 && frame < 908) ||
                         (frame >= 1200 && frame < 1208)) input.button = PAD_BUTTON_B;
+                    if (getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT") &&
+                        frame >= 900 && frame < 1020)
+                        input.button = PAD_BUTTON_B;
                     if (getenv("MELEE_DIAGNOSTIC_KIRBY_LINK_ARROW_HIT") &&
                         ((frame >= 900 && frame < 960) ||
                          (frame >= 1200 && frame < 1260))) input.button = PAD_BUTTON_B;
@@ -2012,6 +2035,18 @@ void gm_Scene_Vs_OnFrame(void)
                                  frame, kirby->u.kb.hat.kind, ftLib_GetMotionId(first),
                                  a.x, a.y, ftLib_GetMotionId(second), b.x, b.y,
                                  input.button, input.stickY, other.stickX, other.stickY);
+                    if ((getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT") ||
+                         getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT")) &&
+                        frame % 10 == 0)
+                        OSReport("NATIVE_KIRBY_COPY_USE frame=%u hat=%d motion=%d opponent_motion=%d opponent_damage=%d\n",
+                                 frame, kirby->u.kb.hat.kind, kirby->motion_id,
+                                 mario->motion_id, Player_GetDamage(1));
+                    if ((getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT") ||
+                         getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT")) &&
+                        frame % 30 == 0)
+                        OSReport("NATIVE_KIRBY_COPY_PAD frame=%u requested_x=%d consumed_x=%f consumed_y=%f\n",
+                                 frame, other.stickX, mario->input.lstick[0].x,
+                                 mario->input.lstick[0].y);
                     if (getenv("MELEE_DIAGNOSTIC_KIRBY_MEWTWO_COPY_INPUT") &&
                         (frame % 30 == 0 || (frame >= 1200 && frame <= 1225 && frame % 5 == 0)))
                         OSReport("NATIVE_KIRBY_MEWTWO_STATE frame=%u motion=%d held=%p charge=%d cmd0=%d cmd1=%d cmd2=%d cmd3=%d\n",
@@ -2056,7 +2091,15 @@ void gm_Scene_Vs_OnFrame(void)
             if (getenv("MELEE_DIAGNOSTIC_KIRBY_PIKACHU_JOLT_HIT") && frame % 30 == 0)
                 OSReport("NATIVE_KIRBY_PIKACHU_DAMAGE frame=%u opponent_damage=%d\n",
                          frame, Player_GetDamage(1));
-            PADSetVirtualStatus(1, &other);
+            if (getenv("MELEE_DIAGNOSTIC_KIRBY_YOSHI_COPY_INPUT") ||
+                getenv("MELEE_DIAGNOSTIC_KIRBY_PURIN_COPY_INPUT")) {
+                /* Match P1's next-latch staging, avoiding asynchronous SDL
+                 * virtual-pad updates for these two deterministic probes. */
+                if (!HSD_PadStageDiagnosticInput(1, &other))
+                    OSReport("NATIVE_KIRBY_COPY_OTHER_STAGE_FAILED frame=%u\n", frame);
+            } else {
+                PADSetVirtualStatus(1, &other);
+            }
         }
         if (getenv("MELEE_DIAGNOSTIC_PEACH_SIDE_CONTACT")) {
             PADStatus other = { 0 };
