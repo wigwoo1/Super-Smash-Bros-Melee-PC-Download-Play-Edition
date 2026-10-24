@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "358a8117ff348a6b8571051946ecad7541063ddd35fe3916dd20907650697664"
+      "sha256": "643cb72cd695b61a8c157707cd9fb546655eb764688f9c84cd70a99db220724e"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10879,6 +10879,14 @@
       "sha256": "ca3cfa677d850422ee6c25041e6decfacf79bebca1a57d749bd6f3f33605aa3c"
     },
     {
+      "path": "source/src/pc/kirby_copy_clink_archive.h",
+      "sha256": "0a93768673e7876e40b19173c693bce3e4a2877409960804708dc36b08b25990"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_clink_plan.h",
+      "sha256": "01b44d8d0f692787032586de5795d392515b39545ea10c0d2a9f83b0a63eb2ef"
+    },
+    {
       "path": "source/src/pc/kirby_copy_donkey_archive.h",
       "sha256": "34ed004f58f622c5659a862c4620f78106dcab319354af70eecf5f24c96839ab"
     },
@@ -10981,6 +10989,14 @@
     {
       "path": "source/src/pc/kirby_copy_peach_plan.h",
       "sha256": "fe7147b09ae5b1a29af5b265e27d762df3e1acc74f4da886592f5a4e8dc91f20"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_pichu_archive.h",
+      "sha256": "6083cb40d14cb44aa2039bf84af0dbbaf6670dda362e506f86f2d33d3800300d"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_pichu_plan.h",
+      "sha256": "bf4ba4738892f45600d48035db2b26e7123700eab81d083ce0c2d13e3420520b"
     },
     {
       "path": "source/src/pc/kirby_copy_pikachu_archive.h",

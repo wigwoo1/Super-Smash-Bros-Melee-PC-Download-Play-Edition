@@ -107,6 +107,8 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "pikachu_results_motion.h"
 #include "kirby_copy_donkey_archive.h"
 #include "kirby_copy_link_archive.h"
+#include "kirby_copy_clink_archive.h"
+#include "kirby_copy_pichu_archive.h"
 #include "kirby_copy_gamewatch_archive.h"
 #include "kirby_copy_pikachu_archive.h"
 #include "kirby_copy_mario_archive.h"
@@ -6440,6 +6442,24 @@ static int MeleePc_DatDecode(void* data,size_t length){
     if(publics==1 && !externs && length==89234 && body==87416 && relocs==439 &&
        MeleePc_DatBe32(bytes+roots)==324 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyEmblem")){
         int result=MeleePc_KirbyCopyRoyBody(bytes,length,body,relocs,324);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Source-typed clink copy hat/items/dynamics; exact original profile. */
+    if(publics==1 && !externs && length==43797 && body==40160 && relocs==894 &&
+       MeleePc_DatBe32(bytes+roots)==884 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyClink")){
+        int result=MeleePc_KirbyCopyCLinkBody(bytes,length,body,relocs,884);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Source-typed pichu copy hat/items/dynamics; exact original profile. */
+    if(publics==1 && !externs && length==118957 && body==115792 && relocs==776 &&
+       MeleePc_DatBe32(bytes+roots)==1196 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyPichu")){
+        int result=MeleePc_KirbyCopyPichuBody(bytes,length,body,relocs,1196);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
