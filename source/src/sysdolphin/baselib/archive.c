@@ -152,12 +152,14 @@ s32 HSD_ArchiveParse(HSD_Archive* archive, u8* src, size_t file_size)
     u32 native_size;memcpy(&native_size,src,4);
     unsigned char* native_original = NULL;
     u32 native_original_size = 0;
-    /* Exact Sheik archive envelope only. Preserve before conversion; the
+    /* Exact Sheik fighter/copy archive envelopes. Preserve before conversion; the
      * decoder still owns full symbol/layout validation and may refuse it. */
-    if(native_size!=file_size && file_size==166907 &&
-       MeleePc_DatBe32(src+4)==156352 && MeleePc_DatBe32(src+8)==2626 &&
-       MeleePc_DatBe32(src+12)==1 && MeleePc_DatBe32(src+16)==0){
-        native_original_size=156352;
+    if(native_size!=file_size &&
+       ((file_size==166907 && MeleePc_DatBe32(src+4)==156352 &&
+         MeleePc_DatBe32(src+8)==2626 && MeleePc_DatBe32(src+12)==1 &&
+         MeleePc_DatBe32(src+16)==0) ||
+        MeleePc_KirbyCopySheikProfile(src,file_size))){
+        native_original_size=MeleePc_DatBe32(src+4);
         native_original=malloc(native_original_size);
         if(!native_original)return -1;
         memcpy(native_original,src+32,native_original_size);
@@ -211,6 +213,9 @@ s32 HSD_ArchiveParse(HSD_Archive* archive, u8* src, size_t file_size)
         int preserved=MeleePc_PreserveAssetBytes(src,src+32,native_original,native_original_size);
         free(native_original);
         if(!preserved){MeleePc_UnregisterAssetAllocation(src);return -1;}
+        if(getenv("MELEE_DIAGNOSTIC_GAME_STARTUP"))
+            OSReport("NATIVE_ARCHIVE original_bytes_preserved bytes=%u body=%u owner_registered=1\n",
+                     (u32)file_size,body_size);
     }
 #endif
 

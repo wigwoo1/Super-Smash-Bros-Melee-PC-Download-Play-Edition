@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "5ab77328c4096145c4286fdbcf21fbae0f347100d920a2811b18eca30d994d7c"
+      "sha256": "359b9c3e49de274b64b92aa199a4e8093f44570ed39b4326580b791aff186d0f"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11031,6 +11031,14 @@
       "sha256": "2a76a9d9dfb0a1d7c0231af4abd0a5e6c5e25c903acc13220fb5f824b167c359"
     },
     {
+      "path": "source/src/pc/kirby_copy_sheik_archive.h",
+      "sha256": "52a429897f9b0c53b27f9546889660eb107520253f2c96a432a53e3fcef4ec0e"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_sheik_plan.h",
+      "sha256": "39af2ca60b61b35bc67804e6800e2cccdf9a9597015a7f6d298f272caf04c547"
+    },
+    {
       "path": "source/src/pc/kirby_copy_sword_archive.h",
       "sha256": "21c089cc8f874d69cf31d66264047a62ee31822d394bcb7a60488a3d5ee79ca7"
     },
@@ -11724,7 +11732,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/archive.c",
-      "sha256": "878e1947bd42134135ac80d7e25330353f495d4ef7851e6511e99415a052b50b"
+      "sha256": "150ecc46b447608f4b51948e330aebd1950dd11209d68871116c43fef796ae87"
     },
     {
       "path": "source/src/sysdolphin/baselib/archive.h",

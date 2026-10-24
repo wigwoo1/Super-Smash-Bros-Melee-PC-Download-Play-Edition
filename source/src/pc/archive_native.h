@@ -121,6 +121,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "kirby_copy_captain_archive.h"
 #include "kirby_copy_ganon_archive.h"
 #include "kirby_copy_zelda_archive.h"
+#include "kirby_copy_sheik_archive.h"
 #include "kirby_copy_roy_archive.h"
 #include "kirby_copy_fox_archive.h"
 #include "kirby_copy_peach_archive.h"
@@ -6425,6 +6426,14 @@ static int MeleePc_DatDecode(void* data,size_t length){
     if(publics==1 && !externs && length==66144 && body==65240 && relocs==211 &&
        MeleePc_DatBe32(bytes+roots)==332 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyPopo")){
         int result=MeleePc_KirbyCopyPopoBody(bytes,length,body,relocs,332);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Exact Sheik copy profile; runtime also preserves original sound bytes. */
+    if(MeleePc_KirbyCopySheikProfile(bytes,length)){
+        int result=MeleePc_KirbyCopySheikBody(bytes,length,body,relocs,944);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
