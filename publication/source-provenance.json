@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "359b9c3e49de274b64b92aa199a4e8093f44570ed39b4326580b791aff186d0f"
+      "sha256": "abc8b4d530f2e4e61c63e5c74451c3662fcf9921b8de4bed30cac38c2845c015"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -9681,6 +9681,14 @@
     {
       "path": "source/src/pc/costume_kirby_copy_mewtwo_plan.h",
       "sha256": "683e2e39d20ded06144edc285925713b8a5ebee2342bffa31ea5c944379caabd"
+    },
+    {
+      "path": "source/src/pc/costume_kirby_copy_purin_archive.h",
+      "sha256": "fc45f020212668535e859a37573dd360e1441074825c6a231e41457150b11e2d"
+    },
+    {
+      "path": "source/src/pc/costume_kirby_copy_purin_plan.h",
+      "sha256": "f07c643d73826011d6efd26a422bfa3705c46587b4ee8c35fef69fb33b3ba9e0"
     },
     {
       "path": "source/src/pc/costume_kirby_plan.h",
@@ -11015,6 +11023,14 @@
       "sha256": "696e85609c018201563f57988a52ee4b415ec2f53a81461b3a35c742e55090bb"
     },
     {
+      "path": "source/src/pc/kirby_copy_purin_archive.h",
+      "sha256": "c83ec73aedf6730af2daaef54a12d5f8d77e5256fe2adecf020588e1d8a627c3"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_purin_plan.h",
+      "sha256": "06422a929aa6214f023209c8b9f61b0df8fb1897ef413767b29b68c01a5237ed"
+    },
+    {
       "path": "source/src/pc/kirby_copy_roy_archive.h",
       "sha256": "ef6c063f41ed8fb182dc2f3418be8275cdda47f607a500e9be6549bcb2341d17"
     },
@@ -11045,6 +11061,14 @@
     {
       "path": "source/src/pc/kirby_copy_sword_plan.h",
       "sha256": "8fac903b737414c8bca66a2c5c2849a24bea205a92e13eccc92c0a998dbb01a4"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_yoshi_archive.h",
+      "sha256": "d6e1d8cba2929b72c32e4870c43b3c6b84bfa95cf044dac3ee28e9d9fa1f87aa"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_yoshi_plan.h",
+      "sha256": "29e797240cdbcdf559c895796ad821d7044ecb82c61f130192e5018b0b1e2c38"
     },
     {
       "path": "source/src/pc/kirby_copy_zelda_archive.h",

@@ -68,6 +68,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "costume_kirby_copy_donkey_archive.h"
 #include "costume_kirby_copy_falco_archive.h"
 #include "costume_kirby_copy_mewtwo_archive.h"
+#include "costume_kirby_copy_purin_archive.h"
 #include "costume_kirby_copy_gamewatch_archive.h"
 #include "costume_koopa_archive.h"
 #include "costume_falco_archive.h"
@@ -122,6 +123,8 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "kirby_copy_ganon_archive.h"
 #include "kirby_copy_zelda_archive.h"
 #include "kirby_copy_sheik_archive.h"
+#include "kirby_copy_purin_archive.h"
+#include "kirby_copy_yoshi_archive.h"
 #include "kirby_copy_roy_archive.h"
 #include "kirby_copy_fox_archive.h"
 #include "kirby_copy_peach_archive.h"
@@ -2926,6 +2929,17 @@ static int MeleePc_DatDecode(void* data,size_t length){
        !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"PlyKirbyDk_Share_joint") &&
        !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12),"PlyKirbyDk_Share_matanim_joint")){
         int result=MeleePc_CostumeKirbyCopyDonkeyBody(bytes,length,body,relocs,57876);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Exact six-color Kirby Purin-copy model/material-animation profiles. */
+    if(publics==2 && !externs && MeleePc_CostumeKirbyCopyPurinMatch(
+       length,body,relocs,MeleePc_DatBe32(bytes+roots),MeleePc_DatBe32(bytes+roots+8),
+       (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),
+       (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12))){
+        int result=MeleePc_CostumeKirbyCopyPurinBody(bytes,length,body,relocs,MeleePc_DatBe32(bytes+roots));
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
@@ -6434,6 +6448,24 @@ static int MeleePc_DatDecode(void* data,size_t length){
     /* Exact Sheik copy profile; runtime also preserves original sound bytes. */
     if(MeleePc_KirbyCopySheikProfile(bytes,length)){
         int result=MeleePc_KirbyCopySheikBody(bytes,length,body,relocs,944);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Exact source-consumer typed Kirby Purin copy profile. */
+    if(publics==1 && !externs && length==67085 && body==63968 && relocs==764 &&
+       MeleePc_DatBe32(bytes+roots)==424 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyPurin")){
+        int result=MeleePc_KirbyCopyPurinBody(bytes,length,body,relocs,424);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Exact source-consumer typed Kirby Yoshi copy profile. */
+    if(publics==1 && !externs && length==110941 && body==109468 && relocs==353 &&
+       MeleePc_DatBe32(bytes+roots)==276 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyYoshi")){
+        int result=MeleePc_KirbyCopyYoshiBody(bytes,length,body,relocs,276);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
