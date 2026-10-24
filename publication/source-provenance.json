@@ -5860,7 +5860,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.c",
-      "sha256": "221b273087c6c03ae25469d0d46636c7776d5152f8dc0abf6aaec775af990e85"
+      "sha256": "793162a45225a3f7f0c43c3af2c04d75e328baf21c0f708cdef604ea30587ec3"
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "58c711bf4c1ae514b8625891e38080fcbf139c1fb0711a02f6bfa18cb7e5adb1"
+      "sha256": "0c8caffd120987c21a73959e68639466971f09f5d2da045e69a402ab45d4e34a"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -8896,7 +8896,7 @@
     },
     {
       "path": "source/src/melee/lb/lbshadow.c",
-      "sha256": "89156eeb954298e16a15f5b36ec45b0ea8bb12e80758b560c333fe3d68b9b34c"
+      "sha256": "49cfe9d6458ca80c9b72d0fc23a8225db855eca02adf31b80706c21dd485d607"
     },
     {
       "path": "source/src/melee/lb/lbshadow.h",
@@ -9072,7 +9072,7 @@
     },
     {
       "path": "source/src/melee/mn/mnmain.c",
-      "sha256": "29c4bdb6d525583a72ab17176be9bb967d7b879866bf31630e615af4c2e01836"
+      "sha256": "c18f9779d70245a6b04b18dc34da55ecd98c57e2e35267118b26a36597120abd"
     },
     {
       "path": "source/src/melee/mn/mnmain.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "9c5fe59ae0d394f3a8747bb8e62e7b4a40801ec2680edf28571ccb694c73bf02"
+      "sha256": "358a8117ff348a6b8571051946ecad7541063ddd35fe3916dd20907650697664"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10887,6 +10887,14 @@
       "sha256": "6ed86be3b8d6db550fb618745d6ec1cce6543832db6b17c74b3c99e9b190f30b"
     },
     {
+      "path": "source/src/pc/kirby_copy_drmario_archive.h",
+      "sha256": "aae5f02794670cfc73a90d4dbf2c7bd7f958f526c658dd6c17e9ee470a0da93a"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_drmario_plan.h",
+      "sha256": "d844c3a2ea058a00f28f1828a093fef0b9b2a6320c852d46b4ac928585a0c114"
+    },
+    {
       "path": "source/src/pc/kirby_copy_falco_archive.h",
       "sha256": "e5c75474463c8563a6505e65911b3df0eb1058a427ab406c6ba5552a209c0159"
     },
@@ -10909,6 +10917,14 @@
     {
       "path": "source/src/pc/kirby_copy_gamewatch_plan.h",
       "sha256": "681f2df97602861d8c929016274b25ce9f292d754d560c6db12165484cc364e2"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_ganon_archive.h",
+      "sha256": "e1b8085136c0fbbab72b863a9bccaf92b7881ed7cb2f0ce8a74c74f6ac6af9a7"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_ganon_plan.h",
+      "sha256": "381e1c380177acb4675a9a7d39eaecd474e8140b533e690d930990f81c5824e8"
     },
     {
       "path": "source/src/pc/kirby_copy_koopa_archive.h",
@@ -10981,6 +10997,14 @@
     {
       "path": "source/src/pc/kirby_copy_popo_plan.h",
       "sha256": "696e85609c018201563f57988a52ee4b415ec2f53a81461b3a35c742e55090bb"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_roy_archive.h",
+      "sha256": "ef6c063f41ed8fb182dc2f3418be8275cdda47f607a500e9be6549bcb2341d17"
+    },
+    {
+      "path": "source/src/pc/kirby_copy_roy_plan.h",
+      "sha256": "2517ea3e679c009bd5ea71402bcaa8046f4231ff545c4a6c98a4717289c6e5aa"
     },
     {
       "path": "source/src/pc/kirby_copy_samus_archive.h",

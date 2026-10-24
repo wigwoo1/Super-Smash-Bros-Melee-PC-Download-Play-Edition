@@ -2759,10 +2759,14 @@ void mnMain_Scene_OnFrame(void)
         const unsigned graphics_route = route[0] == 'g';
         const unsigned renderer_graphics_route =
             graphics_route && strcmp(route, "graphics-renderer") == 0;
+        const unsigned full_graphics_match_route =
+            graphics_route && strcmp(route, "graphics-full-match") == 0;
         const unsigned texture_match_route =
             graphics_route && (strcmp(route, "graphics-pack-match") == 0 ||
                                strcmp(route, "graphics-pack-match-50") == 0 ||
                                strcmp(route, "graphics-pack-match-100") == 0);
+        const unsigned graphics_match_route =
+            texture_match_route || full_graphics_match_route;
         /* Exercise the actual menu from its default 100% value. No direct
          * texture-quality setter is used by these diagnostic routes. */
         const unsigned texture_quality_steps =
@@ -2774,7 +2778,8 @@ void mnMain_Scene_OnFrame(void)
             graphics_route && (strcmp(route, "graphics-pack") == 0 || texture_quality_route);
         const unsigned full_graphics_route =
             graphics_route &&
-            (strcmp(route, "graphics-full") == 0 || renderer_graphics_route);
+            (strcmp(route, "graphics-full") == 0 || renderer_graphics_route ||
+             full_graphics_match_route);
         const unsigned steps = route[0] == 'd' ? 4 : 3;
         /* The settings verifier samples eight navigation edges so it can
          * exercise wraparound twice. The old three-edge schedule stopped at
@@ -2846,6 +2851,7 @@ void mnMain_Scene_OnFrame(void)
             no_save_frames < 1090)
             status.button = PAD_BUTTON_A;
         if (full_graphics_route && !renderer_graphics_route &&
+            !full_graphics_match_route &&
             no_save_frames >= 1065 &&
             no_save_frames < 1075)
             status.button = PAD_BUTTON_B;
@@ -2880,7 +2886,7 @@ void mnMain_Scene_OnFrame(void)
             if (no_save_frames >= 1575 && no_save_frames < 1585)
                 status.button = PAD_BUTTON_LEFT;
         }
-        if (texture_match_route && no_save_frames >= 1340) {
+        if (graphics_match_route && no_save_frames >= 1340) {
             status.button = 0;
             if ((no_save_frames >= 1365 && no_save_frames < 1375) ||
                 (no_save_frames >= 1455 && no_save_frames < 1465))
@@ -2892,11 +2898,11 @@ void mnMain_Scene_OnFrame(void)
                 (no_save_frames >= 1785 && no_save_frames < 1795))
                 status.button = PAD_BUTTON_A;
         }
-        if (texture_match_route && no_save_frames >= 1340 && no_save_frames % 30 == 15)
+        if (graphics_match_route && no_save_frames >= 1340 && no_save_frames % 30 == 15)
             OSReport("NATIVE_PACK_MATCH_NAV frame=%u menu=%u selection=%u pack=%u quality=%u\n",
                      no_save_frames, mn_804A04F0.cur_menu, mn_804A04F0.hovered_selection,
                      aurora_get_texture_pack(), aurora_get_texture_quality());
-        if (no_save_frames <= (texture_match_route ? 1820 : texture_quality_route ? 1640 : texture_pack_route ? 1180 : renderer_graphics_route ? 1120 : 1100)) {
+        if (no_save_frames <= (graphics_match_route ? 1820 : texture_quality_route ? 1640 : texture_pack_route ? 1180 : renderer_graphics_route ? 1120 : 1100)) {
             if (!HSD_PadStageDiagnosticInput(0, &status))
                 OSReport("NATIVE_NO_SAVE_MENU_INPUT_REFUSED frame=%u\n",
                          no_save_frames);

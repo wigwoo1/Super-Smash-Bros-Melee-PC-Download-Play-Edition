@@ -367,7 +367,8 @@ void lbShadow_8000F38C(s32 arg0)
             }
         }
         ftDrawCommon_80081168();
-        if(getenv("MELEE_DIAGNOSTIC_SHADOW_TOGGLE")) {
+        if(getenv("MELEE_DIAGNOSTIC_SHADOW_TOGGLE") ||
+                   getenv("MELEE_DIAGNOSTIC_SHADOW_TRACE")) {
             static unsigned count;
             if(++count<=4 || count%60==0)
                 fprintf(stderr,"NATIVE_SHADOW_DISABLED count=%u attached=%u generation_skipped=1 drawparts_restored=1\n",count,attached);
@@ -613,7 +614,8 @@ void lbShadow_8000F38C(s32 arg0)
                         last_size=size;
                     }
                 }
-                if(getenv("MELEE_DIAGNOSTIC_SHADOW_TOGGLE")) {
+                if(getenv("MELEE_DIAGNOSTIC_SHADOW_TOGGLE") ||
+                   getenv("MELEE_DIAGNOSTIC_SHADOW_TRACE")) {
                     static unsigned count;
                     if(++count<=4 || count%60==0)
                         fprintf(stderr,"NATIVE_SHADOW_GENERATED count=%u enabled=%u\n",count,(unsigned)aurora_get_fighter_shadows());

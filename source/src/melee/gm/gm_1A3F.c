@@ -323,6 +323,13 @@ void gm_801A4014(GameMode* mode)
     }
 #endif
 #ifdef TARGET_PC
+    if (kind == 2 && getenv("MELEE_DIAGNOSTIC_GRAPHICS_MENU_TRACE")) {
+        OSReport("NATIVE_PC_GRAPHICS_MATCH aspect=%u render_height=%u shadows=%d shadow_size=%u texture_quality=%u lighting=%d low_poly=%d\n",
+                 aurora_get_display_preset(), aurora_get_render_height(),
+                 aurora_get_fighter_shadows(), aurora_get_fighter_shadow_resolution(),
+                 aurora_get_texture_quality(), aurora_get_lighting_enabled(),
+                 aurora_get_low_poly_fighters());
+    }
     if (getenv("MELEE_DIAGNOSTIC_PROFILE_LIFECYCLE")) {
         char phase[16];
         snprintf(phase, sizeof(phase), "%d", kind);

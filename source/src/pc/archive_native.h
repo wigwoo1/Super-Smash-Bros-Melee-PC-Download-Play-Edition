@@ -110,12 +110,15 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "kirby_copy_gamewatch_archive.h"
 #include "kirby_copy_pikachu_archive.h"
 #include "kirby_copy_mario_archive.h"
+#include "kirby_copy_drmario_archive.h"
 #include "kirby_copy_samus_archive.h"
 #include "kirby_copy_luigi_archive.h"
 #include "kirby_copy_ness_archive.h"
 #include "kirby_copy_mewtwo_archive.h"
 #include "kirby_copy_sword_archive.h"
 #include "kirby_copy_captain_archive.h"
+#include "kirby_copy_ganon_archive.h"
+#include "kirby_copy_roy_archive.h"
 #include "kirby_copy_fox_archive.h"
 #include "kirby_copy_peach_archive.h"
 #include "kirby_copy_popo_archive.h"
@@ -6424,10 +6427,37 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    /* Source-typed Kirby Ganon copy; exact original archive profile. */
+    if(publics==1 && !externs && length==30345 && body==29952 && relocs==83 &&
+       MeleePc_DatBe32(bytes+roots)==60 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyGanon")){
+        int result=MeleePc_KirbyCopyGanonBody(bytes,length,body,relocs,60);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Source-typed Kirby Emblem copy; exact original archive profile. */
+    if(publics==1 && !externs && length==89234 && body==87416 && relocs==439 &&
+       MeleePc_DatBe32(bytes+roots)==324 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyEmblem")){
+        int result=MeleePc_KirbyCopyRoyBody(bytes,length,body,relocs,324);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     /* Source-audited Kirby Fox-copy archive; exact profile only. */
     if(publics==1 && !externs && length==76827 && body==75416 && relocs==338 &&
        MeleePc_DatBe32(bytes+roots)==832 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyFox")){
         int result=MeleePc_KirbyCopyFoxBody(bytes,length,body,relocs,832);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Source-typed Kirby Dr. Mario copy hat/vitamin; exact original profile. */
+    if(publics==1 && !externs && length==23451 && body==22752 && relocs==159 &&
+       MeleePc_DatBe32(bytes+roots)==376 && !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataKirbyCopyDrmario")){
+        int result=MeleePc_KirbyCopyDrMarioBody(bytes,length,body,relocs,376);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);

@@ -1716,6 +1716,32 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
+    /* Test only: exercise the original pause/no-contest input path without
+     * assigning match outcome, damage, stocks or scene routing. Use calls for
+     * the release delay because simulation frame_count stops while paused. */
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_PAUSE_EXIT") &&
+        gm_GetCurrentGameMode() == GM_CLASSIC) {
+        static unsigned calls, start_call;
+        PADStatus input = { 0 };
+        unsigned elapsed = 0;
+        ++calls;
+        if (!start_call && controller.state.frame_count >= 360) start_call = calls;
+        if (start_call) {
+            elapsed = calls - start_call;
+            if (elapsed < 4)
+                input.button = DbLevel >= DbLKind_DebugRom ?
+                    PAD_BUTTON_UP | PAD_BUTTON_X : PAD_BUTTON_START;
+            if (elapsed >= 120 && elapsed < 124)
+                input.button = PAD_TRIGGER_L | PAD_TRIGGER_R |
+                               PAD_BUTTON_A | PAD_BUTTON_START;
+            if (elapsed <= 150 && elapsed % 15 == 0)
+                OSReport("NATIVE_CLASSIC_PAUSE_EXIT elapsed=%u frame=%u paused=%d requested=%u outcome=%d\n",
+                         elapsed, controller.state.frame_count, gm_GetDbPauseFlag(1),
+                         input.button, controller.state.match_result);
+        }
+        if (!HSD_PadStageDiagnosticInput(0, &input))
+            OSReport("NATIVE_CLASSIC_PAUSE_EXIT input_refused=1\n");
+    }
     if (getenv("MELEE_DIAGNOSTIC_MATCH_INPUT")) {
         PADStatus input = { 0 };
         unsigned frame = controller.state.frame_count;
