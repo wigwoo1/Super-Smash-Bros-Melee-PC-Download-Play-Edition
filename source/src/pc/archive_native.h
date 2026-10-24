@@ -69,6 +69,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "costume_kirby_copy_falco_archive.h"
 #include "costume_kirby_copy_mewtwo_archive.h"
 #include "costume_kirby_copy_purin_archive.h"
+#include "costume_kirby_copy_alts_archive.h"
 #include "costume_kirby_copy_gamewatch_archive.h"
 #include "costume_koopa_archive.h"
 #include "costume_falco_archive.h"
@@ -2935,6 +2936,17 @@ static int MeleePc_DatDecode(void* data,size_t length){
         return 0;
     }
     /* Exact six-color Kirby Purin-copy model/material-animation profiles. */
+    /* Exact source-named alternate DK/Falco copy costumes; neutral profiles stay separate. */
+    if(publics==2 && !externs && MeleePc_CostumeKirbyCopyAltsMatch(
+       length,body,relocs,MeleePc_DatBe32(bytes+roots),MeleePc_DatBe32(bytes+roots+8),
+       (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),
+       (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12))){
+        int result=MeleePc_CostumeKirbyCopyAltsBody(bytes,length,body,relocs,MeleePc_DatBe32(bytes+roots));
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     if(publics==2 && !externs && MeleePc_CostumeKirbyCopyPurinMatch(
        length,body,relocs,MeleePc_DatBe32(bytes+roots),MeleePc_DatBe32(bytes+roots+8),
        (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),

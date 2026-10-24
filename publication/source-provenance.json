@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "abc8b4d530f2e4e61c63e5c74451c3662fcf9921b8de4bed30cac38c2845c015"
+      "sha256": "dec41a624134d23ab19f63997d42bf85c9ac7221874ebce83914749f86f79f10"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -9649,6 +9649,14 @@
     {
       "path": "source/src/pc/costume_kirby_archive.h",
       "sha256": "3f2901545586d401dcc96f3c16fa7f813cc599bfa1b5be14fd9198b2f108d361"
+    },
+    {
+      "path": "source/src/pc/costume_kirby_copy_alts_archive.h",
+      "sha256": "23e18606a8d3a8e1092209bd0a3d8bfaf52f0ed77481b77d636734edf85bbbfd"
+    },
+    {
+      "path": "source/src/pc/costume_kirby_copy_alts_plan.h",
+      "sha256": "fa3a8e7735c4d5fe3ce407964365206dbfe0355f5836fcf088db9848ae428919"
     },
     {
       "path": "source/src/pc/costume_kirby_copy_donkey_archive.h",
