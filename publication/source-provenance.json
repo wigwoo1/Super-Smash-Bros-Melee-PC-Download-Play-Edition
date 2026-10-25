@@ -2424,7 +2424,7 @@
     },
     {
       "path": "source/src/melee/ft/ftcoll.c",
-      "sha256": "e2f6d20f65b4d220550fc6716aa5ca364a90df28fab8d8cd2e413b080366fea9"
+      "sha256": "6096ee9b968bbe59b09e1383a5c3c14fc964e6f42d433b9b133710626e090243"
     },
     {
       "path": "source/src/melee/ft/ftcoll.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "6a323bf72164d6b10566848fb7df2f2e2995fb63d821beaee502e45426616e61"
+      "sha256": "15b7bd3b5bb2319c5323e0366ede85b426b3dee4a2445fd47f8485cc73fbc28c"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",

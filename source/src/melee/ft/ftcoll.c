@@ -1323,9 +1323,9 @@ void ftColl_8007891C(Fighter_GObj* arg0, Fighter_GObj* arg1, float arg2)
     fp1 = GET_FIGHTER(arg1);
 #ifdef TARGET_PC
     if (getenv("MELEE_DIAGNOSTIC_CLASSIC_COMBAT") &&
-        fp0->player_idx == 0 && fp1->player_idx == 1)
-        OSReport("NATIVE_CLASSIC_COMBAT_HIT attacker=%d target=%d motion=%d damage=%f\n",
-                 fp0->kind, fp1->kind, fp0->motion_id, arg2);
+        fp0->player_idx == 0 && fp1->player_idx > 0 && fp1->player_idx < 6)
+        OSReport("NATIVE_CLASSIC_COMBAT_HIT attacker=%d target=%d motion=%d damage=%f target_slot=%u\n",
+                 fp0->kind, fp1->kind, fp0->motion_id, arg2, fp1->player_idx);
     if (getenv("MELEE_DIAGNOSTIC_PURIN_COMBAT") &&
         fp0->kind == Ft_Kind_Purin && fp0->player_idx == 0 &&
         fp1->player_idx == 1 &&

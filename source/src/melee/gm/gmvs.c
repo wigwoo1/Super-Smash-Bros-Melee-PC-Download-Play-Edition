@@ -1721,9 +1721,33 @@ void gm_Scene_Vs_OnFrame(void)
         PADStatus input = { 0 };
         unsigned frame = controller.state.frame_count, phase = frame % 60;
         HSD_GObj* self = Player_GetEntity(0);
-        HSD_GObj* target = Player_GetEntity(1);
-        static unsigned clear_calls, stalled;
+        HSD_GObj* target = NULL;
+        int target_slot = -1;
+        static unsigned clear_calls, stalled, previous_entry;
         static f32 prior_x;
+        if (previous_entry != diagnostic_vs_entries) {
+            clear_calls = stalled = 0; previous_entry = diagnostic_vs_entries;
+        }
+        if (controller.state.unk_0 == 0) clear_calls = 0;
+        /* Original Classic assigns allies before opponents. Choose a live
+         * opposing team by read-only player metadata, never a fixed slot. */
+        if (self && controller.state.unk_0 == 0) {
+            Vec3 a; f32 nearest = 1.0e30f;
+            ftLib_GetPos(self, &a);
+            for (int slot = 1; slot < 6; ++slot) {
+                HSD_GObj* candidate = Player_GetEntity(slot);
+                Vec3 b; f32 dx, dy, distance;
+                if (!candidate || Player_GetStocks(slot) <= 0 ||
+                    (controller.start.is_teams &&
+                     Player_GetTeam(slot) == Player_GetTeam(0))) continue;
+                ftLib_GetPos(candidate, &b);
+                dx = b.x-a.x; dy = b.y-a.y;
+                distance = (dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy);
+                if (distance < nearest) {
+                    nearest = distance; target = candidate; target_slot = slot;
+                }
+            }
+        }
         if (controller.state.unk_0 == 0 && self && target) {
             Vec3 a, b;
             ftLib_GetPos(self, &a); ftLib_GetPos(target, &b);
@@ -1758,11 +1782,12 @@ void gm_Scene_Vs_OnFrame(void)
             }
             prior_x = a.x;
             if (frame % 30 == 0)
-                OSReport("NATIVE_CLASSIC_COMBAT frame=%u state=%u result=%d self_stocks=%d target_stocks=%d self_damage=%d target_damage=%d self_motion=%d target_motion=%d x=%f y=%f target_x=%f target_y=%f requested_x=%d cstick_x=%d button=%u\n",
+                OSReport("NATIVE_CLASSIC_COMBAT frame=%u state=%u result=%d self_stocks=%d target_stocks=%d self_damage=%d target_damage=%d self_motion=%d target_motion=%d x=%f y=%f target_x=%f target_y=%f requested_x=%d cstick_x=%d button=%u entry=%u target_slot=%d teams=%d self_team=%d target_team=%d\n",
                          frame, controller.state.unk_0, controller.state.match_result,
-                         Player_GetStocks(0), Player_GetStocks(1), Player_GetDamage(0), Player_GetDamage(1),
+                         Player_GetStocks(0), Player_GetStocks(target_slot), Player_GetDamage(0), Player_GetDamage(target_slot),
                          ftLib_GetMotionId(self), ftLib_GetMotionId(target), a.x,a.y,b.x,b.y,
-                         input.stickX,input.substickX,input.button);
+                         input.stickX,input.substickX,input.button, diagnostic_vs_entries, target_slot,
+                         controller.start.is_teams, Player_GetTeam(0), Player_GetTeam(target_slot));
         } else if (controller.state.unk_0 == 2) {
             ++clear_calls;
             if (clear_calls >= 240 && clear_calls % 60 < 4)
@@ -1771,6 +1796,9 @@ void gm_Scene_Vs_OnFrame(void)
                 OSReport("NATIVE_CLASSIC_CLEAR_INPUT calls=%u button=%u result=%d stocks=%d\n",
                          clear_calls,input.button,controller.state.match_result,Player_GetStocks(0));
         }
+        if (controller.state.unk_0 == 0 && !target && frame % 60 == 0)
+            OSReport("NATIVE_CLASSIC_COMBAT_NO_TARGET entry=%u frame=%u rules_mode=%u\n",
+                     diagnostic_vs_entries, frame, controller.start.x9);
         if (!HSD_PadStageDiagnosticInput(0, &input))
             OSReport("NATIVE_CLASSIC_COMBAT input_refused=1\n");
     }
@@ -2685,7 +2713,14 @@ void gm_Scene_Vs_OnFrame(void)
     }
     if (getenv("MELEE_DIAGNOSTIC_CLOSE_DURING_MATCH")) {
         static int close_queued;
-        static unsigned close_frame;
+        static unsigned close_frame, close_entry;
+        if (!close_entry) {
+            const char* text = getenv("MELEE_DIAGNOSTIC_MATCH_CLOSE_ENTRY");
+            char* end = NULL;
+            unsigned long requested = text ? strtoul(text, &end, 10) : 2;
+            close_entry = text && end != text && !*end && requested >= 2 && requested <= 16
+                              ? (unsigned) requested : 2;
+        }
         if (!close_frame) {
             const char* text = getenv("MELEE_DIAGNOSTIC_MATCH_CLOSE_FRAME");
             char* end = NULL;
@@ -2694,15 +2729,18 @@ void gm_Scene_Vs_OnFrame(void)
                               ? (unsigned) requested : 360;
         }
         if (!close_queued && controller.state.frame_count >= close_frame &&
-            (!getenv("MELEE_DIAGNOSTIC_CLOSE_SECOND_MATCH") || diagnostic_vs_entries >= 2)) {
+            (!getenv("MELEE_DIAGNOSTIC_CLOSE_SECOND_MATCH") || diagnostic_vs_entries >= close_entry)) {
             if (!aurora_diagnostic_queue_quit())
                 OSPanic(__FILE__, __LINE__, "Match diagnostic Quit queue failed");
             close_queued = 1;
             OSReport("NATIVE_MATCH_CLOSE_QUEUED frame=%u owner=1\n",
                      controller.state.frame_count);
-            if (getenv("MELEE_DIAGNOSTIC_CLOSE_SECOND_MATCH"))
+            if (getenv("MELEE_DIAGNOSTIC_CLOSE_SECOND_MATCH")) {
                 OSReport("NATIVE_SECOND_MATCH_CLOSE entries=%u frame=%u\n",
                          diagnostic_vs_entries, controller.state.frame_count);
+                OSReport("NATIVE_MATCH_CLOSE_ENTRY entries=%u frame=%u\n",
+                         diagnostic_vs_entries, controller.state.frame_count);
+            }
         }
     }
     if (getenv("MELEE_DIAGNOSTIC_MATCH_STATE") && !gmvs_diagnostic_quiet_runtime()) {
