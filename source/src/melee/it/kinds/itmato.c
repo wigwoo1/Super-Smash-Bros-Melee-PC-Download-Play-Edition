@@ -1,4 +1,8 @@
 #include "itmato.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 
 #include <Runtime/platform.h>
 
@@ -59,6 +63,16 @@ bool itMato_UnkMotion0_Coll(Item_GObj* item_gobj)
 
 bool it_802D85F4(Item_GObj* item_gobj)
 {
+#ifdef TARGET_PC
+    int before=stage_info.x6D4;
+#endif
     Ground_801C4338();
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
+        Item* it=GET_ITEM(item_gobj);
+        OSReport("NATIVE_TARGET_DAMAGE_CALLBACK target=%p source_player=%d last_damage=%d before=%d after=%d\n",
+                 item_gobj,it->xCB0_source_ply,it->xCA0,before,stage_info.x6D4);
+    }
+#endif
     return true;
 }

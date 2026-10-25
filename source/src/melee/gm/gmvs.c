@@ -1801,11 +1801,66 @@ void gm_Scene_Vs_OnFrame(void)
                      diagnostic_vs_entries, frame, controller.start.x9);
         if (diagnostic_vs_entries == 3 && controller.state.unk_0 == 0 && self) {
             static int target_capture_armed;
+            if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
+                static Vec3 desired, start;
+                static int point = -1, drop_direction;
+                static unsigned attack_frame, hit_frame, air_frame;
+                Vec3 position; ftLib_GetPos(self,&position);
+                if (frame >= 180 && point == -1) {
+                    f32 nearest = 1.0e30f; start = position;
+                    for (int id = 199; id < 220; ++id) {
+                        Vec3 value;
+                        if (Ground_801C2D24(id,&value)) {
+                            f32 dx=value.x-position.x,dy=position.y-value.y;
+                            f32 score=(dx<0?-dx:dx)+dy*0.25f;
+                            OSReport("NATIVE_TARGET_POINT id=%d x=%f y=%f\n",id,value.x,value.y);
+                            if (dy>8 && dy<100 && score<nearest) {
+                                nearest=score;desired=value;point=id;
+                            }
+                        }
+                    }
+                    if (point>=0) {
+                        drop_direction=desired.x>=position.x?1:-1;
+                        OSReport("NATIVE_TARGET_ROUTE point=%d target_x=%f target_y=%f start_x=%f start_y=%f direction=%d\n",
+                                 point,desired.x,desired.y,start.x,start.y,drop_direction);
+                    }
+                }
+                if (stage_info.x6D4<stage_info.x6D2 && !hit_frame) hit_frame=frame;
+                if (point>=0 && frame>=180 && !hit_frame) {
+                    f32 dx=desired.x-position.x,dy=position.y-desired.y;
+                    if (ftLib_GetGroundAir(self)==GA_Ground) {
+                        input.stickX=drop_direction*55;
+                        air_frame=0;
+                    } else {
+                        if (!air_frame) air_frame=frame;
+                        input.stickY=-80;
+                        input.stickX=frame-air_frame<6?drop_direction*55:dx>2?35:dx<-2?-35:0;
+                        if (!attack_frame && frame-air_frame>=6 && dx<12 && dx>-12 && dy<28 && dy>-5)
+                            attack_frame=frame;
+                        if (attack_frame && frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                    }
+                } else if (hit_frame && ftLib_GetGroundAir(self)==GA_Air) {
+                    input.stickX=position.x>start.x?-40:40;
+                    if (phase<4){input.stickY=80;input.button=PAD_BUTTON_B;}
+                }
+                if (frame%10==0 && frame>=180)
+                    OSReport("NATIVE_TARGET_INPUT frame=%u motion=%d ground=%d x=%f y=%f point=%d remaining=%d stick_x=%d stick_y=%d button=%u attack_frame=%u hit_frame=%u\n",
+                             frame,ftLib_GetMotionId(self),ftLib_GetGroundAir(self),position.x,position.y,point,
+                             stage_info.x6D4,input.stickX,input.stickY,input.button,attack_frame,hit_frame);
+                if (hit_frame && frame-hit_frame>=80) {
+                    static int close_queued;
+                    if (!close_queued) {
+                        close_queued=aurora_diagnostic_queue_quit();
+                        OSReport("NATIVE_TARGET_HIT_CLOSE frame=%u remaining=%d queued=%d\n",frame,stage_info.x6D4,close_queued);
+                    }
+                }
+            }
             if (frame % 60 == 0)
                 OSReport("NATIVE_TARGET_STAGE frame=%u stage_kind=%d initial=%d remaining=%d\n",
                          frame,stage_info.grkind,stage_info.x6D2,stage_info.x6D4);
 #if defined(_WIN32)
-            if (!target_capture_armed && frame >= 180) {
+            if (!target_capture_armed && frame >= 180 &&
+                (!getenv("MELEE_DIAGNOSTIC_TARGET_HIT") || stage_info.x6D4<stage_info.x6D2)) {
                 char* path = NULL; size_t size = 0;
                 if (_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE") == 0 &&
                     path && path[0]) {

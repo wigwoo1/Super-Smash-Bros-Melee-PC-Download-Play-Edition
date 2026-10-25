@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "17f881b1220c06762caf319185357a3a06ff58fa4c4de4d03d917f97450b9fe0"
+      "sha256": "992ef81caeefa802bc939b231aff0157b331703e00761ca8ed8fd470a03e3e1b"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -7240,7 +7240,7 @@
     },
     {
       "path": "source/src/melee/it/itcoll.c",
-      "sha256": "57e0c5de14af2cc4f7b7fcca7a71d415e8beecac582f2e75c14211c678376f5b"
+      "sha256": "cd9ef63a97523d66ee384b23e9c386bfba9f4675a359da1c34ffd088f52ebf52"
     },
     {
       "path": "source/src/melee/it/itcoll.h",
@@ -8064,7 +8064,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itmato.c",
-      "sha256": "f50b59d173618efcf21697694f2c26446235538d2ed9a14af7c56feed58a4d53"
+      "sha256": "3ce0a35851eed58aa006e8a22d89c5e268965d5be816e20846b6b84cc56c43fc"
     },
     {
       "path": "source/src/melee/it/kinds/itmato.h",

@@ -1,4 +1,8 @@
 #include "itcoll.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+extern unsigned int HSD_JObjDiagnosticMatchFrame;
+#endif
 
 #include <Runtime/platform.h>
 
@@ -834,6 +838,12 @@ void it_80270E30(Item_GObj* arg_item_gobj)
             arg_item->xCB0_source_ply = (s32) fighter->player_idx;
             arg_item->xCEC_fighterGObj = fighter->gobj;
             arg_item->xCF0_itemGObj = NULL;
+#ifdef TARGET_PC
+            if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT") && arg_item->kind==It_Kind_Mato)
+                OSReport("NATIVE_TARGET_ACCEPTED_HIT frame=%u target=%p source_player=%d motion=%d damage=%f target_x=%f target_y=%f\n",
+                         HSD_JObjDiagnosticMatchFrame,arg_item->entity,fighter->player_idx,fighter->motion_id,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
+#endif
             if (arg_item->pos.x > fighter->cur_pos.x) {
                 dir = -1.0f;
             } else {
