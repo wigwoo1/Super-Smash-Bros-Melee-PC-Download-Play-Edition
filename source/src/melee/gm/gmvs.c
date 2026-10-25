@@ -1716,8 +1716,10 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
-    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT") &&
-        gm_GetCurrentGameMode() == GM_CLASSIC) {
+    if ((getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT") &&
+         gm_GetCurrentGameMode() == GM_CLASSIC) ||
+        (getenv("MELEE_DIAGNOSTIC_STAGE_NAVIGATION") &&
+         gm_GetCurrentGameMode() == GM_VS)) {
         PADStatus input = { 0 };
         unsigned frame = controller.state.frame_count;
         int stocks = Player_GetStocks(0);
@@ -1742,7 +1744,8 @@ void gm_Scene_Vs_OnFrame(void)
             previous_x = position.x;
             /* Original solid blocks can stop a held direction (Green Greens).
              * Cross them with normal jump/release/double-jump input only. */
-            if (stalled_ticks >= 90) {
+            if (stalled_ticks >= 90 &&
+                !getenv("MELEE_DIAGNOSTIC_STAGE_NAV_BASELINE")) {
                 obstacle_jump_frame = frame;
                 stalled_ticks = 0;
                 OSReport("NATIVE_CLASSIC_DEFEAT obstacle_jump=1 frame=%u x=%f y=%f\n",
@@ -1763,6 +1766,19 @@ void gm_Scene_Vs_OnFrame(void)
         }
         if (!HSD_PadStageDiagnosticInput(Player_GetPadPort(0), &input))
             OSReport("NATIVE_CLASSIC_DEFEAT input_refused=1 frame=%u\n", frame);
+        if (getenv("MELEE_DIAGNOSTIC_STAGE_NAVIGATION") && entity &&
+            (frame % 10 == 0 || input.button ||
+             (HSD_PadCopyStatus[Player_GetPadPort(0)].trigger & PAD_BUTTON_X))) {
+            Vec3 position;
+            Fighter* state = entity->user_data;
+            ftLib_GetPos(entity, &position);
+            OSReport("NATIVE_STAGE_NAV frame=%u motion=%d ground=%d x=%f y=%f collision=%x requested_x=%d button=%u pad_x=%d trigger=%u stalled=%u\n",
+                     frame, ftLib_GetMotionId(entity), ftLib_GetGroundAir(entity),
+                     position.x, position.y, (unsigned) state->coll_data.env_flags,
+                     input.stickX, input.button,
+                     HSD_PadCopyStatus[Player_GetPadPort(0)].stickX,
+                     HSD_PadCopyStatus[Player_GetPadPort(0)].trigger, stalled_ticks);
+        }
         if (stocks != previous_stocks || frame % 120 == 0) {
             Vec3 position = { 0 };
             if (entity) ftLib_GetPos(entity, &position);
