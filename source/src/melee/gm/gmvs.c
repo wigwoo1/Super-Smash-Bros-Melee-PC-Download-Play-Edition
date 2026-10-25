@@ -1802,14 +1802,17 @@ void gm_Scene_Vs_OnFrame(void)
                      diagnostic_vs_entries, frame, controller.start.x9);
         if (diagnostic_vs_entries == 3 && controller.state.unk_0 == 0 && self) {
             static int target_capture_armed;
+            static unsigned target_recovery_stable;
+            int target_recovery_mode=getenv("MELEE_DIAGNOSTIC_TARGET_RECOVERY")!=NULL;
             if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
-                static Vec3 desired, start;
-                static int point = -1, drop_direction, teeter_ready;
-                static unsigned attack_frame, hit_frame, air_frame;
+                static Vec3 desired, start, edge;
+                static int point = -1, drop_direction, teeter_ready, initial_stocks;
+                static unsigned attack_frame, hit_frame, air_frame, cliff_frame, prehit_jump_frame;
                 Fighter* target_input_state=self->user_data;
                 Vec3 position; ftLib_GetPos(self,&position);
                 if (frame >= 180 && point == -1) {
                     f32 nearest = 1.0e30f; start = position;
+                    initial_stocks=Player_GetStocks(0);
                     for (int id = 199; id < 220; ++id) {
                         Vec3 value;
                         if (Ground_801C2D24(id,&value)) {
@@ -1834,26 +1837,103 @@ void gm_Scene_Vs_OnFrame(void)
                         /* Let original Ottotto stop walking momentum before
                          * crossing the edge; do not carry a long run-up. */
                         int motion=ftLib_GetMotionId(self);
-                        if (motion==ftCo_MS_Ottotto || motion==ftCo_MS_OttottoWait)
+                        if (motion==ftCo_MS_Ottotto || motion==ftCo_MS_OttottoWait) {
+                            if (!teeter_ready) edge=position;
                             teeter_ready=1;
+                        }
                         /* Original scale80:62/80=.775 exceeds teeter .75,
                          * while staying below dash .8. No rule changes. */
                         input.stickX=drop_direction*(teeter_ready?62:55);
                         air_frame=0;
                     } else {
                         if (!air_frame) air_frame=frame;
-                        /* Brake toward the lower target immediately. Delay
-                         * Down until the attack, avoiding early fast-fall. */
-                        input.stickX=dx>2?80:dx<-2?-80:
-                            target_input_state->self_vel.x>0?-55:
-                            target_input_state->self_vel.x<0?55:0;
-                        if (!attack_frame && frame-air_frame>=6 && dx<8 && dx>-8 && dy<28 && dy>-5)
-                            attack_frame=frame;
-                        if (attack_frame) {
-                            input.stickY=-80;
-                            if (frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                        if (target_recovery_mode) {
+                            /* Original floor line6 has no ledge-grab flag.
+                             * Jump into the target attack instead of waiting
+                             * out the whole aerial while falling below it. */
+                            f32 outside_dx=edge.x+drop_direction*3-position.x;
+                            input.stickX=outside_dx>0.5f?55:outside_dx<-0.5f?-55:
+                                target_input_state->self_vel.x>0?-35:
+                                target_input_state->self_vel.x<0?35:0;
+                            if (!prehit_jump_frame && dy<=-10) prehit_jump_frame=frame;
+                            if (prehit_jump_frame &&
+                                target_input_state->x1968_jumpsUsed<target_input_state->co_attrs.max_jumps) {
+                                input.stickX=0;
+                                if ((frame-prehit_jump_frame)%2==0) input.button=PAD_BUTTON_X;
+                            } else if (prehit_jump_frame && !attack_frame) attack_frame=frame;
+                            if (attack_frame) {
+                                input.stickX=-drop_direction*80;
+                                if (frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                            }
+                            if (frame%5==0 || input.button)
+                                OSReport("NATIVE_TARGET_RECOVERY_PREHIT frame=%u motion=%d x=%f y=%f vy=%f jumps=%d jump_frame=%u attack_frame=%u button=%u stick_x=%d\n",
+                                         frame,ftLib_GetMotionId(self),position.x,position.y,
+                                         target_input_state->self_vel.y,target_input_state->x1968_jumpsUsed,
+                                         prehit_jump_frame,attack_frame,input.button,input.stickX);
+                            if (ftLib_GetMotionId(self)==ftCo_MS_AttackAirB)
+                                for (int i=0;i<4;++i) {
+                                    HitCapsule* hit=&target_input_state->x914[i];
+                                    if (hit->state==HitCapsule_Unk2 || hit->state==HitCapsule_Unk3)
+                                        OSReport("NATIVE_TARGET_HITBOX_SAMPLE frame=%u box=%d state=%d damage=%f radius=%f x=%f y=%f z=%f previous_x=%f previous_y=%f previous_z=%f\n",
+                                                 frame,i,hit->state,hit->damage,hit->scale,
+                                                 hit->x4C.x,hit->x4C.y,hit->x4C.z,
+                                                 hit->x58.x,hit->x58.y,hit->x58.z);
+                                }
+                        } else {
+                            /* Preserve the verified hit-only input sequence. */
+                            input.stickX=dx>2?80:dx<-2?-80:
+                                target_input_state->self_vel.x>0?-55:
+                                target_input_state->self_vel.x<0?55:0;
+                            if (!attack_frame && frame-air_frame>=6 && dx<8 && dx>-8 && dy<28 && dy>-5)
+                                attack_frame=frame;
+                            if (attack_frame) {
+                                input.stickY=-80;
+                                if (frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                            }
                         }
                     }
+                } else if (hit_frame && target_recovery_mode) {
+                    int motion=ftLib_GetMotionId(self);
+                    unsigned recovery_phase=(frame-hit_frame)%2;
+                    int grounded=ftLib_GetGroundAir(self)==GA_Ground;
+                    if (grounded && position.y>=edge.y-1 &&
+                        position.x>start.x-25 && position.x<start.x+25 &&
+                        Player_GetStocks(0)==initial_stocks) {
+                        ++target_recovery_stable;
+                    } else target_recovery_stable=0;
+                    if (!grounded) {
+                        f32 goal_x=position.y>edge.y+5?start.x:edge.x+drop_direction*8;
+                        f32 dx=goal_x-position.x;
+                        input.stickX=dx>2?55:dx<-2?-55:
+                            target_input_state->self_vel.x>0?-35:
+                            target_input_state->self_vel.x<0?35:0;
+                        if (motion==ftCo_MS_CliffWait) {
+                            if (!cliff_frame) cliff_frame=frame;
+                            input.stickX=0;
+                            if (frame-cliff_frame>=6) input.stickY=80;
+                        } else {
+                            cliff_frame=0;
+                            /* Original aerial attack IASA gates jumping.
+                             * Repeated press/release edges do not force it. */
+                            if (target_input_state->x1968_jumpsUsed<target_input_state->co_attrs.max_jumps) {
+                                if (recovery_phase==0) input.button=PAD_BUTTON_X;
+                            } else if (target_input_state->self_vel.y<=0) {
+                                input.stickY=80;
+                                if (recovery_phase==0) input.button=PAD_BUTTON_B;
+                            }
+                        }
+                    }
+                    if (frame%5==0 || input.button || target_recovery_stable==60)
+                        OSReport("NATIVE_TARGET_RECOVERY frame=%u motion=%d ground=%d x=%f y=%f vx=%f vy=%f interrupt=%d anim=%f jumps=%d max_jumps=%d stocks=%d edge_x=%f edge_y=%f stable=%u button=%u stick_x=%d stick_y=%d\n",
+                                 frame,motion,grounded?0:1,position.x,position.y,
+                                 target_input_state->self_vel.x,target_input_state->self_vel.y,
+                                 target_input_state->allow_interrupt,target_input_state->cur_anim_frame,
+                                 target_input_state->x1968_jumpsUsed,target_input_state->co_attrs.max_jumps,
+                                 Player_GetStocks(0),edge.x,edge.y,target_recovery_stable,
+                                 input.button,input.stickX,input.stickY);
+                    if (target_recovery_stable==60)
+                        OSReport("NATIVE_TARGET_RECOVERY_COMPLETE frame=%u remaining=%d stable=%u stocks=%d x=%f y=%f\n",
+                                 frame,stage_info.x6D4,target_recovery_stable,Player_GetStocks(0),position.x,position.y);
                 } else if (hit_frame && ftLib_GetGroundAir(self)==GA_Air) {
                     input.stickX=position.x>start.x?-40:40;
                     if (phase<4){input.stickY=80;input.button=PAD_BUTTON_B;}
@@ -1868,11 +1948,14 @@ void gm_Scene_Vs_OnFrame(void)
                              target_input_state->self_vel.x,teeter_ready);
                 /* Allow the20-present GPU capture to finish, then leave
                  * before this deliberately off-stage hit probe falls out. */
-                if (hit_frame && frame-hit_frame>=24) {
+                if (hit_frame && ((!target_recovery_mode && frame-hit_frame>=24) ||
+                                  (target_recovery_mode && target_recovery_stable>=100))) {
                     static int close_queued;
                     if (!close_queued) {
                         close_queued=aurora_diagnostic_queue_quit();
-                        OSReport("NATIVE_TARGET_HIT_CLOSE frame=%u remaining=%d queued=%d\n",frame,stage_info.x6D4,close_queued);
+                        if (target_recovery_mode)
+                            OSReport("NATIVE_TARGET_RECOVERY_CLOSE frame=%u remaining=%d stable=%u queued=%d\n",frame,stage_info.x6D4,target_recovery_stable,close_queued);
+                        else OSReport("NATIVE_TARGET_HIT_CLOSE frame=%u remaining=%d queued=%d\n",frame,stage_info.x6D4,close_queued);
                     }
                 }
             }
@@ -1881,7 +1964,9 @@ void gm_Scene_Vs_OnFrame(void)
                          frame,stage_info.grkind,stage_info.x6D2,stage_info.x6D4);
 #if defined(_WIN32)
             if (!target_capture_armed && frame >= 180 &&
-                (!getenv("MELEE_DIAGNOSTIC_TARGET_HIT") || stage_info.x6D4<stage_info.x6D2)) {
+                (!getenv("MELEE_DIAGNOSTIC_TARGET_HIT") ||
+                 (stage_info.x6D4<stage_info.x6D2 &&
+                  (!target_recovery_mode || target_recovery_stable>=60)))) {
                 char* path = NULL; size_t size = 0;
                 if (_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE") == 0 &&
                     path && path[0]) {

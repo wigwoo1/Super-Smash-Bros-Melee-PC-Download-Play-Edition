@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "0a7d2fa3554184251a058a4e306f887e604256adc00a85621b429c5883a19bca"
+      "sha256": "edca5a44c899dd57ddbc8a3fde8432d7c82df1b9bc4b9e031d881288c35b04a5"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
