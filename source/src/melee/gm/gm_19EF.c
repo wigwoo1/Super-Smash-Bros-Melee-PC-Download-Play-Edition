@@ -700,8 +700,9 @@ void gm_Scene_GOver_OnEnter(void* arg0_)
     fn_8019F9C4(arg0->ckind);
 #ifdef TARGET_PC
     if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT"))
-        OSReport("NATIVE_CLASSIC_GAMEOVER initialized=1 kind=%d affordable=%u coins=%u\n",
-                 arg0->ckind, lbl_80479A98.x4_u.x0.x20 == 0, arg0->x18);
+        OSReport("NATIVE_CLASSIC_GAMEOVER initialized=1 kind=%d affordable=%u coins=%u price=%u score=%u\n",
+                 arg0->ckind, lbl_80479A98.x4_u.x0.x20 == 0, arg0->x18,
+                 arg0->x16, arg0->x0);
 #endif
 }
 
@@ -713,7 +714,25 @@ void gm_Scene_GOver_OnExit(void* arg0_)
     arg0->x18 = lbl_80479A98.x4_u.x0.x22;
 #ifdef TARGET_PC
     if (getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT"))
-        OSReport("NATIVE_CLASSIC_GAMEOVER exit=1 continue=%d\n", arg0->xC);
+        OSReport("NATIVE_CLASSIC_GAMEOVER exit=1 continue=%d coins=%u score=%u\n",
+                 arg0->xC, arg0->x18, arg0->x4);
+#if defined(_WIN32)
+    if (getenv("MELEE_DIAGNOSTIC_GAMEOVER_CONTINUE") && arg0->xC == 1) {
+        /* Only hand off diagnostic input/capture after the ORIGINAL Continue
+         * handler has accepted Yes. No campaign or match state is assigned. */
+        char* capture = NULL;
+        size_t capture_size = 0;
+        int accepted = _dupenv_s(&capture, &capture_size,
+            "MELEE_DIAGNOSTIC_RESUMED_SCENE_CAPTURE") == 0 &&
+            _putenv_s("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT", "") == 0 &&
+            _putenv_s("MELEE_DIAGNOSTIC_CLASSIC_PAUSE_EXIT", "1") == 0 &&
+            _putenv_s("MELEE_DIAGNOSTIC_CLASSIC_CONTINUE_PLAY", "1") == 0;
+        if (capture && capture[0])
+            accepted = accepted && _putenv_s("MELEE_DIAGNOSTIC_GAME_SCENE_CAPTURE", capture) == 0;
+        free(capture);
+        OSReport("NATIVE_CLASSIC_CONTINUE_INPUT armed=%d\n", accepted);
+    }
+#endif
 #endif
     lbAudioAx_800236DC();
     lbArchive_80016EFC(lbl_804D6698);

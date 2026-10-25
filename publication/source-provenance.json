@@ -5836,7 +5836,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_19EF.c",
-      "sha256": "519c405a9e49b66b93520ba34d081eb46864680fd2054bf477200c50a9f41e7d"
+      "sha256": "03bdf7f205d1c6c4f3c107d1d52ffe506f5e76a38fe1cfffeeff350d65be5b81"
     },
     {
       "path": "source/src/melee/gm/gm_19EF.h",
@@ -6196,7 +6196,7 @@
     },
     {
       "path": "source/src/melee/gm/gmscene.c",
-      "sha256": "673f0e06fab084faf38df4c752ae04363c4950daf7a596054a5702d326a818d1"
+      "sha256": "67a99315610aa0b49bec516a689c274825e0b71325f4adbad639302fbcb51750"
     },
     {
       "path": "source/src/melee/gm/gmscene.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "398e60b9877622e4b2bb2b21475b3fb6750da25133e67130af41e893d8656db2"
+      "sha256": "038538390e9d4af82596fef946706e573f624af6413ddad1f3b3ef90557318cc"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",

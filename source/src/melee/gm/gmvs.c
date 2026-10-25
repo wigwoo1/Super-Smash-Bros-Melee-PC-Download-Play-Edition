@@ -1723,13 +1723,42 @@ void gm_Scene_Vs_OnFrame(void)
         int stocks = Player_GetStocks(0);
         HSD_GObj* entity = Player_GetEntity(0);
         static int previous_stocks = -1;
+        static unsigned stalled_ticks, obstacle_jump_frame;
+        static f32 previous_x;
         /* Natural off-stage movement only; original KO/stock/Game Over rules
          * choose the outcome. No damage, stocks, outcome or route writes. */
         if (frame >= 180) input.stickX = -80;
+        if (entity && frame >= 180) {
+            Vec3 position;
+            ftLib_GetPos(entity, &position);
+            if (stocks != previous_stocks) {
+                stalled_ticks = obstacle_jump_frame = 0;
+                previous_x = position.x;
+            }
+            if (ftLib_GetGroundAir(entity) == GA_Ground &&
+                position.x > previous_x - 0.01f && position.x < previous_x + 0.01f)
+                ++stalled_ticks;
+            else stalled_ticks = 0;
+            previous_x = position.x;
+            /* Original solid blocks can stop a held direction (Green Greens).
+             * Cross them with normal jump/release/double-jump input only. */
+            if (stalled_ticks >= 90) {
+                obstacle_jump_frame = frame;
+                stalled_ticks = 0;
+                OSReport("NATIVE_CLASSIC_DEFEAT obstacle_jump=1 frame=%u x=%f y=%f\n",
+                         frame, position.x, position.y);
+            }
+            if (obstacle_jump_frame) {
+                unsigned elapsed = frame - obstacle_jump_frame;
+                if (elapsed < 4 || (elapsed >= 30 && elapsed < 34))
+                    input.button = PAD_BUTTON_X;
+            }
+        }
         if (entity && ftLib_GetMotionId(entity) == ftCo_MS_CliffWait) {
             /* Original CliffWait requires a neutral sample before a drop.
              * Keep Down out of grounded movement so it cannot crouch. */
             input.stickX = 0;
+            input.button = 0;
             if (frame % 30 >= 6) input.stickY = -80;
         }
         if (!HSD_PadStageDiagnosticInput(Player_GetPadPort(0), &input))
@@ -1753,6 +1782,12 @@ void gm_Scene_Vs_OnFrame(void)
         PADStatus input = { 0 };
         unsigned elapsed = 0;
         ++calls;
+        if (getenv("MELEE_DIAGNOSTIC_CLASSIC_CONTINUE_PLAY") && !start_call) {
+            unsigned frame = controller.state.frame_count;
+            if (frame >= 180 && frame < 196) input.stickX = 35;
+            if (frame >= 240 && frame < 256) input.stickX = -35;
+            if (frame >= 300 && frame < 308) input.button = PAD_BUTTON_X;
+        }
         if (!start_call && controller.state.frame_count >= 360) start_call = calls;
         if (start_call) {
             elapsed = calls - start_call;
@@ -1769,6 +1804,21 @@ void gm_Scene_Vs_OnFrame(void)
         }
         if (!HSD_PadStageDiagnosticInput(0, &input))
             OSReport("NATIVE_CLASSIC_PAUSE_EXIT input_refused=1\n");
+        if (getenv("MELEE_DIAGNOSTIC_CLASSIC_CONTINUE_PLAY")) {
+            unsigned frame = controller.state.frame_count;
+            if (frame % 60 == 0 || (frame >= 178 && frame <= 198) ||
+                (frame >= 238 && frame <= 258) || (frame >= 298 && frame <= 310)) {
+                Vec3 position = { 0 };
+                HSD_GObj* entity = Player_GetEntity(0);
+                if (entity) ftLib_GetPos(entity, &position);
+                OSReport("NATIVE_CLASSIC_RESUME calls=%u frame=%u stocks=%d result=%d paused=%d motion=%d x=%f y=%f requested_x=%d pad_x=%d button=%u trigger=%u\n",
+                         calls, frame, Player_GetStocks(0), controller.state.match_result,
+                         gm_GetDbPauseFlag(1), entity ? ftLib_GetMotionId(entity) : -1,
+                         position.x, position.y, input.stickX,
+                         HSD_PadCopyStatus[0].stickX, HSD_PadCopyStatus[0].button,
+                         HSD_PadCopyStatus[0].trigger);
+            }
+        }
     }
     if (getenv("MELEE_DIAGNOSTIC_MATCH_INPUT")) {
         PADStatus input = { 0 };

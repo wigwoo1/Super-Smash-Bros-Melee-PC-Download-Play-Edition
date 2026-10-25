@@ -835,7 +835,8 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
                 /* Original Continue defaults to Yes. A Right edge selects No;
                  * a later A edge confirms, after a stable screen capture.
                  * Stage through the same next-tick pad route as gameplay. */
-                if (frame >= 220 && frame < 228) pad.stickX = 80;
+                if (frame >= 220 && frame < 228 &&
+                    !getenv("MELEE_DIAGNOSTIC_GAMEOVER_CONTINUE")) pad.stickX = 80;
                 if (frame >= 300 && frame < 308) pad.button = PAD_BUTTON_A;
                 HSD_ASSERT(1, HSD_PadStageDiagnosticInput(0, &pad));
                 if (frame == 1 || frame == 220 || frame == 228 ||
