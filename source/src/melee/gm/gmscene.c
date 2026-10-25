@@ -654,6 +654,7 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
     unsigned pc_frame_index = 0;
     unsigned native_results_input_frame = 0;
     unsigned native_prize_input_frame = 0;
+    unsigned native_gameover_input_frame = 0;
     unsigned native_ordered_tick = 0;
     PADStatus native_delayed_ports[4];
     bool native_delayed_pending = false;
@@ -828,6 +829,20 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
                 temp_r25->unk_4++;
             }
 #include "gmvs.h"
+            if (info->scene_kind == GS_GAMEOVER && getenv("MELEE_DIAGNOSTIC_GAMEOVER_EXIT")) {
+                PADStatus pad = { 0 };
+                unsigned frame = ++native_gameover_input_frame;
+                /* Original Continue defaults to Yes. A Right edge selects No;
+                 * a later A edge confirms, after a stable screen capture.
+                 * Stage through the same next-tick pad route as gameplay. */
+                if (frame >= 220 && frame < 228) pad.stickX = 80;
+                if (frame >= 300 && frame < 308) pad.button = PAD_BUTTON_A;
+                HSD_ASSERT(1, HSD_PadStageDiagnosticInput(0, &pad));
+                if (frame == 1 || frame == 220 || frame == 228 ||
+                    frame == 300 || frame == 308)
+                    OSReport("NATIVE_GAMEOVER_INPUT frame=%u button=%u stick_x=%d port=0\n",
+                             frame, pad.button, pad.stickX);
+            }
             if (info->scene_kind == 39 && getenv("MELEE_DIAGNOSTIC_PRIZE_CONFIRM")) {
                 PADStatus pad = { 0 };
                 unsigned frame = ++native_prize_input_frame;

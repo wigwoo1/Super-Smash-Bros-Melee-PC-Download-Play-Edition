@@ -318,6 +318,16 @@ static void fn_8019F810(void)
     PAD_STACK(16);
 
     trigger = HSD_PadCopyStatus[lbl_80479A98.x4_u.x0.x15].trigger;
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_GAMEOVER_EXIT")) {
+        static unsigned diagnostic_frame;
+        if (++diagnostic_frame % 60 == 0 || trigger)
+            OSReport("NATIVE_GAMEOVER_STATE frame=%u state=%u selected_yes=%u trigger=%x port=%u anim=%d\n",
+                     diagnostic_frame, lbl_80479A98.x0,
+                     lbl_80479A98.x4_u.x0.x14, trigger,
+                     lbl_80479A98.x4_u.x0.x15, lbl_804D66D0.x4);
+    }
+#endif
     fn_8019EFC4(&HSD_PadCopyStatus[lbl_80479A98.x4_u.x0.x15]);
     if (lbl_80479A98.x0 < 8U) {
         lbl_804D66B0.x4 += 1;

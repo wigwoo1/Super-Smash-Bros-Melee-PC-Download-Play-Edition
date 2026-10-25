@@ -5836,7 +5836,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_19EF.c",
-      "sha256": "054a19975c6a16ce750372033afd47d172056790ef3fee974a14b175cafc5292"
+      "sha256": "519c405a9e49b66b93520ba34d081eb46864680fd2054bf477200c50a9f41e7d"
     },
     {
       "path": "source/src/melee/gm/gm_19EF.h",
@@ -6196,7 +6196,7 @@
     },
     {
       "path": "source/src/melee/gm/gmscene.c",
-      "sha256": "c61c4b1cd6749fb021b44e39f895a2fbb60c2ebc8484bbf7bdd077bad2f8153c"
+      "sha256": "673f0e06fab084faf38df4c752ae04363c4950daf7a596054a5702d326a818d1"
     },
     {
       "path": "source/src/melee/gm/gmscene.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "8c0a3ffc4c3b759dedc597db53e6a1f2dd673d555fe4ba7bfa83f0a12cb4860c"
+      "sha256": "405672acb5c60afb052be5ff4336bd7a58e234d26bc1d9ab2f6a430eeb976c2a"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11704,7 +11704,7 @@
     },
     {
       "path": "source/src/pc/title_archive.h",
-      "sha256": "600387a832add41529a5c544db60eb56ff7eb0bd1aa8b1537d95fb44ebcf1f75"
+      "sha256": "b3fb4818913de3a3306beeb7e657f4c71735f2d378efa49500c66f71a4d3b5b0"
     },
     {
       "path": "source/src/pc/title_layouts.h",
@@ -11721,6 +11721,10 @@
     {
       "path": "source/src/pc/trophy_archive.h",
       "sha256": "370105606dcf562bb2d81dac47b18f28f510420a4ce731933cf86603cf3b5af4"
+    },
+    {
+      "path": "source/src/pc/trophy_model_profile.h",
+      "sha256": "559c7f1f1a8ef8541a566e3928a6fe6662a568bf5645f2697f66ab80d4636fb5"
     },
     {
       "path": "source/src/pc/udp_input.h",
