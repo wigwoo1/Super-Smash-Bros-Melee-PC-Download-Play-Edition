@@ -5387,6 +5387,8 @@ void mnCharSel_Scene_OnFrame(void)
         if ((frames >= 30 && frames < 40) || (frames >= 120 && frames < 130)) status.button = PAD_BUTTON_A;
         if (frames >= 60 && frames < 82) status.stickY = 100;
         if (getenv("MELEE_DIAGNOSTIC_CSS_FEEDBACK")) {
+            bool classic_target = getenv("MELEE_DIAGNOSTIC_CLASSIC_MATCH") != NULL &&
+                getenv("MELEE_DIAGNOSTIC_CSS_TARGET0") != NULL;
             static unsigned settled[2];
             static u8 targets[2] = { CKind_Koopa, CKind_Pikachu };
             static unsigned target_costume;
@@ -5401,7 +5403,7 @@ void mnCharSel_Scene_OnFrame(void)
                     else
                         OSReport("NATIVE_CSS_COSTUME_REFUSED invalid_number=1\n");
                 }
-                for (port = 0; port < 2; ++port) {
+                for (port = 0; port < (classic_target ? 1 : 2); ++port) {
                     const char* text = getenv(port == 0 ? "MELEE_DIAGNOSTIC_CSS_TARGET0" : "MELEE_DIAGNOSTIC_CSS_TARGET1");
                     char* end;
                     long kind;
@@ -5422,7 +5424,7 @@ void mnCharSel_Scene_OnFrame(void)
                     OSReport("NATIVE_CSS_TARGET_ACCEPTED port=%u kind=%u\n", port, targets[port]);
                 }
             }
-            for (port = 0; port < 2; ++port) {
+            for (port = 0; port < (classic_target ? 1 : 2); ++port) {
                 PADStatus input = { 0 };
                 struct CSSCursorData* cursor = mnCharSel_804A0BC0[port];
                 unsigned icon;
@@ -5462,7 +5464,7 @@ void mnCharSel_Scene_OnFrame(void)
                 if (port == 0 && frames > 240 && frames % 30 < 4 &&
                     mnCharSel_804D6CB0->vs.start.players[0].color == target_costume &&
                     mnCharSel_804D6CB0->vs.start.players[0].ckind == targets[0] &&
-                    mnCharSel_804D6CB0->vs.start.players[1].ckind == targets[1] &&
+                    (classic_target || mnCharSel_804D6CB0->vs.start.players[1].ckind == targets[1]) &&
                     mnCharSel_804D6CF7) input.button = PAD_BUTTON_START;
                 if (port == 1 && frames >= 240 && frames < 250 &&
                     getenv("MELEE_DIAGNOSTIC_CSS_TARGET1")) {

@@ -8960,7 +8960,7 @@
     },
     {
       "path": "source/src/melee/mn/mncharsel.c",
-      "sha256": "2b49be9e26c725bb9f859a72bcaceb0e7f702262c7c054d299635978f64dea06"
+      "sha256": "58ad2707669baa63c1b503c94543fff79dc186f381fe2d6a8a32e24c29e09047"
     },
     {
       "path": "source/src/melee/mn/mncharsel.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "405672acb5c60afb052be5ff4336bd7a58e234d26bc1d9ab2f6a430eeb976c2a"
+      "sha256": "025daecb8037b90edee5efa25549566357a8dd4f0c1d83138981e6280f58f009"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11704,7 +11704,7 @@
     },
     {
       "path": "source/src/pc/title_archive.h",
-      "sha256": "b3fb4818913de3a3306beeb7e657f4c71735f2d378efa49500c66f71a4d3b5b0"
+      "sha256": "7f36467dbd7ad7eb579ee47532be8304b905951c052e8352a2261af8ef193eff"
     },
     {
       "path": "source/src/pc/title_layouts.h",
@@ -11724,7 +11724,7 @@
     },
     {
       "path": "source/src/pc/trophy_model_profile.h",
-      "sha256": "559c7f1f1a8ef8541a566e3928a6fe6662a568bf5645f2697f66ab80d4636fb5"
+      "sha256": "44a27252757b7be29eecc17c1f62513cb2d07910472ee85b0ce6b7709fc26a1c"
     },
     {
       "path": "source/src/pc/udp_input.h",

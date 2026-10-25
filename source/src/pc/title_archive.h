@@ -459,7 +459,7 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(!strncmp(name,"ftDemoIntroMotionFile",21)){
             title_nested_archive(&p,at);continue;
         }
-        else if(MeleePc_IsDrMarioTrophyProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_HSD_Joint;
+        else if(MeleePc_IsStandardTrophyModelProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_HSD_Joint;
         else if(toy_model){
             size_t len=strlen(name);
             if(len>=14 && !strcmp(name+len-14,"_matanim_joint"))type=TITLE_HSD_MatAnimJoint;
@@ -487,12 +487,13 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
             p.error=-1;
         if(!p.error){title_payload(&p,65512,882,1);title_payload(&p,75284,882,1);}
     }
-    if(!p.error && MeleePc_IsDrMarioTrophyProfile(bytes,body,relocs,publics,roots,strings)){
+    if(!p.error && MeleePc_IsStandardTrophyModelProfile(bytes,body,relocs,publics,roots,strings)){
         /* Exact retained model/list, not a second scene or an animation list. */
-        if(title_u32(&p,449952)!=84936 || title_u32(&p,449956)!=0 ||
-           title_u32(&p,449960)!=0 || title_u32(&p,449964)!=0 ||
-           title_u32(&p,449968)!=449952 || title_u32(&p,449972)!=0)p.error=-1;
-        if(!p.error)title_array(&p,449968,TITLE_DynamicModelDesc,0,1);
+        uint32_t model=body-24, root=MeleePc_DatBe32(bytes+roots);
+        if(title_u32(&p,model)!=root || title_u32(&p,model+4)!=0 ||
+           title_u32(&p,model+8)!=0 || title_u32(&p,model+12)!=0 ||
+           title_u32(&p,model+16)!=model || title_u32(&p,model+20)!=0)p.error=-1;
+        if(!p.error)title_array(&p,model+16,TITLE_DynamicModelDesc,0,1);
     }
     title_finish_plan(&p,0);
     free(p.claims);free(p.relocs);free(p.seen);free(p.nodes);return p.error;

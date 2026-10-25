@@ -9444,7 +9444,7 @@ static int MeleePc_DatDecode(void* data,size_t length){
             (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12) : NULL;
         if((!strncmp(first,"ToyDsp",6) &&
            (!second || !strncmp(second,"ToyDsp",6))) ||
-           MeleePc_IsDrMarioTrophyProfile(bytes,body,relocs,publics,roots,strings)){
+           MeleePc_IsStandardTrophyModelProfile(bytes,body,relocs,publics,roots,strings)){
             int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
             if(result)return result;
             for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
