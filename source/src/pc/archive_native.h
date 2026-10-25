@@ -140,6 +140,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "coin_get_scene_archive.h"
 #include "background_flash_archive.h"
 #include "intro_text_archive.h"
+#include "clear_sis_archive.h"
 #include "gm_intro_easy_table_archive.h"
 #include "menu_sis_archive.h"
 #include "toy_sis_archive.h"
@@ -3208,6 +3209,30 @@ static int MeleePc_DatDecode(void* data,size_t length){
         return 0;
     }
 
+    /* Original clear-overlay bonus-name text (gmregclear/SisLib). */
+    if(publics==1 && !externs && relocs==259 &&
+       ((length==9861 && body==8768) || (length==90757 && body==89664)) &&
+       MeleePc_DatBe32(bytes+roots)==0 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_DecisionData")){
+        int result=MeleePc_ClearSisBody(bytes,length,body,relocs,0);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
+    /* Original Classic clear-overlay SIS text (US and Japanese exports). */
+    if(publics==1 && !externs && relocs==5 &&
+       ((length==202 && body==128) || (length==1706 && body==1632)) &&
+       MeleePc_DatBe32(bytes+roots)==0 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_ClearData")){
+        int result=MeleePc_ClearSisBody(bytes,length,body,relocs,0);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
     if(publics==1 && !externs && length==374 && body==288 && relocs==8 && MeleePc_DatBe32(bytes+roots)==0 &&
        !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_IntroData")){
         int result=MeleePc_IntroTextBody(bytes,length,body,relocs,0);
@@ -4767,6 +4792,30 @@ static int MeleePc_DatDecode(void* data,size_t length){
        MeleePc_DatBe32(bytes+roots)==0 &&
        !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_MenuData")){
         int result=MeleePc_MenuSisBody(bytes,length,body,relocs,0);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
+    /* Original clear-overlay bonus-name text (gmregclear/SisLib). */
+    if(publics==1 && !externs && relocs==259 &&
+       ((length==9861 && body==8768) || (length==90757 && body==89664)) &&
+       MeleePc_DatBe32(bytes+roots)==0 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_DecisionData")){
+        int result=MeleePc_ClearSisBody(bytes,length,body,relocs,0);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
+    /* Original Classic clear-overlay SIS text (US and Japanese exports). */
+    if(publics==1 && !externs && relocs==5 &&
+       ((length==202 && body==128) || (length==1706 && body==1632)) &&
+       MeleePc_DatBe32(bytes+roots)==0 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_ClearData")){
+        int result=MeleePc_ClearSisBody(bytes,length,body,relocs,0);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);

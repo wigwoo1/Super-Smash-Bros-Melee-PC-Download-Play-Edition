@@ -1,4 +1,8 @@
 #include "gmregclear.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 
 #include <Runtime/platform.h>
 
@@ -1061,6 +1065,20 @@ void fn_80180630(int arg0, int arg1, int arg2, bool arg3, MatchEnd* arg4)
 
     arg4->player_standings[0].xE = coins;
     fn_8017F2A4(&state->x84, 264.0f, 211.0f);
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_COMBAT")) {
+        OSReport("NATIVE_CLASSIC_CLEAR initialized=1 outcome=%d total=%d coins=%d\n",
+                 arg4->outcome, state->x104, coins);
+#if defined(_WIN32)
+        char* capture = NULL; size_t size = 0;
+        if (_dupenv_s(&capture,&size,"MELEE_DIAGNOSTIC_CLASSIC_CLEAR_CAPTURE") == 0 &&
+            capture && capture[0])
+            OSReport("NATIVE_CLASSIC_CLEAR capture_armed=%d\n",
+                     _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",capture) == 0);
+        free(capture);
+#endif
+    }
+#endif
     PAD_STACK(0x18);
 }
 

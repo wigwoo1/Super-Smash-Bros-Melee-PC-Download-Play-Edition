@@ -2424,7 +2424,7 @@
     },
     {
       "path": "source/src/melee/ft/ftcoll.c",
-      "sha256": "185c766683b71fc26f1af46002f3ef37bfb1a814fae3f0120331158bec19a929"
+      "sha256": "e2f6d20f65b4d220550fc6716aa5ca364a90df28fab8d8cd2e413b080366fea9"
     },
     {
       "path": "source/src/melee/ft/ftcoll.h",
@@ -6144,7 +6144,7 @@
     },
     {
       "path": "source/src/melee/gm/gmregclear.c",
-      "sha256": "9389e1165e82488c7421087d84851a19df20d18797f88ec267ff24d05a9db65c"
+      "sha256": "de095f958a28e6065e38d28c3a41468ba4a4ef23154f0a1f35d810542d0b6b3d"
     },
     {
       "path": "source/src/melee/gm/gmregclear.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "e93323ea2716fc24c5a18498b440e7924143bf72639fad502c6c95aab7fc69fb"
+      "sha256": "6a323bf72164d6b10566848fb7df2f2e2995fb63d821beaee502e45426616e61"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "025daecb8037b90edee5efa25549566357a8dd4f0c1d83138981e6280f58f009"
+      "sha256": "15504049dfb70a450e480252d60af91f9f292c86d5798636c9acb7eeec9431c9"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -9549,6 +9549,10 @@
     {
       "path": "source/src/pc/character_select_sis_archive.h",
       "sha256": "826eb907a61bd598d285d79e99ae76fda7ea2febcdf249b136fabfe1106806db"
+    },
+    {
+      "path": "source/src/pc/clear_sis_archive.h",
+      "sha256": "163e00970ca286647be77b8665c4c843072527a5f25839e9be44290df85d4eb8"
     },
     {
       "path": "source/src/pc/coin_get_scene_archive.h",

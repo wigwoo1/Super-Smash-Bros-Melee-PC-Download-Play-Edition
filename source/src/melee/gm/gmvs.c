@@ -1716,6 +1716,64 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
+    if (getenv("MELEE_DIAGNOSTIC_CLASSIC_COMBAT") &&
+        gm_GetCurrentGameMode() == GM_CLASSIC) {
+        PADStatus input = { 0 };
+        unsigned frame = controller.state.frame_count, phase = frame % 60;
+        HSD_GObj* self = Player_GetEntity(0);
+        HSD_GObj* target = Player_GetEntity(1);
+        static unsigned clear_calls, stalled;
+        static f32 prior_x;
+        if (controller.state.unk_0 == 0 && self && target) {
+            Vec3 a, b;
+            ftLib_GetPos(self, &a); ftLib_GetPos(target, &b);
+            f32 dx = b.x-a.x, dy = b.y-a.y;
+            f32 distance = dx < 0 ? -dx : dx;
+            int direction = dx >= 0 ? 1 : -1;
+            if (frame >= 180) {
+                bool grounded = ftLib_GetGroundAir(self) == GA_Ground;
+                if (distance > 18) input.stickX = direction*55;
+                /* Only movement blocked on the ground counts as an obstacle.
+                 * Separate jump edges from A/stick attack edges. */
+                if (grounded && input.stickX &&
+                    a.x > prior_x-0.01f && a.x < prior_x+0.01f) ++stalled;
+                else stalled = 0;
+                if (phase < 4 && grounded && (dy > 15 || stalled > 60))
+                    input.button = PAD_BUTTON_X;
+                else if (phase >= 30 && phase < 34 && !grounded && dy > 25)
+                    input.button = PAD_BUTTON_X;
+                /* Neutral samples precede the original A + stick-flick path. */
+                if (distance <= 35 && dy < 28 && dy > -28) {
+                    if ((phase >= 6 && phase < 12) ||
+                        (phase >= 36 && phase < 42)) input.stickX = 0;
+                    if ((phase >= 12 && phase < 15) ||
+                        (phase >= 42 && phase < 45)) {
+                        input.stickX = direction*80;
+                        input.button = PAD_BUTTON_A;
+                    }
+                }
+                if (!grounded && a.y < -15 && phase >= 20 && phase < 24) {
+                    input.button = PAD_BUTTON_B; input.stickY = 80;
+                }
+            }
+            prior_x = a.x;
+            if (frame % 30 == 0)
+                OSReport("NATIVE_CLASSIC_COMBAT frame=%u state=%u result=%d self_stocks=%d target_stocks=%d self_damage=%d target_damage=%d self_motion=%d target_motion=%d x=%f y=%f target_x=%f target_y=%f requested_x=%d cstick_x=%d button=%u\n",
+                         frame, controller.state.unk_0, controller.state.match_result,
+                         Player_GetStocks(0), Player_GetStocks(1), Player_GetDamage(0), Player_GetDamage(1),
+                         ftLib_GetMotionId(self), ftLib_GetMotionId(target), a.x,a.y,b.x,b.y,
+                         input.stickX,input.substickX,input.button);
+        } else if (controller.state.unk_0 == 2) {
+            ++clear_calls;
+            if (clear_calls >= 240 && clear_calls % 60 < 4)
+                input.button = PAD_BUTTON_START;
+            if (clear_calls % 60 == 0)
+                OSReport("NATIVE_CLASSIC_CLEAR_INPUT calls=%u button=%u result=%d stocks=%d\n",
+                         clear_calls,input.button,controller.state.match_result,Player_GetStocks(0));
+        }
+        if (!HSD_PadStageDiagnosticInput(0, &input))
+            OSReport("NATIVE_CLASSIC_COMBAT input_refused=1\n");
+    }
     if ((getenv("MELEE_DIAGNOSTIC_CLASSIC_DEFEAT") &&
          gm_GetCurrentGameMode() == GM_CLASSIC) ||
         (getenv("MELEE_DIAGNOSTIC_STAGE_NAVIGATION") &&
