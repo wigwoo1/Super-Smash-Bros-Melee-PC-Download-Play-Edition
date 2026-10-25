@@ -37,6 +37,7 @@ extern unsigned int HSD_JObjDiagnosticMatchFrame;
 #include <melee/ef/eflib.h>
 #include <melee/ft/ftdevice.h>
 #include <melee/ft/ftlib.h>
+#include <melee/ft/fighter.h>
 #include <melee/gr/ground.h>
 #include <melee/gr/grpstadium.h>
 #include <melee/gr/stage.h>
@@ -1803,8 +1804,9 @@ void gm_Scene_Vs_OnFrame(void)
             static int target_capture_armed;
             if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
                 static Vec3 desired, start;
-                static int point = -1, drop_direction;
+                static int point = -1, drop_direction, teeter_ready;
                 static unsigned attack_frame, hit_frame, air_frame;
+                Fighter* target_input_state=self->user_data;
                 Vec3 position; ftLib_GetPos(self,&position);
                 if (frame >= 180 && point == -1) {
                     f32 nearest = 1.0e30f; start = position;
@@ -1829,25 +1831,44 @@ void gm_Scene_Vs_OnFrame(void)
                 if (point>=0 && frame>=180 && !hit_frame) {
                     f32 dx=desired.x-position.x,dy=position.y-desired.y;
                     if (ftLib_GetGroundAir(self)==GA_Ground) {
-                        input.stickX=drop_direction*55;
+                        /* Let original Ottotto stop walking momentum before
+                         * crossing the edge; do not carry a long run-up. */
+                        int motion=ftLib_GetMotionId(self);
+                        if (motion==ftCo_MS_Ottotto || motion==ftCo_MS_OttottoWait)
+                            teeter_ready=1;
+                        /* Original scale80:62/80=.775 exceeds teeter .75,
+                         * while staying below dash .8. No rule changes. */
+                        input.stickX=drop_direction*(teeter_ready?62:55);
                         air_frame=0;
                     } else {
                         if (!air_frame) air_frame=frame;
-                        input.stickY=-80;
-                        input.stickX=frame-air_frame<6?drop_direction*55:dx>2?35:dx<-2?-35:0;
-                        if (!attack_frame && frame-air_frame>=6 && dx<12 && dx>-12 && dy<28 && dy>-5)
+                        /* Brake toward the lower target immediately. Delay
+                         * Down until the attack, avoiding early fast-fall. */
+                        input.stickX=dx>2?80:dx<-2?-80:
+                            target_input_state->self_vel.x>0?-55:
+                            target_input_state->self_vel.x<0?55:0;
+                        if (!attack_frame && frame-air_frame>=6 && dx<8 && dx>-8 && dy<28 && dy>-5)
                             attack_frame=frame;
-                        if (attack_frame && frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                        if (attack_frame) {
+                            input.stickY=-80;
+                            if (frame-attack_frame<3) input.button=PAD_BUTTON_A;
+                        }
                     }
                 } else if (hit_frame && ftLib_GetGroundAir(self)==GA_Air) {
                     input.stickX=position.x>start.x?-40:40;
                     if (phase<4){input.stickY=80;input.button=PAD_BUTTON_B;}
                 }
-                if (frame%10==0 && frame>=180)
-                    OSReport("NATIVE_TARGET_INPUT frame=%u motion=%d ground=%d x=%f y=%f point=%d remaining=%d stick_x=%d stick_y=%d button=%u attack_frame=%u hit_frame=%u\n",
+                if ((frame%10==0 || input.button) && frame>=180)
+                    OSReport("NATIVE_TARGET_INPUT frame=%u motion=%d ground=%d x=%f y=%f point=%d remaining=%d stick_x=%d stick_y=%d button=%u attack_frame=%u hit_frame=%u facing=%f latched_x=%f teeter=%f walk=%f dash=%f stick_scale=%d velocity_x=%f teeter_ready=%d\n",
                              frame,ftLib_GetMotionId(self),ftLib_GetGroundAir(self),position.x,position.y,point,
-                             stage_info.x6D4,input.stickX,input.stickY,input.button,attack_frame,hit_frame);
-                if (hit_frame && frame-hit_frame>=80) {
+                             stage_info.x6D4,input.stickX,input.stickY,input.button,attack_frame,hit_frame,
+                             target_input_state->facing_dir,target_input_state->input.lstick[0].x,
+                             p_ftCommonData->teeter_walk_threshold,p_ftCommonData->walk_stick_threshold,
+                             p_ftCommonData->dash_smash_stick_threshold,HSD_PadLibData.scale_stick,
+                             target_input_state->self_vel.x,teeter_ready);
+                /* Allow the20-present GPU capture to finish, then leave
+                 * before this deliberately off-stage hit probe falls out. */
+                if (hit_frame && frame-hit_frame>=24) {
                     static int close_queued;
                     if (!close_queued) {
                         close_queued=aurora_diagnostic_queue_quit();
