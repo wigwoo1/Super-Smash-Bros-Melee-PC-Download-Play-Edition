@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <melee/ft/ft_0C88.h>
 #include <melee/ft/kinds/ftCommon/forward.h>
+#include <melee/ft/kinds/ftMario/forward.h>
 #include <melee/ft/kinds/ftKirby/forward.h>
 #include <aurora/diagnostics.h>
 #include <aurora/aurora.h>
@@ -59,6 +60,7 @@ extern unsigned int HSD_JObjDiagnosticMatchFrame;
 #include <melee/lb/lbtime.h>
 #include <melee/mn/types.h>
 #include <melee/mp/mpcoll.h>
+#include <melee/mp/mplib.h>
 #include <melee/pl/player.h>
 #include <melee/pl/plbonus.h>
 #include <melee/pl/plbonuslib.h>
@@ -1803,7 +1805,12 @@ void gm_Scene_Vs_OnFrame(void)
         if (diagnostic_vs_entries == 3 && controller.state.unk_0 == 0 && self) {
             static int target_capture_armed;
             static unsigned target_recovery_stable;
+            static unsigned target_second_phase, target_second_begin, target_second_stable;
+            static int target_second_air;
             int target_recovery_mode=getenv("MELEE_DIAGNOSTIC_TARGET_RECOVERY")!=NULL;
+            int target_second_mode=target_recovery_mode &&
+                getenv("MELEE_DIAGNOSTIC_TARGET_SECOND")!=NULL &&
+                stage_info.grkind==Gr_Kind_TDrmario && ftLib_GetKind(self)==Ft_Kind_DrMario;
             if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
                 static Vec3 desired, start, edge;
                 static int point = -1, drop_direction, teeter_ready, initial_stocks;
@@ -1938,6 +1945,100 @@ void gm_Scene_Vs_OnFrame(void)
                     input.stickX=position.x>start.x?-40:40;
                     if (phase<4){input.stickY=80;input.button=PAD_BUTTON_B;}
                 }
+                if (target_second_mode && hit_frame) {
+                    int grounded=ftLib_GetGroundAir(self)==GA_Ground;
+                    int motion=ftLib_GetMotionId(self);
+                    Vec3 second_target={0};
+                    Vec3 waypoint_left,waypoint_right;
+                    mpFloorGetLeft(7,&waypoint_left);mpFloorGetRight(7,&waypoint_right);
+                    f32 waypoint_x=(waypoint_left.x+waypoint_right.x)*0.5f;
+                    f32 waypoint_y=(waypoint_left.y+waypoint_right.y)*0.5f;
+                    int has_target=Ground_801C2D24(204,&second_target);
+                    if (!target_second_phase && target_recovery_stable>=60) {
+                        target_second_phase=1;target_second_begin=frame;
+                        target_second_stable=0;target_second_air=0;
+                        OSReport("NATIVE_TARGET_SECOND_BEGIN frame=%u point=204 target_x=%f target_y=%f stocks=%d\n",
+                                 frame,second_target.x,second_target.y,Player_GetStocks(0));
+                    }
+                    if (target_second_phase) {
+                        /* This route owns only the opt-in test PAD input.
+                         * Stage/player state and outcomes remain original. */
+                        memset(&input,0,sizeof(input));
+                        if (stage_info.x6D4<=8 && target_second_phase<3) {
+                            target_second_phase=3;target_second_stable=0;
+                        }
+                        if (target_second_phase==1 || target_second_phase==2) {
+                            unsigned elapsed=frame-target_second_begin;
+                            if (!grounded) target_second_air=1;
+                            if (grounded && target_second_air) {
+                                int waypoint=target_input_state->coll_data.floor.index==7 &&
+                                    position.x>waypoint_left.x && position.x<waypoint_right.x;
+                                if (target_second_phase==1 && waypoint) {
+                                    ++target_second_stable;
+                                    if (target_second_stable==30) {
+                                        OSReport("NATIVE_TARGET_SECOND_WAYPOINT frame=%u stable=30 stocks=%d x=%f y=%f\n",
+                                                 frame,Player_GetStocks(0),position.x,position.y);
+                                        target_second_phase=2;target_second_begin=frame;
+                                        target_second_stable=0;target_second_air=0;
+                                    }
+                                } else {
+                                    int queued=aurora_diagnostic_queue_quit();
+                                    OSReport("NATIVE_TARGET_SECOND_ABORT frame=%u phase=%u reason=route_landed_without_goal remaining=%d queued=%d\n",
+                                             frame,target_second_phase,stage_info.x6D4,queued);
+                                    target_second_phase=99;
+                                }
+                            } else if (elapsed<8) {
+                                /* Hold through original KneeBend for a full
+                                 * ground jump, then release before air jump. */
+                                input.button=PAD_BUTTON_X;
+                            } else if (!grounded) {
+                                if (motion==ftMr_MS_SpecialAirHi) {
+                                    if (target_second_phase==1) {
+                                        f32 dx=waypoint_x-position.x;
+                                        input.stickX=position.y<waypoint_y+5?35:dx>2?55:dx<-2?-55:0;
+                                    } else input.stickX=second_target.x>position.x?35:-35;
+                                } else if (target_input_state->self_vel.y<=0) {
+                                    if (target_second_phase==2 &&
+                                        target_input_state->x1968_jumpsUsed<target_input_state->co_attrs.max_jumps) {
+                                        if (elapsed%2==0) input.button=PAD_BUTTON_X;
+                                    } else {
+                                        input.stickY=80;
+                                        input.stickX=target_second_phase==1?35:second_target.x>position.x?35:-35;
+                                        if (elapsed%2==0) input.button=PAD_BUTTON_B;
+                                    }
+                                }
+                            }
+                        } else if (target_second_phase==3) {
+                            int safe_floor=target_input_state->coll_data.floor.index==6 ||
+                                           target_input_state->coll_data.floor.index==7;
+                            if (grounded && safe_floor && Player_GetStocks(0)==initial_stocks)
+                                ++target_second_stable;
+                            else target_second_stable=0;
+                            if (!grounded) {
+                                f32 goal=position.y>waypoint_y+5?waypoint_x:start.x,dx=goal-position.x;
+                                input.stickX=dx>2?55:dx<-2?-55:
+                                    target_input_state->self_vel.x>0?-35:
+                                    target_input_state->self_vel.x<0?35:0;
+                            }
+                            if (target_second_stable==60)
+                                OSReport("NATIVE_TARGET_SECOND_COMPLETE frame=%u remaining=%d stable=60 stocks=%d x=%f y=%f\n",
+                                         frame,stage_info.x6D4,Player_GetStocks(0),position.x,position.y);
+                            if (target_second_stable==100) {
+                                int queued=aurora_diagnostic_queue_quit();
+                                OSReport("NATIVE_TARGET_SECOND_CLOSE frame=%u remaining=%d stable=100 queued=%d\n",
+                                         frame,stage_info.x6D4,queued);
+                            }
+                        }
+                        if (frame%5==0 || input.button)
+                            OSReport("NATIVE_TARGET_SECOND frame=%u phase=%u ground=%d motion=%d x=%f y=%f vx=%f vy=%f jumps=%d stocks=%d remaining=%d stable=%u target_valid=%d target_x=%f target_y=%f button=%u stick_x=%d stick_y=%d floor=%d waypoint_x=%f waypoint_y=%f\n",
+                                     frame,target_second_phase,grounded?0:1,motion,position.x,position.y,
+                                     target_input_state->self_vel.x,target_input_state->self_vel.y,
+                                     target_input_state->x1968_jumpsUsed,Player_GetStocks(0),stage_info.x6D4,
+                                     target_second_stable,has_target,second_target.x,second_target.y,
+                                     input.button,input.stickX,input.stickY,target_input_state->coll_data.floor.index,
+                                     waypoint_x,waypoint_y);
+                    }
+                }
                 if ((frame%10==0 || input.button) && frame>=180)
                     OSReport("NATIVE_TARGET_INPUT frame=%u motion=%d ground=%d x=%f y=%f point=%d remaining=%d stick_x=%d stick_y=%d button=%u attack_frame=%u hit_frame=%u facing=%f latched_x=%f teeter=%f walk=%f dash=%f stick_scale=%d velocity_x=%f teeter_ready=%d\n",
                              frame,ftLib_GetMotionId(self),ftLib_GetGroundAir(self),position.x,position.y,point,
@@ -1948,7 +2049,7 @@ void gm_Scene_Vs_OnFrame(void)
                              target_input_state->self_vel.x,teeter_ready);
                 /* Allow the20-present GPU capture to finish, then leave
                  * before this deliberately off-stage hit probe falls out. */
-                if (hit_frame && ((!target_recovery_mode && frame-hit_frame>=24) ||
+                if (hit_frame && !target_second_mode && ((!target_recovery_mode && frame-hit_frame>=24) ||
                                   (target_recovery_mode && target_recovery_stable>=100))) {
                     static int close_queued;
                     if (!close_queued) {
@@ -1966,7 +2067,8 @@ void gm_Scene_Vs_OnFrame(void)
             if (!target_capture_armed && frame >= 180 &&
                 (!getenv("MELEE_DIAGNOSTIC_TARGET_HIT") ||
                  (stage_info.x6D4<stage_info.x6D2 &&
-                  (!target_recovery_mode || target_recovery_stable>=60)))) {
+                  (target_second_mode?(stage_info.x6D4==8 && target_second_stable>=60):
+                   (!target_recovery_mode || target_recovery_stable>=60))))) {
                 char* path = NULL; size_t size = 0;
                 if (_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE") == 0 &&
                     path && path[0]) {
@@ -1976,6 +2078,15 @@ void gm_Scene_Vs_OnFrame(void)
                 free(path);
             }
 #endif
+        }
+        if (getenv("MELEE_DIAGNOSTIC_TARGET_SECOND") && diagnostic_vs_entries==3 &&
+            controller.state.unk_0==2) {
+            static int target_second_end_queued;
+            if (!target_second_end_queued) {
+                target_second_end_queued=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_TARGET_SECOND_ABORT reason=original_stage_end remaining=%d outcome=%d queued=%d\n",
+                         stage_info.x6D4,controller.state.match_result,target_second_end_queued);
+            }
         }
         if (!HSD_PadStageDiagnosticInput(0, &input))
             OSReport("NATIVE_CLASSIC_COMBAT input_refused=1\n");
