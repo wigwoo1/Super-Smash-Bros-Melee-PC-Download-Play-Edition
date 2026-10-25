@@ -1799,6 +1799,23 @@ void gm_Scene_Vs_OnFrame(void)
         if (controller.state.unk_0 == 0 && !target && frame % 60 == 0)
             OSReport("NATIVE_CLASSIC_COMBAT_NO_TARGET entry=%u frame=%u rules_mode=%u\n",
                      diagnostic_vs_entries, frame, controller.start.x9);
+        if (diagnostic_vs_entries == 3 && controller.state.unk_0 == 0 && self) {
+            static int target_capture_armed;
+            if (frame % 60 == 0)
+                OSReport("NATIVE_TARGET_STAGE frame=%u stage_kind=%d initial=%d remaining=%d\n",
+                         frame,stage_info.grkind,stage_info.x6D2,stage_info.x6D4);
+#if defined(_WIN32)
+            if (!target_capture_armed && frame >= 180) {
+                char* path = NULL; size_t size = 0;
+                if (_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE") == 0 &&
+                    path && path[0]) {
+                    target_capture_armed = _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path) == 0;
+                    OSReport("NATIVE_TARGET_STAGE capture_armed=%d frame=%u\n",target_capture_armed,frame);
+                }
+                free(path);
+            }
+#endif
+        }
         if (!HSD_PadStageDiagnosticInput(0, &input))
             OSReport("NATIVE_CLASSIC_COMBAT input_refused=1\n");
     }

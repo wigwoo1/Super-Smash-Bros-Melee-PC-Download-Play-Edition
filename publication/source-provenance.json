@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "15b7bd3b5bb2319c5323e0366ede85b426b3dee4a2445fd47f8485cc73fbc28c"
+      "sha256": "17f881b1220c06762caf319185357a3a06ff58fa4c4de4d03d917f97450b9fe0"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "15504049dfb70a450e480252d60af91f9f292c86d5798636c9acb7eeec9431c9"
+      "sha256": "ebdd6146113fcb6bd0d838019ee94011a10cfc49f19e5ac8d3f58b9bccb7c811"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11629,6 +11629,10 @@
     {
       "path": "source/src/pc/stage_story_parameters.h",
       "sha256": "67750bb35ce10a1c2623f7034fce618bc364f31edfc1af537965bf95cfa72e47"
+    },
+    {
+      "path": "source/src/pc/stage_target_drmario_archive_plan.h",
+      "sha256": "716652c09df4c9252137151644edbc142a9379ac8a4055797117ea186561825a"
     },
     {
       "path": "source/src/pc/stage_venom_archive_plan.h",

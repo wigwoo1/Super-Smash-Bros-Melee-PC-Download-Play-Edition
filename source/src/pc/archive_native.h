@@ -179,6 +179,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "stage_flatzone_archive_plan.h"
 #include "stage_last_archive_plan.h"
 #include "stage_icemt_archive_plan.h"
+#include "stage_target_drmario_archive_plan.h"
 #include "stage_kongo_archive_plan.h"
 #include "item_common_archive.h"
 #include "fighter_common_archive.h"
@@ -9443,6 +9444,20 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    /* Original DrMario Break the Targets: source-typed common stage graph. */
+    if(length==228472 && body==223104 && relocs==1202 && publics==18 && !externs){
+        static const char* names[]={"ALDYakuAll","GrdTargetBack00_CMPR_image","GrdTargetDrmario00_CMPR_image","GrdTargetDrmario01_CMPR_image","GrdTargetDrmario02_CMPR_image","GrdTargetDrmario03_CMPR_image","GrdTargetDrmario04_CMPR_image","GrdTargetDrmario05_CMPR_image","GrdTargetDrmario08_I4_image","GrdTargetMario06_CMPR_image","GrdTargetMario07_CMPR_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};
+        static const uint32_t offsets[]={154904,220064,191392,199584,209824,175008,183200,201632,218016,158624,166816,154500,154644,154864,428,157824,223080,154872};
+        for(uint32_t i=0;i<publics;i++)
+            if(MeleePc_DatBe32(bytes+roots+i*8)!=offsets[i] ||
+               strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+i*8+4),names[i]))return -2;
+        int result=MeleePc_StageTargetDrmarioBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
     if(length==452171 && body==445920 && relocs==1279 && publics==37 && !externs){
         static const char* names[]={"ALDYakuAll","GrdBattle2Color_RGB565_image","GrdBattle2Linex_I4_image","GrdBattle2texblack_RGB565_image","GrdBattle2texgreen_RGB565_image","GrdBattle2texsky2_RGB565_image","GrdBattleBGGrad2_I8_image","GrdBattleBGWater_RGB5A3_image","GrdBattleBit_I4_image","GrdBattleClaw_CMPR_image","GrdBattleCord_CMPR_image","GrdBattleCore0_CMPR_image","GrdBattleCore1_CMPR_image","GrdBattleGrad2_CMPR_image","GrdBattleGrad_CMPR_image","GrdBattleGround_CMPR_image","GrdBattleWall0_C8_image","GrdBattleWall0_tlut","GrdBattleWall0_tlut_desc","GrdBattleWall1_C8_image","GrdBattleWall1_tlut","GrdBattleWall1_tlut_desc","GrdBattleWall2_CMPR_image","GrdBattleWall4_CMPR_image","GrdBattleWall5_CMPR_image","GrdBattleWall7_CMPR_image","GrdBattleYuka2_I4_image","GrdBattleYuka_I4_image","coll_data","grGroundParam","itemdata","map_head","map_plit","map_ptcl","map_texg","quake_model_set","yakumono_param"};
         static const uint32_t offsets[]={213220,303616,305664,287232,295424,313856,238080,254464,237440,238016,237984,216736,215072,237472,216096,225536,222944,224992,225504,226656,228704,229216,225568,229248,218848,226592,216800,216608,205020,212904,213124,636,213388,205088,205888,445896,213184};
