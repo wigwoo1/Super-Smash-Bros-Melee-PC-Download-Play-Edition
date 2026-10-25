@@ -20,6 +20,11 @@
 #include <melee/ft/kinds/ftCommon/inlines.h>
 #include <melee/ft/types.h>
 #include <melee/it/kinds/itpikachuthunder.h>
+#ifdef TARGET_PC
+#include <pc/thunder_handle.h>
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 
 bool ftPk_SpecialLw_CheckProperty(HSD_GObj* gobj)
 {
@@ -70,6 +75,13 @@ bool ftPk_SpecialLw_8012765C(HSD_GObj* gobj)
         return false;
     }
 
+#ifdef TARGET_PC
+    if(!MeleePc_ThunderHandleLive(thunder_gobj,gobj)){
+        if(thunder_gobj && getenv("MELEE_DIAGNOSTIC_FIGURE_GEOMETRY"))
+            OSReport("NATIVE_THUNDER_EXPIRED_HANDLE motion=%d kind=%d item=%p\n",fp->motion_id,fp->kind,thunder_gobj);
+        return false;
+    }
+#endif
     if (thunder_gobj) {
         it_802B1FE8(thunder_gobj, &vec);
     } else {

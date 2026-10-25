@@ -10,6 +10,7 @@
 #include <sysdolphin/baselib/random.h>
 #ifdef TARGET_PC
 #include <stdlib.h>
+#include <pc/replay_seed.h>
 #include <sysdolphin/baselib/objalloc.h>
 #define CLASSIC_OBJALLOC_TRACE(phase) HSD_ObjAllocDiagnosticTrace(phase)
 #else
@@ -723,6 +724,16 @@ void gm_Mode_Classic_OnLoad(void)
     gm_803DDEC8Struct* entry;
     PAD_STACK(40);
 
+#ifdef TARGET_PC
+    /* Title/menu effects consume RNG before Classic builds its matchup order. */
+    const char* campaign_seed = getenv("MELEE_DIAGNOSTIC_CLASSIC_SEED");
+    if (campaign_seed) {
+        uint32_t seed;
+        HSD_ASSERT(0, MeleePc_ParseReplaySeed(campaign_seed, &seed));
+        *HSD_RandSeedPtr = seed;
+        OSReport("NATIVE_CLASSIC_REPLAY seed=%u before_matchup_shuffle=1\n", seed);
+    }
+#endif
     CLASSIC_OBJALLOC_TRACE("classic_on_load.enter");
     for (entry = scene_data->matchups.x00; entry->x0 != 0x0D; entry++) {
         entry->xC = NULL;

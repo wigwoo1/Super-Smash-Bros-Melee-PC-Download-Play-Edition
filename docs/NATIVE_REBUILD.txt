@@ -74,5 +74,12 @@ All six runtime DLLs were observed loading from the relocated preview.
 See NATIVE_PREVIEW_EVIDENCE.json. Physical controls, other machines, full
 gameplay/release acceptance and a clean packaged Aurora rebuild remain open.
 
-SOURCE-TO-EXECUTABLE UPDATE (2026-10-16)
-Fresh cached-source game/runtime compilation, native link and muted D3D12/Vulkan integration passed. See SOURCE_REBUILD.txt and development/source-rebuild-20261016. Cold dependency downloads, new-runtime relocation and complete release acceptance remain open.
+2026-10-25 x86 address-space configuration:
+link-game-audit.py now links the native x86 executable with /LARGEADDRESSAWARE.
+This retains the x86 game ABI and permits additional process address space on
+64-bit Windows. It does not increase physical GPU memory or prove that resource
+caches are bounded. --legacy-2gb-address-space restores the previous limit for
+controlled diagnostic comparisons. The link-plan JSON records the setting;
+verify the PE header and the actual runtime memory samples when comparing builds.
+Keep this linker script with the exact source and build receipt of each new build.
+The existing installed Desktop build has not been replaced by this source change.

@@ -1,3 +1,8 @@
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#include <melee/gm/gmvs.h>
+#endif
 #include "grfigureget.h"
 
 #include <Runtime/platform.h>
@@ -318,6 +323,11 @@ void grFigureGet_80219B10(void* user_data, int joint_id, CollData* coll,
                     gp->u.figureget.x28[gp->u.figureget.x8] = coll->x0_gobj;
                     gp->u.figureget.x1C[gp->u.figureget.x8] = value;
                     gp->u.figureget.x8++;
+#ifdef TARGET_PC
+                    if(getenv("MELEE_DIAGNOSTIC_FIGURE_CATCH"))
+                        OSReport("NATIVE_FIGURE_CAUGHT frame=%u item=%p trophy=%d count=%d x=%f y=%f\n",
+                                 gm_GetFrameCount(),coll->x0_gobj,value,gp->u.figureget.x8,coll->cur_pos.x,coll->cur_pos.y);
+#endif
                 }
             }
         }

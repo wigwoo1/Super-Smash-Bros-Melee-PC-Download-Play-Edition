@@ -9547,3 +9547,519 @@ Final exeae9847c1ed159331986c97d3f0093bedfec968f31e71a2b352e71b443fcba875, Relea
 Prior frozen source readback confirms original target count, aerial attacks, ground jump/KneeBend, air jump, Mario UpB and map collision sources unchanged. Stage decoder hashes unchanged, retaining applicable763record/1202relocation whole-byte/field-policy oracle,153malformed atomic refusals and8whole-output regressions; no redundant archive tests for controller-only change. Six runtime DLLs and renderer libraries unchanged. Default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd, discs, saves and earlier frozen development builds preserved.
 Desktop development/target-second-drmario-20261025 includes7runtime files, exact matching-source.zip with3624source/build files/full per-file hash readback, dependency pins/notices/nod-Cargo.lock, build receipt/link metadata/rebuild scripts and mod installation instructions. Full packaged-source audit0mismatches. PLAY_MUTED.cmd is normal development startup; automation flags are opt-in. Public source may update while older binary prerelease remains immutable/pinned to its own source; no new public binary without separate matched-source/asset-stripping/muted reconstruction/download-hash gates.
 Two targets and navigation/recovery now verified. Remaining eight targets, original all-target completion/next Classic battle, other target archives/characters, full campaigns/boss/endgame, physical controls, complete reference fidelity/performance and full graphics/mod/P2P/browser roadmap remain unfinished. Overall approximately29%; playable release NOT accepted. Next recommended Sol High for a COMPLETE remaining-stage route and original next-stage transition: consolidate reusable navigation/attack phases across moving targets/platforms rather than treating each remaining target as a separate milestone. This is a larger trajectory/planning task; Medium completed the bounded two-target check successfully. Full project goal scope retained and active; no pause requested.
+
+2026-10-25 DR MARIO FULL TARGET ROUTE - PARTIALLY VERIFIED, ASTRA LOW HANDOFF
+Overall project estimate remains29%; full playable release NOT accepted. Human explicitly selected Sol High. Full-stage task remains all remaining8targets and ORIGINAL completion/clear/Start/next Classic stage, not isolated target milestones.
+A muted Vulkan read-only motion survey after the accepted two-target route PASSED:61samples across1800simulation ticks,11live floor lines,8surviving Mato items identified by original stage joint. Remaining item positions stayed fixed during this survey, while floors0-4 moved. Floor0 elevator worldY ranges-35..45; floors1/2 translate horizontally45units; floors3/4 translate left45units. Earlier point204 was moving and already destroyed. Do not describe all remaining targets as moving. See diagnostic-verification.json for exact ranges/coordinates and motion-survey-vulkan/target.png for inspected earlier safe-platform/HUD8 image; this is NOT a clear-screen image.
+Added opt-in pc/target_route_diagnostic.h controller route, read-only surviving-item identity/survey, target point IDs on original Mato callback, and original projectile-hit attribution logging. Input route has reusable navigation/attack/drop primitives, bounded failure exit and planned full-stage sequence. MELEE_DIAGNOSTIC_TARGET_ALL gates it; normal player flow is not replaced. Original10->0callbacks/success/clear/Start/entry4 gameplay600frames/GPU capture are required by run-hit.py. The final-success capture is intentionally not consumed by early HUD8. Original target-stage success is allowed through the diagnostic abort gate; this success/next-stage path is compiled but NOT runtime verified.
+Both new Release/no-save builds and native links PASS. Launches require matching PASS receipt/executable/current17source hashes before starting. Full-route attempt1 bf9e7674ab86f01f675f7056aa60562d06c20c623077dd30532d0365fe506841 reached original moving floor4 and hit third target203 with original UpB348/5damage at1532, original callback8->7. It then failed return to moving floor4 and lost stock at1689; queued normal quit, process0/no scanned faults. Full-clear test FAIL; no entry4 or final GPU capture.
+Focused revision added air braking,45tick live platform lead, locked UpB facing and intended BackAir for203 preserving air jump/UpB. Attempt2 exe81060c3ef1d97068d7d6e1f4323468e685b3577c290f1968a7b757ef6d006840 reached floor4 at1020 with stock1, but generic recovery fallback selected UpB BEFORE the intended aerial window. At1084 pos(26.531956,52.950077), target(20.114962,54.902786), BackAir gate pos.x>goal.x+7 was false, then generic descending dy>0 fallback requested Up+B. Motion27/jumps2 observed1085, UpB348 accepted target203/5damage1088 and callback8->7. It did NOT execute the proposed BackAir approach. Root motion then stayed nearx28 along original wall before falling; stock0at1245/remaining7. Process0/muted/no scanned faults; GPU pool3635acquired=submitted=retired,failed0. Full-clear test FAIL. First2target callbacks10->9->8 and prior recovery/waypoint still pass in both runs. No third speculative attempt under Sol High.
+Next Astra Low: inspect point203 branch precedence and original tap-jump/Up+B input staging; distinguish requested inputs from actual accepted motion. Make the intended aerial/recovery sequence exclusive rather than allowing fallback to consume recovery early. Choose a physically reachable landing (current moving floor4 return can be too far left; evaluate floor9 as an alternative from the actual trajectory), then continue full route to upper-left/high-right/lower-slot targets and original next-stage transition. Do not change physics, geometry, positions, target count, stocks, jump availability, outcome or scene state to make the test pass. Planned later primitives have NOT been exercised because failure is still step1. Revisit them from source/live evidence before claiming valid.
+11original gameplay/decoder files match previous frozen source: target count/ground, original Classic, aerial/jump/KneeBend/airjump/UpB, collision and archive profiles. Installed default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd verified unchanged. Existing accepted two-target Desktop development package and full frozen source remain intact. No failed candidate delivered or public binary published. Private disc used read-only; no existing saves touched. Each failed case includes raw logs/summary/process result, exact build receipt and tested-inputs.zip; diagnostic-verification.json hashes evidence. Current candidate/runtime retained in private work folder for investigation.
+MODEL UPGRADE RECOMMENDED: currentSol High, recommendedAstra Low. Reason: two distinct source/controller revisions still fail the moving-platform return, and the second never entered its intended aerial branch. Need careful controller/motion/wall trajectory investigation, not more speculative timing changes. Goal remains active; no pause requested. Stop dependent gameplay attempts pending human model selection or explicit authorization to continue current model.
+
+2026-10-25 ASTRA LOW: THIRD TARGET RECOVERY VERIFIED; FOURTH HIT; FULL CLEAR UNFINISHED
+Human confirmed Astra Low. Goal resumed automatically; fresh blocked audit. Overall estimate29%, playable release NOT accepted. Two focused muted Vulkan runs completed; no D3D12 acceptance or candidate delivery for this revision.
+Original source audit confirms aerial selection uses left-stick direction relative to facing; airjump can trigger from Up alone, and original aerial IASA gates jumping via allow_interrupt. Fixed the opt-in diagnostic route: point203 BackAir phase is exclusive, so generic UpB fallback cannot preempt it. Up+B now sent together on the same samples, avoiding unintended Up-only tap-jump. Added read-only accepted motion/animation/latched input logs. No original gameplay/physics/asset/target/outcome code changed.
+Astra1 exe3c88b81a67a7bca98029be3219ba791fe536c8bc602fee999e31d7d623fa3ac9 builds/links PASS. Actual target203 BackAir67/8damage at1085 causes original callback8->7. Original backward airjump28 and UpB348 then land on moving floor4; safe step completion1266/stock1. The route reaches floor1 but fixed column5 wallx-80 blocks walking; shelf moves away and stock is lost. This is a route failure, not evidence of broken original collision.
+Read-only original-collision-lines.json now audits ALL35lines (not only floors). Fixed column5 spansx-95..-80,y-25..90. Central upper structure has ceilingy80,x-30..30, inner wallx30,y10..80, outer wallx40,y20..90 and sloping walls towardx70/80,y-35/-25. Future floor-center navigation must account for these walls; e.g. direct floor9->target206 upward path crosses the sloped structure.
+Astra2 exe9a4b4b00b8f926075d6609ec01b536deb12c5d02c5458d440eb5a85dea6511c4 builds/links PASS. Added original jump/UpB waypoint to solid column topfloor5, then left-side step-off onto moving floor1; floor5complete1397 and leftshelfcomplete1459, stock1. Point201 approach passes to target left and UpB faces back toward platform. Third target BackAir hit1085 and safe return1266 repeat identically. Fourth target201 originalUpB2damage at1518 causes7->6. Upper shelf is missed: sample1575playerX-108.496239,Y72.903091 versus floor1left-101.313454,Y75 (~7units horizontal short). Character subsequently lands safely on original floor6 at1655 with stock1. However diagnostic prelaunch wait is incorrectly allowed after hit when jump_begin resets: it steers using upperfloor1center from floor6 instead of selecting a valid return route, eventually loses stock at2268. All-target clear remains FAIL; original0count/clear/Start/nextstage4 never reached.
+Both cases process0/muted/no scanned faults. verify-astra.py PASS establishes scoped evidence only, including same-target original callback chains and actual BackAir/airjump/UpB/safe landing. Initial report assertion expected forward airjump27; corrected report checker to actual backward airjump28 after inspecting trace. No game/source change or extra launch for that checker correction. 11original gameplay/decoder files still match previous frozen source. Installed default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd unchanged. Discs/saves/accepted Desktop build and matching full source retained. No new binary release.
+MODEL UPGRADE RECOMMENDED: currentAstra Low, nextAstra Medium. Two focused full-route revisions yielded verified third-target recovery and fourth hit but still fail full-stage routing. Stop further attempts per user budget rule. Next: plan a collision-aware complete route with valid alternate landing/fallback waypoints. Guard prelaunch waits with surviving target and correct support; do not chase upper-floor centers while on another floor. Fourth-target upper shelf miss is quantified, and lowerfloor6landing is verified; use that evidence rather than assuming all recovery failed. Inspect whether earlier return-facing UpB initiation can catch upper shelf, or route onward from the actual safe lower landing. Account for fixed column and sloped structure on later targets200/202/206/205/199/207. Preserve accepted first3target sequence. No scripted position/stock/jump/target/outcome assignments. Success still requires all10unique original hit callbacks10->0, original success/clear/normalStart, fourth Classic match600frames and GPU capture; retain full scope. Goal active, awaiting human Astra Medium confirmation or explicit current-model continuation. No pause requested.
+
+2026-10-25 ASTRA MEDIUM: FOURTH-TARGET RECOVERY VERIFIED; SIX TARGETS REMAIN
+Status: PARTIALLY VERIFIED. Overall engineering estimate remains approximately 29%; playable release NOT accepted. Human authorized Astra Medium and resumed the full target-clear/next-Classic-stage task. Two focused muted Vulkan runtime attempts completed. No third runtime attempt performed under the user's two-attempt rule.
+
+Changes: diagnostic controller code only. Prelaunch waits now require a surviving target and the actual intended support floor. Drop toward the left moving shelf stays west of the fixed column. The first revision tried earlier return-facing UpB; the second restored the proven original target201 attack timing and accepts the actual safe floor6 landing, then climbs around the left edge of solid floor7. Original collision, physics, stocks, targets, scenes and outcomes are not assigned or altered.
+
+Attempt all-vulkan-medium1: game compile/native link PASS, executable 815b777fff0856fd3b2274e041c7085effd54cecfca406125a9cddf3c663a994. Earlier UpB request1497 missed point201 because the rising attack passed to its right; subsequent controller kept chasing the target during special fall. Stock lost1682 with7remaining. Full-stage FAIL. This approach was not retained.
+
+Attempt all-vulkan-medium2: game compile/native link PASS, executable d9736d04d9261e9f8a69856bdefd6ef50e0c9e5f0dc960d294694d8bdadcc9fa. Original callbacks208,204,203,201 produce10->9->8->7->6. First3target route remains verified. Fourth target201 hit timing restored; actual safe floor6 landing/centering completes1718 withstock1, then actual floor7 landing completes1851 withstock1. Thus fourth-target recovery and subsequent lower-to-middle-platform climb are verified, not upper-shelf interception.
+
+Next failure is precisely identified: next Nav4 step starts1852 while original LandingFallSpecial motion43 still locks input. Diagnostic holdsX only1852..1859, all whilemotion43. By1865 original motion15 walking starts withbutton0. At1880 motion29/airborne/jumps1 shows walking off the ledge without a ground jump. Airjump andUpB then peak only~y11.4 below shelfy30; stock lost2041 atstep6 with6remaining. No evidence of broken original physics. The controller's jump_begin timer measures requested input, not original acceptance. Next change should keep character safely on its support through landing recovery, request a fresh jump edge once actionable, and require observed KneeBend/ground-jump acceptance before advancing the launch phase. Do not consume the8-frame hold timer during a locked landing. Preserve sufficient hold through original KneeBend. Add bounded retry/refusal diagnostics rather than walking off the support. No implementation or runtime verification of this next fix yet.
+
+verify-medium.py passed: both completed muted native runs exited0/no scanned faults; matching exact source/build receipts and tested-inputs.zip verified; original callback count chains/distinct identities checked; actual floor6/floor7 recovery rows and rejected launch sequence asserted;11original gameplay/decoder files unchanged; installed Desktop default hash38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd unchanged. Evidence medium-route-verification.json. Both full-stage summaries remain FAIL. Six remaining targets, original count0/success/clear/Start, fourth Classic match600frames and GPU capture are not verified. No D3D12 validation, physical-input proof, performance claim, delivered candidate binary or public release from these revisions.
+
+Recommended next model: Astra Medium for the remaining complete route. A stronger-model recommendation is not supported merely by this now-identified input timing error. Stop after the two focused failed full-route attempts; await explicit continuation for the next bounded jump-acceptance fix and then resume remaining targets/full transition acceptance. Do not repeat completed attempts unchanged, and do not mark the overall task complete. Preserve this report and exact receipts; the previously accepted Desktop build/source package and discs/saves remain unchanged.
+
+
+2026-10-25 ASTRA MEDIUM: JUMP ACCEPTANCE FIX VERIFIED; FIVE TARGETS REMAIN
+Status PARTIALLY VERIFIED. Overall engineering estimate29%; playable release NOT accepted. User explicitly authorized continuing Astra Medium. Two new focused muted Vulkan full-route attempts completed, both clean native exit0/no scanned faults, both full-stage FAIL. No D3D12/full-clear/next-stage/physical-input/performance acceptance.
+
+Controller-only fix: later-route waypoints now wait through original Landing/LandingFallSpecial before counting stable/launch ticks. Original KneeBend acceptance is logged; a ground launch not accepted within8requested samples releases and retries instead of walking off. X stays held through accepted original KneeBend. First-four-target prefix retained. Original gameplay, physics, collision, targets, stocks, scenes and outcomes remain untouched. Build/link both revisions PASS.
+
+all-vulkan-medium3 exe a07938066bda9b18fffc77534e5367702719efb1c59bc7c514c460839f18d967: ground jump accepted1864, request1862 fromfloor7. Nav4 eventually lands2170/stock1, Nav5 column lands2753/stock1, leftshelf1 lands3081/stock1. This verifies the prior jump-input failure is fixed, though route uses intermediate fallback landings. Drop tofloor2 actually lands, but the shelf carries player against fixed left column wallx-95; while waiting to stabilize afterlanding, moving support slides east out from under player. Drop handler keeps steering to-105 rather than recovering ontofloor6. Stock lost3305/step9/6remaining. Full-stage FAIL.
+
+all-vulkan-medium4 exe03e77c85711636c5ee3acdeede2928bbee68b900f65cdde8899d2beb1a4666ba: second revision starts later-route column departure earlier while shelfmoveswest and capsfloor2center/landing at-103 to avoid solidcolumn. Jumpaccepted1864, floor4landing2170, floor5landing2753 repeat. Early departure leaves playerx-101.36,y81.36 at2970 while shelfleft-97.47; by2980playerx-101.78,y65.27 vsleft-100.35, so misses shelf by a few units. EmergencyUpB facesleft, misses upper shelf again, but actual safe floor2landing occurs around3074 and is visible at3110. Handler remains in RouteLeftShelf step8 and walks left off the lower shelf instead of recognizing this valid alternate support. Subsequent originalUpB348 hits point200 at3138 for2damage, original callback6->5. This fifth hit is genuine but incidental during recovery, not a verified completed Attack200 route. Cannot return to departing shelf, stocklost3273/step8/5remaining. Full-stage FAIL.
+
+Evidence medium-jump-route-verification.json from verify-medium.py all-vulkan-medium3 all-vulkan-medium4: two muted clean native cases, matching tested source17inputs/build receipts, four original count-decrements reproduced, accepted original groundjump1864 and floor4landing checked twice, fifth point200 same-pointer actualUpB348/2damage3138 and original6->5 callback checked. Actual lowerfloor2landing checked.11original gameplay/decoder sources unchanged. Installed default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd unchanged. Exact tested-inputs.zip receipts preserved per case. No candidate binary delivered, no public release, no disc/save changes. Desktop notes synchronized only.
+
+Next action: keep verified jump-acceptance fix. Make left-shelf/drop routing handle actual alternate support instead of pursuing stale upper-floor goals: atfloor2 landing, transition to a valid lower-shelf attack/remaining-target route rather than blindly walking left. Alternatively adjust column departure/air braking to land inside the moving shelf, using measured edge miss above. Add safe floor6 fallback when lower shelf departs; do not let a fixed-aim Drop handler fall below all reachable supports. Audit original point200 alive state so a genuine incidental hit is not retried as a live target. Five targets199/202/205/206/207 remain; pill202 and right-side routes are still unexercised. Success continues to require all10distinct original callbacks10->0, originalsuccess/clear/Start and fourthClassicmatch600frames withGPUcapture; no reduced acceptance.
+
+Stopped after two focused runtime attempts per user rule. Astra Medium remains appropriate; this identified diagnostic-route problem does not justify inventing a stronger-model recommendation. Await explicit continuation before another runtime attempt. Do not repeat unchanged failed cases. No goal-completion or playable-release claim.
+
+
+2026-10-25 ASTRA MEDIUM: ALTERNATE SUPPORT AND TWO MORE HITS VERIFIED; FOUR REMAIN
+Status PARTIALLY VERIFIED. Overall engineering estimate29%, playable release NOT accepted. Human explicitly continued Astra Medium. Two new focused muted Vulkan attempts completed; both full-stage FAIL, clean native exit0/no scanned faults. No D3D12/full-clear/next-stage/physical-input/performance acceptance. Stop further runtime attempts per user's two-attempt rule.
+
+Controller changes only: recognize actual lowerfloor2 landing in LeftShelf step8 and hand off to diagnostic step10 (Pill202), skipping upper-shelf/drop waypoints only. No target/game state assigned. Pill202 precedes Attack200, followed by lowerfloor6 recovery viafloor7/floor4. Point200 hit can accept real floor6landing. An airborne phase handoff now uses original remaining jumps rather than requiring a ground launch. Second revision advances immediately after confirmed original projectile hit even in air and faces point200 UpB right toward the recovery platform. Original physics/collisions/targets/stocks/scenes/outcomes remain unchanged.
+
+all-vulkan-medium5 executable4375aaf0f743ae66fc0e2b1c0cc576c822174c39035bc283bfc9d8de0e17a15d: compile/link PASS. First4hits and jump/floor4/column5landings reproduce. Alternate floor2hand-off3104/stock1 verified. Original pillkind49 spawns at(-109.496658,-8.350101),vx-1.072462,vy-.939903. Actual projectile hitpoint202 at3202,8damage, originalcallback6->5. However Pill phase awaited on_floor before finishing; shelf had departed and driver remained neutral in air. Stock lost3302,step10/5remaining. Full-stage FAIL.
+
+all-vulkan-medium6 executable4b04513e1db86673f95cf9875353f49a8ad80dda74e132243ed1dc52c4425618: compile/link PASS. Alternatefloor2handoff3104 and originalpill202hit3202 repeat. Immediate diagnostic phasecomplete3202, airhandoff3203 withonejumpused, original airjumpmotion27 observed3210. Original return-facingUpB348 hits point200 at3230 for2damage, callback5->4. Distinct originaltarget sequence208,204,203,201,202,200 gives10->9->8->7->6->5->4. Six original targets hit in one run, but no safe recovery after sixth. Stock lost3359,step11/4remaining. Remaining199,205,206,207 and original clear/Start/nextClassic stage remain unverified.
+
+Exact new recovery failure: UpB pushes right against original column leftwall atx-97,y13.87 around3240. At3270 specialfallx-98.39,y-3.17 receivesstickX-80 because it still aims for departed shelf/temporary-101 goal. At3280x-100.998,y-25.755,vx-.194961; only after below-28 does route aimright towardfloor6. At3310x-90.57,y-94.76; by crossingfloor6height-105 it remains left of floor6left-85 and then hits platform's outer wall below its top. Candidate next correction: immediately steer right toward the reachable lowerfloor6 after point200hit, letting original fixed-column collision hold the player outside until below columnbottom-25. Do not first brake/steerleft toward the departed shelf or temporary-101 goal. This is evidence-based next action, not implemented/tested yet. Preserve accepted six-hit sequence and jump/alternate landing fixes. No higher-model recommendation warranted solely by this diagnostic input mistake; Astra Medium remains suitable.
+
+verify-medium.py all-vulkan-medium5 all-vulkan-medium6 passed scoped audit: exact17input snapshots/build receipts matched; both muted exit0/no scannedfaults; original countchains/distinct identities; two actual kind49 pillhits3202; medium6 same-pointer point200UpB2damage3230 and original5->4; originalairjump27/airhandoff verified.11original gameplay/decoder source files unchanged; installeddefault38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd preserved. Evidence medium-alternate-route-verification.json. Full-stage acceptance remains FAIL, noGPUcapture or original clear from targetstage. No candidate binary delivery or public release; private discs/saves/accepted Desktop build and matching full source retained. Only progress notes synchronized to Desktop.
+
+Await explicit continuation after these two focused attempts. Next bounded task: immediate post-hit rightward recovery tofloor6, then finish remaining four targets and original full-clear/next-stage acceptance. No repeated unchanged attempts; no reduced completion scope. Do not mark goal complete.
+
+
+2026-10-25 ASTRA MEDIUM: SIX-HIT RECOVERY AND UPPER CLIMB VERIFIED; ELEVATOR UNFINISHED
+PARTIALLY VERIFIED, overall estimate29%, playable release NOT accepted. Human explicitly continued Astra Medium. Two focused muted Vulkan full-route attempts completed; both process0/no scanned faults, both full-stage FAIL. No D3D12/current candidate delivery/public binary release/full-stage GPU capture or next-stage acceptance.
+
+Controller-only change: after original point200hit, aim immediately right toward fixed lowerfloor6. Let original column collision hold the player outside until below its bottom; remove the previous westward braking toward the departing shelf/-101 staging goal. Original gameplay/physics/collision/targets/stocks/outcomes remain unchanged.
+
+all-vulkan-medium7 executablebad174601b31ae4245a505808f4c24dcea362233c9b7815ba9d89f20363c798a: compile/link PASS. Same6original targets208,204,203,201,202,200 yield10->4. Actual floor6safe landing/centering3380 withstock1; floor7waypoint3513, movingfloor4waypoint3833, upperfixedfloor8waypoint4007 allstock1. Recovery fixed. Right-elevator navigation then crosses safely above its interiorx113, but generic fallback requests UpB just before touchdown because pos.y<floor_y+8. UpB overshoots right edge, stocklost4306 step15/4remaining. Full-stage FAIL.
+
+all-vulkan-medium8 executabled870da74559d6faccfeb374ea1a8ad07cd1bceff1636b582958d7564910779dc: compile/link PASS. Added diagnostic Nav0 guard suppressing UpB while pos.x withinfloor0edges+/-2 and pos.y>=floor_y. Six hits, floor6recovery3380, floor7/4/8climb3513/3833/4007 repeat identically. Guard delays but does not solve landing. At4175 rootpos(113.467384,-28.529825),floor0y-35, neutral input. At4179 rooty-35.329826 stillair/floor8 and guard releases, requestsUpB. At4180rooty-37.029827 stillair;4185 originalfloorindex0 now observed butmotion348 UpB alreadyactive. Then root drifts beyond rightedge130 and loses stock4309. Stable elevator landing not proved. Do not infer physics/collision bug: diagnostic input may preempt landing while rootposition crosses surface before collision/ground state settles. Need inspect actual ECB bottom and original collision ordering, allow a bounded landing-settle interval/margin inside elevator rather than treating rootpoint crossing as missed support, and only recover when genuinely below reachable landing. No further source change/runtime attempt after these2runs.
+
+verify-medium.py all-vulkan-medium7 all-vulkan-medium8 passed scoped audit: exact17input source snapshots/build receipts matched; two muted exit0/no scannedfault cases; six original unique callbacks10->4; actual floor6ground row3380 and stock1completion; upperfloor8completion4007 verified twice.11original gameplay/decoder sources unchanged, installeddefault38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd unchanged. Evidence medium-lower-recovery-verification.json. Fullstage summaries bothFAIL. Four targets199/205/206/207 and originalsuccess/clear/Start/fourthClassicmatch600frames/GPUcapture remain unverified. Discs/saves/accepted Desktop build with matching source preserved; only progress notes synchronized.
+
+Next task: bounded elevator landing investigation using read-only ECB/ground-state evidence; retain verified six-hit/recovery/climb prefix. Then finish remaining four targets and original next-stage transition. Astra Medium remains suitable; no stronger-model recommendation justified merely by this diagnostic-route error. Await explicit continuation under two-attempt rule. No goal/playable release completion claim.
+
+
+2026-10-25 ASTRA MEDIUM: RIGHT-ELEVATOR LANDING VERIFIED TWICE; FOUR TARGETS REMAIN
+Status PARTIALLY VERIFIED. Overall engineering estimate 29%; playable release NOT accepted.
+
+Changed only the diagnostic controller route and read-only trace in src/pc/target_route_diagnostic.h. Landing guard now uses the original collision ECB bottom (collision position plus bottom offset), rather than the animated root position. This prevents premature Up-B while the character is still able to land naturally. Original physics, collision, targets, stocks and scene transitions were not changed.
+
+Two focused muted Vulkan runs compiled and linked successfully and exited 0 without scanned runtime faults. Both retain six original hits (208,204,203,201,202,200), count 10 to 4, safe lower-floor recovery at frame3380 and upper-platform completion4007. In BOTH runs original floor0 grounded landing occurs4181 and stable elevator completion4200 with one stock. At4179 root_y=-35.329826 but ECB bottom_world=-31.892656 remains above elevator_y=-35; neutral input now allows the original landing instead of triggering Up-B.
+
+all-vulkan-medium9: elevator fix passes. Upper-target preparation waits at the elevator center, leaving too little time to reach the right launch edge. Route times out5101 with four remaining and one stock. Executable SHA256 8b71a8da3b0aad644ae1a4f215728e096f67e79fb82167548ebb3a7e7144c594.
+all-vulkan-medium10: prepositioning at the right edge fixes launch timing. However braking around the second jump sends the character left: original backward aerial jump28 has vx=-0.9 at4390. Up-B begins too far left to hit target199 at (154.314972,135.082825). Later recovery chases the still-live target and stock is lost; abort4601 with four remaining. Executable SHA256 ff344f0804a5d854f66e5bb0e81786fd14914899649d16495a1d3e93ccfd279c.
+
+verify-medium.py all-vulkan-medium9 all-vulkan-medium10 passed the scoped provenance and landing audit. Evidence: medium-elevator-verification.json and medium-elevator-audit-output.json; each case retains runtime.log, summary.json, build-receipt.json and tested-inputs.zip. Seventeen build inputs match receipts; eleven original gameplay/decoder sources and installed default executable remain unchanged. Full-stage acceptance FAIL for both runs. No current D3D12 test, full clear, normal next-stage transition, physical-input proof or new delivered candidate.
+
+Next: preserve the verified six-hit route and elevator landing. Inspect the second-jump input for target199 and force the intended rightward jump direction independently of braking, then steer toward the attack position. Ensure a missed attack returns toward reachable support instead of chasing the target during helpless fall. Finish targets199/205/206/207 and verify original success, clear screen, normal Start and next Classic gameplay. These changes are not yet implemented or tested. Stopping after two focused failed full-route attempts under the user's rule; Astra Medium remains appropriate for this input-route investigation.
+
+Default Desktop game and matching packaged source, discs and saves preserved. Progress notes only synchronized; no new binary published. To check this milestone, inspect the two case logs for ground=1/floor_index=0 at4181 and step15 completion4200. The installed game is unchanged.
+
+2026-10-25 ASTRA HIGH: EIGHT TARGETS AND SAFE INNER-PLATFORM RECOVERY VERIFIED
+Status PARTIALLY VERIFIED. Overall engineering estimate29%; playable release NOT accepted. Two new focused full-route attempts, both muted native Vulkan, both compile/link PASS and runtime exit0/no scanned faults. Full-stage acceptance FAIL; no next-stage verification or delivered candidate.
+
+Changes confined to diagnostic controller route in src/pc/target_route_diagnostic.h. On target199 aerial-jump button sample, explicitly point right instead of allowing braking to reverse the original jump's initial velocity. Original ftCo_JumpAerial_Enter_Basic reads stick.x for horizontal speed. Then route step17 goes beneath the outer central wall (x80 to70 underside at y-50) before spending aerial jump and Up-B to reach inner floor9. Original gameplay, collision, targets, stocks and scene state remain unchanged.
+
+all-vulkan-high1 executable c69978d049e34913cd5f7f2e3a3583d3e85dbbd6dc41dc6dfc20b43e25d99da2: first six hits and elevator landing4181/stable4200 preserved. Rightward airjump confirmed4390 motion27/vx0.9/jumps2. Original target199 Up-B hit reduces4->3; natural elevator recovery grounded4530, stable completion4541/stock1. Subsequent direct route to floor9 collides with the solid sloped outer wall; stocklost4779 with3remaining. Full-stage FAIL.
+
+all-vulkan-high2 executable d668578555a3970bc29ea318ad39f8abc98856c3d5305a6b572688158fd72a72: seventh hit/recovery repeats. Under-wall route walks left off elevator, passes below lip, airjumps near (67,-87), Up-B reaches floor9. Actual floor9 grounded4720, stable completion4736/stock1. Original target206 hit4832 motion348 damage2 reduces3->2. Natural floor9 recovery grounded4910, stable completion4923/stock1. All eight unique callback IDs:208,204,203,201,202,200,199,206. Remaining205 and207.
+
+Second run fails in lower-slot step19, stocklost5121/2remaining. Existing RouteSlot chooses x20 whenever y>-99 and center35 only below -99. Airjump starts near(18,-100), but as the character rises above -99 the goal switches back to x20. At5030 x29.044/y-78.680 and5040 x29.734/y-78.005, leftward braking then pulls the character away from floor10 [30,40] y-80. The route never commits to entering the slot after the jump. Next correction should latch a local controller phase once the return jump begins and retain center35 through ascent/landing, with original collision/ECB checks. Do not change floor geometry or fighter state. This correction is identified but not implemented/tested. Final target207 and original clear/Start/next Classic600frames/GPUcapture remain unverified.
+
+verify-medium.py all-vulkan-high1 all-vulkan-high2 passed scoped audit: current17inputs/build receipt/executable match, per-case tested-inputs.zip matches receipt,11 original gameplay/decoder files unchanged, original unique callback count chain valid, target199 forward airjump/hit/recovery verified twice, target206 hit/recovery and floor9 navigation verified in high2. Evidence high-upper-target-verification.json and high-upper-target-audit-output.json. Each case has runtime.log,summary.json,process-result.json,build-receipt.json,tested-inputs.zip. No D3D12/physical-input/full-campaign or playable-release acceptance.
+
+Installed Desktop default SHA38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd and matching packaged source preserved. Discs/saves untouched. Only progress notes synchronized; no new binary published. To inspect evidence, high2 runtime.log has count3->2 callback point206 and floor9 recovery completion4923.
+
+Two focused full-route attempts completed; stop under user's rule. Sol High is sufficient for the next bounded controller phase-latch correction and muted check; wider remaining route still unverified. No need to remain on Astra High for that identified source-level bug. Await human continuation/model selection. Goal not completed or paused.
+
+2026-10-25 SOL HIGH: LOWER SLOT LANDING AND NINTH TARGET VERIFIED; ONE TARGET REMAINS
+Status PARTIALLY VERIFIED. Overall engineering estimate29%; playable release NOT accepted. Two native Vulkan launches, both muted, compile/link PASS and process exit0/no scanned faults. Neither satisfies full-stage acceptance. No delivered binary or next-stage proof.
+
+Controller-only source changes in src/pc/target_route_diagnostic.h. RouteSlot now latches its return phase once below y-99, keeping the center35 steering goal during ascent rather than switching back to20. The original aerial-jump input explicitly points right. Original fighter/collision/target/stock/scene state unchanged.
+
+all-vulkan-slot1 executable7d52d432a7fa564f9e3ef7dac53fbf5bead5e24a7e1c9223f6351dc93a52e2b7: verified prior eight hits and safe floor9 recovery4923. Slot now reaches actual floor10 grounded5080, stable completion5095 withstock1. Original target205 hit5127, motion348, damage5 reduces2->1. Nine unique target callbacks208,204,203,201,202,200,199,206,205. The subsequent left-facing Up-B leaves the slot, x21.94/y-60.24 at5140 and x12.49/y-84.20 at5180; stocklost5233 step20/1remaining. Slot landing and ninth hit verified; post-hit recovery failed.
+
+all-vulkan-slot2 executable5b03d449de322fd718d5f680e0b4c68fd65073e23d0d2307c3c290017bf36c14: changed target205 special direction inward/right and added acceptance for an actual safe floor9 landing after that hit. Build passed, but this run never reached the target stage. In the preceding Classic battle, scripted fighter fell to one stock, and the run never initialized a clear screen or VS entry2. Configured 240second close ended cleanly, process0/timed_out=false/no scanned faults. No target callbacks or target-route steps. This is failed test setup/progression, NOT evidence that the new target205 recovery works or fails. Exact reason for preceding-battle divergence has not been established; do not assume the target-only edit caused it. Current inward recovery is compiled but runtime-unverified.
+
+verify-medium.py all-vulkan-slot1 all-vulkan-slot2 passes scoped evidence audit, explicitly distinguishing slot1 route evidence from slot2 missing route coverage. Evidence slot-route-verification.json, slot-route-audit-output.json. Seventeen input hashes/build receipt/current executable checked, each exact tested-inputs.zip archived,11 original gameplay/decoder sources unchanged, installed Desktop executable hash38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd unchanged. Per-case logs, summaries and receipts retained. Full-stage summaries remain FAIL; no D3D12/physical-input/full-campaign/release acceptance.
+
+Next: preserve verified nine-hit prefix and slot phase latch. Check why the latest normal Classic setup did not reach the course; then verify current inward target205 recovery without altering original gameplay state. Finish target207 and original success/clear/normal Start/next Classic600frames/GPU capture. No third runtime launch after these two attempts. Sol High remains appropriate for the bounded controller recovery and setup trace investigation; no unsupported claim that a stronger model is required.
+
+Discs, saves, installed game and matching packaged source preserved. Progress notes only synchronized. To check evidence, slot1 runtime.log contains point205 before2/after1 and actual floor10 landing/completion5095. The installed game has not been replaced by either diagnostic candidate.
+
+2026-10-25 SOL HIGH: NINTH-TARGET RECOVERY AND LOWER-SLOT EXIT VERIFIED
+Status PARTIALLY VERIFIED. Overall engineering estimate29%; playable release NOT accepted. Two new muted native Vulkan full-route runs compiled/linked PASS and exited0/no scanned faults. Both full-stage acceptance FAIL, one original target207 remains; no normal next-stage transition or new delivery.
+
+Setup investigation: successful prior slot1 starts on a high moving stage at(-72,115), stalled slot2 starts at(-90,12). Existing match seed2644 applies in gmvs after campaign selection. Added strictly parsed, opt-in MELEE_DIAGNOSTIC_STARTUP_SEED in gmmain.c using existing pc/replay_seed.h, with read-only startup trace; absent option retains original OSGetTick seed. Test runner enables seed2644 plus scene RNG traces. Build/run receipts expanded to19source inputs including gmmain.c and replay_seed.h. This does NOT yet make campaign selection reproducible: seeded1 opening positions(-72,115), seeded2(0,0); first scene RNG difference is title scene_enter_end kind0, after equal scene_enter_begin seed568381383. End seeds3839205164 vs2361163367. startup-rng-comparison.json records exact evidence; reason for differing title random consumption remains unresolved. Both current runs nevertheless reach the course. Do not claim campaign determinism fixed.
+
+all-vulkan-seeded1 executablec8f0b8924132ce4a824093f6358d8984c3356571ffe64f8e51e90ee9ae368c1c: preserves nine original hits10->1 and floor10slot landing5095. Previously compiled inward/right-facing target205 Up-B recovery is now runtime verified: original safe floor10 landing and completion5193 withstock1. Next Nav9 tries rising under solid platform9 underside, repeatedly collides and returns toslot. Route timesout6094 step21/remaining1/stocks1. No death at route bound. Full-stage FAIL.
+
+all-vulkan-seeded2 executable32ebc52435d5842ab7c54cd54c9068f8a3431a862996a25b0ff2c3baa7212b13: added diagnostic-only step21 exit via left opening before airjump/Up-B inward. Nine-hit sequence, target205 safe recovery5193 repeat. Natural floor9ground5350 and stable completion5364 withstock1 verify slot exit. Next step22 direct return toward elevator again intersects central sloped wall. At5380x46/y-21,5390x38/y-12 despite rightward velocity; subsequent attempts collide and landfloor9. Route timesout6265 step22/remaining1/stocks1. Final target207 never hit. Full-stage FAIL.
+
+Source changes: gmmain.c diagnostic startup seed/trace, target_route_diagnostic.h diagnostic PAD route for step21. No original physics/collision/targets/stocks/scene outcomes assigned. Eleven previously audited gameplay/decoder sources remain byte-identical. verify-medium.py all-vulkan-seeded1 all-vulkan-seeded2 passes scoped audit:19currentinput hashes/executable/build receipt, per-case exact tested-inputs.zip,9distinct original callbacks10->1, safe target205completion5193 twice, floor9landing/step21completion5364 inseeded2 and timeout withstock1. Evidence seeded-route-verification.json, seeded-route-audit-output.json, startup-rng-comparison.json. Both case dirs retain logs/summaries/receipts/source snapshots. No D3D12/current default launch/physical-input/full-campaign/release acceptance from these cases.
+
+Next: preserve verified nine-hit prefix and safe slot exit. Plan collision-aware path from inner floor9 around the outer wall's lip toward elevator/final target207; direct rightward jump crosses solid slope. Inspect original coordinates and actual ECB clearance. Consider final-target approach directly only if original geometry and recovery resources support it; do not alter target counts, positions, lives or transition state. Verify tenth original hit, original success/clear/normal Start and next Classic600frames/GPUcapture. Campaign reproducibility remains separate unresolved diagnostic issue; startup seed alone is insufficient.
+
+Stopped after two focused full-route attempts per user's rule. Sol High remains suitable for the identified collision-aware controller route; no unsupported stronger-model recommendation. Goal not complete or paused. Discs/saves/default Desktop executable38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd and matching source package preserved. Notes only synchronized; no new binary published. To inspect milestone, seeded2 runtime.log shows point205count2->1, step20completion5193 and actual floor9landing5350/step21completion5364.
+
+2026-10-25 SOL HIGH: ALL TEN DR. MARIO TARGETS AND NEXT CLASSIC STAGE VERIFIED
+Status PARTIALLY VERIFIED overall; scoped target-clear/gameplay transition VERIFIED on muted Vulkan and D3D12. Overall engineering estimate29%; full playable release NOT accepted. Vulkan full route acceptance PASS with source-backed oracle correction. D3D12 route/clear/Start/next600frames pass; next-match image acceptance remains pending due single-capture test configuration.
+
+Final route now goes directly from verified inner floor9 to target207 instead of returning through outer slope to elevator. Diagnostic PAD walks right off floor9, passes beneath wall lip atx80/y-50, preserves airjump untilx>84/y<-65, brakes nearx108 and uses original Up-B after descending12belowtarget. No target/player/stage/scene state writes. Previous nine hits and slot exit5364 preserved. Original tenth target207 damage5 reduces1->0, original stage end5472 remaining0/outcome6/stocks1. All ten distinct callback IDs208,204,203,201,202,200,199,206,205,207.
+
+Both runs use identical executable7795ecc7efeb6600139ff4a51da4f77d8bb398c18b65fd05574dc8d1e2d0f381 and librarybea09cfbcb3f2f7336e52b69b3b930ab947fff321ad767d00b22dd2b55a2e61a. Build/link PASS, muted gain0, process exit0/no scanned faults. Original eleven gameplay/decoder sources unchanged;19input hashes, per-case exact build receipts/tested-inputs.zip and installed default checked.
+
+all-vulkan-final1: all10original callbacks10->0, original bonus clear outcome6, normal Start after third clear, entry4/next Classic stage19 with2stocks,600gameplayframes, exact GPU capture target.png. Capture visually inspected: gameplay/stage/HUD render. Raw summary.json FAIL was caused solely by incorrect test expectations: required battle outcome3 for target bonus and exactly1stock after progression. Source gm/forward.h defines6 as bonus-stage end, Ground_801C4338 decrements realtarget count. acceptance-correction.json preserves raw-summary hash, source oracle hashes and strict corrected checks. Corrected acceptance PASS. Raw summary/log remain immutable.
+
+all-d3d12-final2: same10hits/original bonus outcome6/normal third-clear Start/entry4stage36with2stocks/600frames. First Classic clear screen captured clear.png and visually inspected: readable title, bonus list, score, Press Start. However diagnostic capture is consumed once per process; enabling clear capture used it on first clear. Later next-match capture arm produced no target.ppm. Only failed checks target_capture/next_stage_gpu_capture. No next-match GPU image proof on D3D12 from this case; do not call entire acceptance PASS. It does verify target clear and normal gameplay transition. The image is first battle clear, not target bonus clear; third target clear is proved by original scene initialization/input/transition trace, not its screenshot.
+
+verify-medium.py all-vulkan-final1 all-d3d12-final2 passes scoped audit, status VULKAN_FULL_STAGE_VERIFIED_D3D12_CAPTURE_PENDING. Evidence final-target-verification.json, final-target-audit-output.json. Final-case sources/build scripts/runner snapshots retained. run-hit.py source oracle now expects third clear outcomes[3,3,6], zero targets/alive stock at original end, positive next-stage stock and an actual Start between third clear and entry4. Clear image capture is now --capture-clear opt-in; default leaves one capture for next match. Runner syntax PASS. The new opt-in/default arrangement has not yet been rerun; next bounded check should run D3D12 default capture with existing passed game build.
+
+Next task/model: Sol Medium is sufficient for a bounded muted D3D12 confirmation using current run-hit.py without --capture-clear, verify next-match image/600frames and inspect image. Then next bounded Classic-stage input check. No stronger-model work needed for this known capture setup issue. If new archive/decoder or difficult collision/runtime issue appears, re-evaluate model. Await user model selection under preference to stop when a lower model suffices. Campaign startup determinism remains unresolved separately (startup-rng-comparison.json); startup seed alone did not fix title random consumption. Do not claim full campaign, physical input, all-content or playable release complete.
+
+Discs/saves and installed Desktop default executable38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd with matching packaged source preserved. Only progress notes synchronized; no new binary/public release. To check milestone, inspect all-vulkan-final1/target.png for next match, all-d3d12-final2/clear.png for first clear appearance, logs for tenthcallback, originalend5472 and NATIVE_MATCH_CLOSE_ENTRY entries4 frame600.
+
+2026-10-25 SOL MEDIUM: D3D12 NEXT-STAGE CHECK BLOCKED BY PIPELINE ALLOCATION FAILURE
+Status BLOCKED for requested screenshot/input verification. Overall engineering estimate29%; playable release NOT accepted. Prior ten-target clear/next-stage600frames evidence remains valid in final-target-verification.json. No new D3D12 next-match image or input acceptance from this turn.
+
+Attempt1 all-d3d12-capture-confirm uses prior passed executable7795ecc7efeb6600139ff4a51da4f77d8bb398c18b65fd05574dc8d1e2d0f381, default screenshot reservation. Scripted fighter loses stocks in preceding team battle, never reaches target course/entry4. Configured240second close exits0/no timeout. This is setup/progression failure, not a screenshot or next-stage-input result. Exact prior source/build receipt/tested-inputs.zip retained.
+
+Investigated source: gm_Mode_Classic_OnLoad shuffles matchups with HSD_Randi after variable title RNG consumption. Existing startup seed and per-match seed do not constrain that shuffle. Added opt-in MELEE_DIAGNOSTIC_CLASSIC_SEED using strict replay_seed parser at the shuffle, seed3622720458 from a successful mode-load trace. Normal launches without option retain original shuffle. This run verifies seed trace and successful course progression; cross-run reproducibility of this new hook remains unverified. Do not claim campaign determinism complete.
+
+Added opt-in MELEE_DIAGNOSTIC_TARGET_NEXT_INPUT inside the existing entry4 neutral PAD diagnostic branch: right180-209, left240-269, jump360-367, A540-543, B720-723, read-only fighter input/motion/stock trace175-810. Runner --next-input extends next-stage close to900frames. No original fighter/physics/collision/target/stock/outcome/scene data assigned. Source/build manifest now20inputs including gmclassic.c. Compile/link PASS: executablee62205c1f03f72307053981cde11327cfb81bb463da0d582657ed23d496c54cd, library9ea7d47578fc5b609d8112b18e536bed6b7d392b1b18bb5346fbb8079fcab2dd.
+
+Attempt2 all-d3d12-next-input1 muted on NVIDIA GeForce RTX5070 Laptop GPU, D3D12 driver32.0.16.1088. New seed trace present. All10original targets cleared; original end5472/outcome6/stock1; normal third clear/Start reaches VS entry4. During initial next-stage rendering, Dawn D3D12 reports: create graphics pipeline state failed with E_OUTOFMEMORY(0x8007000E), GX Pipeline29ba41a6 shader809d372b. Backend device removed reason S_OK. Process exits90 (terminal, timed_outfalse), no clean shutdown, no next-input rows and no next-match image. The input routine did not run; no inference about its correctness. Root cause not established: cannot distinguish GPU allocation, CPU virtual address/commit, driver or retained resource pressure from this log. Read-only CIM memory-counter query unavailable; no memory-use measurement claimed.
+
+Both runtime attempts terminal. No third launch or speculative GPU change. MODEL UPGRADE RECOMMENDED: currentSol Medium, nextSol High. Reason GPU pipeline allocation/resource-lifetime debugging is beyond this bounded screenshot/input task. Next: investigate pipeline29ba41a6/shader809d372b, memory and resource retirement across Classic transitions, collect actual memory/driver diagnostics, then fix and verify muted. Preserve prior verified target route. Do not repeatedly rerun unchanged failing case or claim new input behavior works.
+
+Evidence: next-stage-input-verification.json, next-stage-input-audit-output.json, next-input-source-audit.json and both case logs/summaries/build receipts/tested-inputs.zip. Audit validates20currentinput hashes/executable, exact archive hashes,10other protected gameplay/decoder files unchanged. Removing exactly gmclassic opt-in seed block/include restores prior protected source moduloCRLF; removing exactly gmvs opt-in input block restores pre-turn gmvs source moduloCRLF. Runtime acceptance PARTIALLY_VERIFIED/false as expected; verifier exits1 to signal unmet requested check. Do not describe it as a gameplay PASS.
+
+Fault scanner previously missed E_OUTOFMEMORY because it searched spaced 'out of memory'. Added E_OUTOFMEMORY/0x8007000e/WebGPU error detection to runner. Raw historical summaries remain immutable: attempt2 raw no_scanned_fault=true is a scanner false negative; dedicated audit explicitly records allocation failure and exit90. Updated scanner not runtime-retested; syntax checked only.
+
+Installed Desktop executable38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd and matching source package preserved. Discs/saves untouched. Only progress notes synchronized; no delivered or published candidate. To inspect failure, open all-d3d12-next-input1/runtime.log last22lines; full readable audit in next-stage-input-verification.json. Await Sol High selection or explicit instruction to continue current model; goal not complete or paused.
+
+2026-10-25 SOL HIGH: D3D12 IMAGE AND900FRAMES VERIFIED; X86 ADDRESS HEADROOM INCREASED
+Status PARTIALLY VERIFIED overall. Scoped D3D12 screenshot, full target route, next900frames, movement/jump/special responses VERIFIED. Ordinary attack response remains unverified. Engineering estimate29%; playable release NOT accepted.
+
+Investigated prior GX Pipeline29ba41a6/shader809d372b E_OUTOFMEMORY. Existing x86 executable PE flags0x102 lacked LARGE_ADDRESS_AWARE, limiting its user address space to2GiB. Aurora caches compiled pipelines across scenes; inspected cache code but made NO renderer/resource-ownership/cache-eviction change without lifetime evidence. Added read-only external process_memory_probe.py using GetProcessMemoryInfo, VirtualQueryEx and GlobalMemoryStatusEx to sample only allocation metadata, not game memory contents. Samples every2seconds. System drive had~161GBfree; one pre-run NVIDIA query reported8151MiBtotal/4889used/3003free, not process-specific VRAM evidence.
+
+Measured baseline all-d3d12-memory-baseline: executablee62205c1f03f72307053981cde11327cfb81bb463da0d582657ed23d496c54cd,105memory samples, LAAfalse. Full10original target callbacks/bonus clear/normal Start/next900frames/exact GPU image PASS, muted, exit0. Minimum free process address space376274944bytes(~359MiB), largest free block141340672bytes(~135MiB). Peak private853340160bytes. Minimum system free RAM7252951040bytes and free commit55632900096bytes. Original E_OUTOFMEMORY did NOT recur, so exact failure cause remains unproven. Do not describe a deterministic failing baseline or proved VRAM exhaustion.
+
+Change: work/link-game-audit.py now defaults to /LARGEADDRESSAWARE for native x86 links and records setting in link-plan JSON. --legacy-2gb-address-space permits controlled comparisons. The x86 ABI/game library/renderer remain unchanged. Updated work/NATIVE_REBUILD.txt. Build helper validates PE machine0x14c and LAAflag, records linker/build-script hashes; snapshot helper archives those exact build tools. Link/build PASS. Existing installed Desktop executable/source package not replaced.
+
+Measured candidate all-d3d12-memory-laa: executable159ba768ca49a055f6a33703a8641e4c12141bd5aa9585b02022b40070095efd;105samples,LAAtrue. Minimum free address space2274328576bytes(~2169MiB), largest free block1868693504bytes(~1782MiB). Peak private840531968bytes. Actual4GiBaddress scan complete in every sample. Same game library9ea7d47578fc5b609d8112b18e536bed6b7d392b1b18bb5346fbb8079fcab2dd. Exact .text machine-code section equal before/after SHA f039e260586c07cee1c57d088d237e97fd05ee26b3916cbba750d018a67313a5. Link configuration removes confirmed2GiBceiling and materially increases measured headroom; does NOT prove all high-address paths, bounded caches or cure every allocation failure.
+
+Candidate muted D3D12 full route acceptance PASS:10unique original callbacks10->0, original outcome6/stock1, third-clear Start, entry4next900frames and exact GPU capture target.png. Image visually inspected: Big Blue gameplay, characters/stage/HUD visible. Native exit0, shutdown complete, no allocation/scanned faults. Same public-safe source/build snapshots and20production inputs audited, original10 protected gameplay/decoder files unchanged, prior opt-in gmclassic/gmvs insertions scoped by source reconstruction audit. Baseline and candidate both pass route acceptance, no performance improvement measurement claimed.
+
+Input evidence via next-stage-memory-input-verification.json: right/left received, original walk, jump received/original jump, original special, positive stock and900frames/image allPASS. ordinary_attack=false. At540requestedA256,545held256 but original motion80 remains through565 (damage reaction); frame570landing42. This is valid received input during damage, not proof attack can begin then. Next bounded test should wait for original interruptible/ready state, release/repress A via PAD and verify original attack animation. Do not change hitstun/gameplay timing or claim ordinary attack verified from this sample.
+
+Durable evidence: address-space-verification.json (headroom/route PASS), address-space-code-comparison.json (identical machine code), next-stage-memory-input-verification.json (PARTIALLY_VERIFIED; only ordinary attack unresolved), next-stage-memory-input-audit-output.json. Each case includes runtime.log, summary.json, build-receipt.json, tested-inputs.zip and process-memory.jsonl. Baseline exact executable and pre-change linker preserved in its case. New candidate archive includes current linker and build helper hashes. Current default Desktop hash38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd preserved. Discs/saves unchanged. Notes only synchronized; no binary/source-package/public-release delivery.
+
+Next model: Sol Medium sufficient for the bounded ordinary-attack readiness test and next Classic input milestone. If allocation failure recurs, return to Sol High with actual telemetry; original root cause and full-campaign memory/caching acceptance remain open. Await lower-model selection under user's preference to stop when a lower model suffices. Goal not complete or paused. To check now, open all-d3d12-memory-laa/target.png and address-space-verification.json; installed game unchanged.
+
+2026-10-25 SOL MEDIUM: ORDINARY ATTACK READINESS AND POST-TARGET INPUT VERIFIED
+Status VERIFIED for the scoped muted native D3D12 check. Overall engineering estimate29%; full playable release NOT accepted.
+
+Changed only the opt-in fourth-Classic-match input diagnostic in gmvs.c. Ordinary A now waits for original grounded idle motion14, with A released, instead of pressing during damage. No original damage, attack, input-latching, physics, stocks, target or scene rules changed. Frame-by-frame read-only trace covers attack request/acceptance. Existing LAA link setting retained. Source reconstruction audit removes exactly the opt-in block to recover the pre-input-test gmvs reference; other protected gameplay/decoder sources unchanged.
+
+Attempt1 all-d3d12-ready-attack1: build/link PASS, executable924a5a65c948e68bba048a92133df9006ef35a9560ff057eb08775afb5858a8c. Muted full10target clear/normal Start/entry4/900frames/exactGPUimage and cleanexit0 PASS. Dedicated attack check PARTIAL: readiness window540-699 closed before any grounded idle state. Trace shows damage80 at540-565, landing42 at570-575, stockloss/rebirth afterward; special343 at750-760 and original Wait14 from765. No attack request occurred. This justified extending the diagnostic readiness window rather than changing gameplay hitstun.
+
+Attempt2 all-d3d12-ready-attack2: build/link PASS, executable4e7952105f18c7411cd4fad1e83904792bc514e8039b542848015fa9d1f0c2fa; library983f139a041e4ac5b81db5cdbbfc1b980ba4e9796f568a38e8faf29682ac86f1. Attack readiness continues after760 until850, leaving the scheduled special-move sample separate. Trace through890 preserves acceptance evidence. At765 original Wait14/ground1/held0/stocks2 requestsA256. At767 fighterheld256/pressed256 and original motion44(Attack11), continuing768-770. This verifies actual fresh input and original jab animation. No opponent damage or stage win is inferred from the jab animation alone.
+
+verify-next-input.py all-d3d12-ready-attack1 all-d3d12-ready-attack2 returnsPASS for current case. All checks true: original10target route/bonus outcome6/third-clear Start, positive stock, received right/left, original walk, received/original jump, ready-grounded freshA and original attack, original special, exactnext-matchGPUimage and900frames. Muted nativeD3D12, process0, no scanned/pipeline allocation faults, complete shutdown. target.png visually inspected: BigBlue stage/characters/HUD rendered. This is diagnostic PAD input proof; physical keyboard/Xbox controls and full campaign remain outside scope.
+
+Evidence ready-attack-verification.json, ready-attack-audit-output.json and ready-attack1-audit-output.json. Per-case runtime.log/summary.json/build-receipt.json/tested-inputs.zip/source-audit.json retained. Twenty production inputs, current executable and exact linker/build helper hashes checked; default Desktop hash38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd preserved. Current runner/candidate retain expanded address support. Earlier E_OUTOFMEMORY did not recur, but exact rootcause remains unproven as recorded in address-space-verification.json. No performance/VRAM/campaign-wide memory claim.
+
+Next bounded milestone: Sol Medium remains sufficient. Run muted Vulkan regression of current LAA/readiness candidate, then prepare next Classic progression check. No model switch or user confirmation needed to continue authorized goal. If a new decoder/architecture problem or two genuinely different failed fixes arise, stop and re-evaluate model. Keep full goal active; no pause/block/completion claim.
+
+Installed Desktop game and its matching source package remain unchanged. Discs/saves preserved. Only progress notes synchronized; no new binary/public release delivered. How to check: open all-d3d12-ready-attack2/runtime.log around NATIVE_TARGET_NEXT_ATTACK_REQUEST frame765 and motion44 at767, or inspect ready-attack-verification.json and target.png.
+
+2026-10-25 SOL MEDIUM: CURRENT-BUILD VULKAN REGRESSION VERIFIED
+Status VERIFIED for scoped Vulkan regression and cross-renderer input milestone. Overall engineering estimate29%; full playable release NOT accepted.
+
+No game/library/renderer/linker source change this turn. Reused passed LAA executable4e7952105f18c7411cd4fad1e83904792bc514e8039b542848015fa9d1f0c2fa and library983f139a041e4ac5b81db5cdbbfc1b980ba4e9796f568a38e8faf29682ac86f1. Existing build receipt and20currentproduction hashes validated before launch and in post-run audit. Updated verifier only to accept the Vulkan case and accurately describe recorded backends.
+
+all-vulkan-ready-attack: native Vulkan muted gain0; full10distinct original target callbacks10->0, original bonus outcome6/stock1, third-clear normal Start, entry4 next Classic match, exact GPU capture and900frames PASS. Actual received right/left input and original walk, received/original jump, freshA/originaljab44 after grounded idle request, and original special allPASS. Attack765readyWait14 and freshA received/originalmotion44 observed767; stock stays positive through checked input samples. Clean shutdown/process0, no scanned fault or pipeline allocation failure. target.png visually inspected: BigBlue gameplay, stage, characters and HUD render. Original physical keyboard/Xbox input, combat win, full campaign and performance remain outside this diagnostic check.
+
+Cross-renderer evidence: cross-renderer-ready-attack-verification.json and cross-renderer-ready-attack-audit-output.json statusPASS. Prior D3D12 ready-attack-verification.json allchecksPASS referenced byhash; exact D3D12 case log/summary/receipt/snapshot hashes rechecked and executable matches current. Vulkan currentchecks allPASS. Both use the same LAA build; no rendering/physics/performance parity or benchmark claim is made. Each case keeps runtime.log,summary.json,build-receipt.json,tested-inputs.zip. Source reconstruction audit/protected unchanged original files and Desktop default hash validated. Earlier E_OUTOFMEMORY did not recur but exact rootcause remains unproven; address-space-verification.json remains the measured mitigation evidence, not a full resource-lifetime/campaign proof.
+
+Next bounded milestone: Sol Medium remains suitable. Prepare original next-Classic combat/progression check from entry4 to entry5, reusing the existing opt-in PAD combat controller and original clear/Start path. Do not assign damage, lives, result or scene routing to obtain a pass. Bound the runtime, capture actual next-stage evidence, and stop after two genuinely different focused failures. If new archive-format or GPU-resource debugging is substantial, recommend Sol High. No model switch/user confirmation required now; keep authorized goal active.
+
+Installed Desktop default executable38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd and matching source package preserved. Discs/saves unchanged. Progress notes only synchronized; no new binary/public release delivered. To check milestone, open all-vulkan-ready-attack/target.png and cross-renderer-ready-attack-verification.json. Full goal not complete or paused.
+
+2026-10-25 SOL MEDIUM: FOURTH VICTORY/FIFTH IMAGE AND VICTORY VERIFIED; SIXTH BONUS ARCHIVE BLOCKED
+Status PARTIALLY VERIFIED. Overall engineering estimate29%; playable release NOT accepted. Scoped original fourth-battle win/clear/Start to fifth gameplay VERIFIED. Fifth GPU image and subsequent original victory also verified in attempt2. Sixth-stage loading fails closed on unsupported typed archive; do not claim full campaign or clean full-test PASS.
+
+Opt-in progression diagnostic added in gmvs.c: MELEE_DIAGNOSTIC_TARGET_NEXT_COMBAT retains the existing original PAD combat generator in entry4, holds entry5 neutral for capture, and reports original entry4 result. No damage/life/result/scene assignments. Original defeat or3600combatframes closes the diagnostic; overall runner bound300seconds. Without flag the previously verified input/capture path is restored. Source reconstruction audit progression-source-audit.json proves removing only new diagnostic guard/trace and restoring original capture-entry predicate yields prior verified gmvs source. Combat generator unchanged. Build/linkPASS with LAAtrue, executable634ea12390602c53e31d7c5e9108b5e9a5bdab4d8c3918cd0e21659a7b698e76, library1a2dbac1230fad30afde908ff78bf042de4d385e3fa041ec3f0b3730aa77e55e.
+
+all-d3d12-progression1: muted nativeD3D12,10targets originalclear intact. Original fourth victory788/outcome3/stocks3, fourth clear/normalStart, fifth entry and600frames, cleanexit0. Only image acceptance fails: target_capture/target_capture_gpu_presentation/next_stage_gpu_capture false. Source capture delay120 renderedframes and fifth short observation appear insufficient after loading/render debt; not conclusively measured per-scene pacing. Did not weaken exactGPUticket requirement.
+
+all-d3d12-progression2: same exact game executable/source, test-only capture delay20 and fifth observation bound1800. Fourth original victory788/outcome3/stocks3 repeats. Fourth clear/Start enters fifth. Exact GPU capture queued/OK vi_active0/vi_black0/vi_frame0; target.png visually inspected: Yoshi-story scene, multiple standard fighters and HUD render. Fifth combat trace reaches1590 with playerstocks2; original fifth victory occurs1609/outcome3, clear total259100 and normalStartwithstocks2 advances to entry6 before the planned1800close. This is observed original team victory, not a claim that player0 personally dealt the winning hit. Actual fifth gameplay exceeds600frames.
+
+Entry6 blocks on native typed archive conversion, exit1/no clean shutdown. Metadata bytes444859/body441440/reloc567/public36/extern0. Root0 ALDYakuAll114556; coll_data114136; grGroundParam114280; itemdata114500; GrdFigureget images/tlut roots. Native conversion refused unsupported typed body schema, then lbarchive.c:25 HSD assertion/panic. Source gr/grfigureget.c StageData names /GrNFg.dat and Gr_Kind_FigureGet (0x26), identifying trophy bonus stage. No decoder bypass or heuristic rewrite attempted. Existing disc/image preserved.
+
+MODEL UPGRADE RECOMMENDED: currentSol Medium, recommendedSol High. Reason new original stage archive requires typed bounded format investigation/reverse engineering. Two focused runtime attempts completed; stop before decoder work. Next: inspect /GrNFg.dat using original grfigureget/types/ground consumers, implement validated typed profile in existing decoder architecture with malformed-refusal and source-byte checks, compile/link, then verify sixth bonus startup muted while preserving fourth/fifth progression. Do not assign outcomes/counts/lives or skip the bonus to make campaign pass.
+
+Evidence classic-progression-verification.json/progression-audit-output.json, progression1-audit-output.json, progression-source-audit.json; eachcase retains runtime.log/summary.json/build-receipt.json/tested-inputs.zip/source-audit.json. Provenance/20sourceinput/currentexecutable/linkerbuildtool/unchangedotherprotectedsource/Desktophash audits pass. Overall runtime acceptance PARTIALLY_VERIFIED, verifier exit1 appropriate. Raw summaries immutable. Auditor independently recognizes the fourth clear by sequence index rather than last outcome3 and preserves the extra fifth clear as progression. Future runner corrected fourth-clear prefix/index checks (syntax checked) so a legitimate later fifth clear will not invalidate fourth transition; the sixth archive failure still fails acceptance. Fifth1800close not met because original victory1609 advanced naturally; minimum600 is proved by actual fifthcombattrace1590. No claim of full1800observation.
+
+Installed Desktop game SHA38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd and matching packaged source unchanged. Discs/saves preserved. Progress notes only synchronized; no new delivered/public binary. To check, view all-d3d12-progression2/target.png and final log lines for unsupported444859byte archive. Full goal not complete or paused. Await Sol High selection or explicit instruction to continue current model.
+
+
+2026-10-25 — FIGURE GET TROPHY BONUS DECODER AND NATIVE BASIC PLAY VERIFIED
+Overall project estimate: approximately29%, not complete playable-release acceptance.
+
+Added a bounded typed decoder profile for original GrNFg.dat (444859 bytes,
+441440 body bytes,567 relocation pointers,36 public roots). It reuses the
+existing stage graph/collision/model/script readers. grfigureget.c proves
+three integer spawn parameters and three float bounds; itemdata is an empty
+list and Coin remains the original common item. No new stage selection,
+random-stage/unlock changes, no-save changes or original physics changes.
+
+Offline PASS: independent Python schema/component byte oracle and all394
+typed records; actual x86 HSD parser/567 installed pointers/region lifetime;
+133 malformed atomic refusals; nine existing archive outputs identical.
+Release game build and no-save native link PASS, x86 large-address flag kept.
+Exact executable179423796a2a2b4c8061090d19979e7b4817322fd7fd47898b909b23b047f42f.
+
+Muted D3D12 and Vulkan PASS on the same executable. Each route completed
+four ordinary Classic battles plus all10 original target callbacks, then
+entered sixth FigureGet/grkind38. Read-only existing ground-object and item
+traces verify three original trophies spawned and fell, walking both ways,
+original jump and jab, >600 simulation frames and original bonus end734,
+state1/outcome6/stock1 followed by clean native exit0. Both actual GPU images
+were inspected: fighter, basket/platforms/rails/pillars/background, timer and
+mushroom trophy render. Zero trophies were caught: this is not a successful
+basket-collection or trophy-knockback verification. The next stage remains
+unverified; diagnostic shutdown follows the original sixth bonus end.
+
+First D3D12 attempt was INVALIDATED: the new diagnostic mistook
+Ground_GetStageGObj for a lookup; it allocates. That owned process was stopped.
+The corrected probe walks existing link5/classSTAGE/map1/self-owned user_data;
+no allocator or stage-state assignments. Only the subsequent D3D12 and Vulkan
+passes are accepted. Raw invalid test evidence and TEST_INVALIDATION.json kept.
+
+Evidence: development/figure-get-20261025/{stage-verification.json,
+independent-verification.json,source-audit.json,native-verification.json,
+visual-inspection.json,delivery-verification.json}. Exact runtime cases:
+development/target-clear-drmario-20261025/{figure-get-d3d12-2,figure-get-vulkan}.
+They retain raw logs, process results, hashes, build receipts, exact-source
+snapshots and GPU images. Historical raw summaries were not reclassified.
+
+Private Desktop delivery: development/figure-get-20261025, containing muted
+launcher, matching runtime, both screenshot/evidence sets,3626-file frozen
+matching-source.zip, rebuild scripts, dependency versions/lockfile and notices.
+The3156-file implementation/metadata audit has zero mismatches; all source
+archive entries were read back and hashed. Source archive SHA256:
+a4418107f03da51941967435308aa669679bd28c2c1d3d71c76fe29ef62b3a62.
+Installed default remains38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd.
+Original discs and existing saves preserved. No public binary release made.
+Normal private launcher relocation and full clean packaged rebuild were not
+newly tested; source/runtime hashes and source readback were verified.
+
+Next bounded milestone: normal attack contacts a falling trophy, original
+knockback moves it toward the basket, and original caught count increments.
+Then check next Classic transition. Sol Medium is sufficient to start this
+bounded input/observation task; recommend Sol High again only if investigation
+or two different focused failed attempts justify it. Await human model choice;
+goal is not marked complete or paused.
+
+
+2026-10-25 — TROPHY HIT/CATCH CHECK: PARTIALLY VERIFIED; SOL HIGH RECOMMENDED
+Overall project estimate remains approximately29%; no playable-release acceptance.
+
+Added optional normal-PAD approach/jab helper and read-only reports at the
+original Coin damage callback and FigureGet basket-count increment. Removing
+these gated additions restores previous gameplay sources exactly. No direct
+fighter/item position, damage, velocity, count, stock or outcome assignments.
+Source audit and exact build/source snapshots preserved for both tests.
+
+Two genuinely different focused attempts, both muted D3D12, completed:
+1. catch-jab-d3d12: outside approach requested x36 for trophy x24, but the
+original platform edge held DrMario x17.210400 in OttottoWait246. A never armed.
+2. catch-inside-jab-d3d12: inside approach stopped x12.761734; trophy x24.
+A requested frame286, original jab motion44 appeared288; held A256 logged290.
+At286 player y=-33.316502, trophy y=-13.620070. Still no damage callback.
+Both produced zero trophy damage and zero collection callbacks. Raw strict
+summaries remain FAIL; no successful hit, knockback or catch is claimed.
+
+Each release build and native no-save/LAA link passed. Both runtime cases
+preserved the normal four battle victories, ten unique target callbacks,
+sixth archive loading/GPU image, three trophy spawns and original bonus end
+at734, followed by clean native exit0/no timeout. All runner gates except
+original_trophy_damage and original_basket_collection passed. This proves
+continued stage smoke only, not the missing interaction. Actual hitbox/
+hurtbox overlap and active-frame/filter conditions remain unknown.
+
+Independent evidence/provenance audit: interaction-verification.json PASS
+for the PARTIALLY_VERIFIED classification and exact per-case source hashes.
+Both cases retain runtime.log, summary.json, process-result.json, tested-inputs.zip,
+build-receipt.json, source-audit.json and GPU image. Current working executable
+2723d446ce023e5428c8fe8c59beaeaaaa7e5a6bcd80165062d55df0ef7df4c6.
+Game library b5fdfbc069d2cd96df77d2135414d41c0531665e31c250d478608fb74c3cf893.
+The working tree retains the diagnostic-only changes for investigation.
+No new candidate was delivered/published because interaction gates failed.
+
+Desktop installed default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd,
+prior FigureGet candidate179423796a2a2b4c8061090d19979e7b4817322fd7fd47898b909b23b047f42f,
+and its matching-source.zip a4418107f03da51941967435308aa669679bd28c2c1d3d71c76fe29ef62b3a62
+were hash-checked unchanged. Discs and saves untouched. Desktop update is
+progress notes only; failed experimental executables stay in private work/.
+
+MODEL UPGRADE RECOMMENDED
+Current: Sol Medium. Recommended: Sol High.
+Reason: normal positioning and jab activation are confirmed, but trophy
+contact is not. Inspect actual fighter hitbox and Coin hurtbox world positions,
+active frames and collision masks around286-305 to distinguish geometric miss
+from missing native collision. Do not keep guessing timing or force a hit.
+Stopped after the two focused attempts as requested. Next-stage advancement,
+physical controls, full campaign and release remain incomplete.
+Await Sol High confirmation or explicit authorization to continue Sol Medium.
+
+
+2026-10-25 — ORIGINAL TROPHY HIT, KNOCKBACK AND BASKET COLLECTION VERIFIED
+Overall project estimate remains approximately29%; finished playable-release acceptance is false.
+
+Sol High measured the actual original item collision routine using the prior
+inside-jab controller. All3 jab hitboxes were active/eligible on289-290, but
+all6 actual overlap tests returned0: punch axes aroundy=-28, trophy capsule
+endpoints aroundy=-11 to-14. It was early input, not proof of missing collision.
+Changed only the optional PAD test's relative-height trigger20->16, delaying
+A286->292. Collision shapes, fighter/item positions, physics, damage, counts,
+stocks, stage flags and outcomes were not assigned by the test.
+
+Both strict muted D3D12 and Vulkan runs PASS on the same native executable:
+- Normal Classic route retains four ordinary victories and10 original targets.
+- Sixth FigureGet first trophy: original overlap1 and P1 jab4damage at295.
+- Original velocity vx=-0.938394, vy=3.176148 moves that SAME trophy inward/upward.
+- Original basket callback450, trophy104, count0->1, x=3.971342 within original
+  [-4.5,+4.5] mouth. Native trajectory and matching object identity verified.
+- Three trophies spawn; ordinary bonus end734/state1/outcome6/stock1; clean exit0.
+- Both actual GPU images inspected and capture-ticket provenance verified.
+  Images show the early stage, not the exact catch moment; native callbacks
+  prove the interaction. All-three collection and next Classic transition
+  remain unverified. Physical input, full campaign/fidelity and release open.
+
+An earlier observation run crashed before the bonus, in fifth-battle Pichu
+Thunder. Fault71/access0xc0000005 atRVA8d26ab maps to it_802B1FE8+11, null
+item-data read at0xC4 through ftPk_SpecialLw_8012765C. A native-only live-list,
+kind, owner and first-segment check now precedes that retained-handle read.
+Ten actual production-helper assertions pass, including valid Pikachu/Pichu,
+null/expired/null-data/reused-kind/wrong-owner/nonfirst-segment cases. Valid
+handles take the original game path. Removing this guard restores frozen prior
+source. Successful runtime cases recorded0 expired-handle guard rows: do NOT
+claim full Thunder lifecycle or recurrence/stress verification from them.
+The failed prebonus crash remains immutable, separately symbolicated.
+
+Release builds/no-save/LAA native links and source audits PASS. Original
+collision routine still evaluates exactly once with identical arguments;
+only its result/eligibility/positions are logged under optional diagnostics.
+Current executable ba618fa8074465f72d0a0748705c6ff379f7948b12d917743fef1aed5cc6e506.
+Library84539cb987636ca489d15e54e4a718d9af5ea26c7289f7c86a72bfb4241858a1.
+Evidence in development/figure-collision-20261025: native-verification.json,
+geometry-analysis.json, final-source-audit.json, thunder-handle-verification.json,
+prebonus-fault-symbols.json, visual-inspection.json and delivery-verification.json.
+Accepted cases delayed-jab-d3d12 and delayed-jab-vulkan retain raw logs,
+process results, build receipts, exact26-input snapshots, hashes and GPU images.
+geometry-live-thunder-d3d12 is explicitly observation-only, not hit/catch acceptance.
+
+Private Desktop candidate delivered at development/figure-collision-20261025.
+It includes muted normal launcher, runtime, both accepted evidence/image sets,
+all3628 packaged source/build files frozen in matching-source.zip, dependency
+versions/lockfile, notices and rebuild/mod instructions.3158 implementation/
+metadata files audited with0 mismatches; every zipped source entry read back
+and hashed. Source archive0720e1f68e6779f7a6c42a7582939c4abd89deba503424ccc41a27d4661f7e22.
+Installed default remains38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd.
+Prior frozen candidate/source, original discs and saves preserved. No public
+binary release performed; public release still needs asset-stripping,
+matched reconstruction/download/provenance validation. No new clean packaged
+rebuild or relocated normal-launch test is claimed from source/hash audits.
+
+Next bounded milestone: permit the original post-bonus transition and verify
+the following Classic stage loads, renders and responds to normal input.
+Sol Medium is sufficient for this bounded check after the difficult geometry
+investigation. All-three trophy collection is a later validation task.
+Await Sol Medium confirmation or explicit continue Sol High, as requested.
+Goal remains incomplete and is not marked complete or paused.
+
+
+2026-10-25 — NATURAL SEVENTH CLASSIC TRANSITION AND INPUT VERIFIED
+Overall about29%; full port/release incomplete. Both muted D3D12/Vulkan runs
+preserve the first trophy jab4damage295/catch450/count1 and let the original
+bonus end734/state1/outcome6 continue normally. No stage/result was assigned.
+Both enter original VS entry7/grkind2 (GrCs.dat/Castle), render inspected actual
+GPU images and pass900 simulation frames with ordinary right/left walk, jump
+and jab44 (A pressed256). Minimum stocks3 D3D12,2 Vulkan; clean native exit0.
+The only source change is optional gmvs transition/capture/PAD instrumentation;
+removing it restores previous source. Source,26-input build receipt and exact
+case snapshots audit PASS. Source/library build and no-save/LAA link PASS.
+Exe e2f39a0f29e3caa84ac2bee5018fd373ae210c0d40189dba4003148a2bfd3588;
+library1e3a2f6ba3160ac360063281a3a5401bc144ceaf545eb37dec8546bd5aa01209.
+Evidence: development/classic-post-figure-20261025/native-verification.json;
+cases seventh-d3d12-1 and seventh-vulkan contain raw log, process-result,
+source snapshots/receipt and target.png. Images show DrMario, Peach and stage
+geometry/background/HUD; not complete stage/fidelity/combat-win acceptance.
+No new binary delivered for this diagnostic-only milestone. Installed default
+and prior source-matched Desktop candidates/discs/saves preserved.
+Next seventh-match victory and eighth transition remain unverified. Continue
+on current Sol Medium with existing normal PAD combat generator, stopping
+on a new source-format investigation or two focused failed attempts.
+
+
+2026-10-25 — SEVENTH CLASSIC CONTROLS AND VICTORY VERIFIED; NEXT INTRO CRASH
+Overall project estimate approximately29%; full playable release incomplete.
+Status PARTIALLY_VERIFIED. Current Sol Medium; recommend Sol High next.
+
+First bounded milestone completed on muted D3D12 AND Vulkan:
+Original first trophy4damage295/catch450/count1/end734 continues naturally
+to seventh VS entry/grkind2 (GrCs.dat/Castle). Actual GPU images inspected;
+900 simulation frames, right/left walk, original jump and ready-jab44/A
+pressed256 pass. Minimum stocks3 D3D12 and2 Vulkan; both clean exit0.
+Source/compiler/link/provenance audit PASS. Evidence and exact case snapshots:
+development/classic-post-figure-20261025/native-verification.json,
+seventh-d3d12-1 and seventh-vulkan. No game stage/result/position was assigned.
+No binary delivery was needed for these diagnostic-only changes.
+
+Continued on current Sol Medium using the EXISTING normal-PAD combat policy,
+with optional original seventh-end trace/abort and eighth-entry input/capture.
+Only gmvs diagnostic instrumentation changed; removing it restores prior
+source. Builds and no-save/LAA native links PASS,26input snapshots retained.
+Current working executable e5b300e32199bc7d09665da793151b06279cb4bc10c118ddff16358af8b617c2;
+library4c081826031f9e200110407ab4d3b56d31a2f95292901a4e9ec7648daa64507f.
+
+First case seventh-combat-d3d12-1: native300000ms wall-clock harness timer
+quit at sixth bonus frame620, after trophy collection but BEFORE entry7.
+Clean exit0; not a combat failure or crash. File timestamps support about301s.
+The existing Aurora window.cpp diagnostic timer only accepts100..300000ms.
+Corrected test harness, without engine changes: extended case omits this
+optional native timer, uses Python420000ms+30s safety, retains normal per-stage
+gameover/3600active-frame abort and intended eighth900frame close. Exact same
+executable and combat input policy. Raw first FAIL summary preserved.
+
+Extended case seventh-combat-d3d12-2 yielded meaningful new evidence:
+- Original seventh victory frame1072/outcome3, P1 stocks2.
+- Four positive P1 hits against Peach recorded by ftcoll.c's player_idx0 guard.
+  Log attacker/target are FIGHTER KINDs (21/9), not player indices; target_slot1.
+- Original clear screen initialized; normal Start accepted at clear_calls240.
+- Original next intro scene kind32 begins (state56), loading GmIntEz.dat,
+  TyPokeA.dat, related display archives, SdIntro.dat and PlCo.dat.
+- Execute-null exception0xc0000005, EIP0/access8/target0, native exit71.
+  No eighth VS entry or eighth GPU capture/900frames; these gates remain FAIL.
+
+READ-ONLY map symbolication, not root-cause proof: last camera callback
+fn_8018564C atRVA6f90c0, gobj3edeabe0; raw stack candidate
+HSD_GObj_80390FC0+206 atRVA31b67e. Other scanned stack values may be data.
+Fault context/stack and exact source/binary receipts preserved. Inspect the
+actual callback/call path before changing renderer ownership or ignoring any
+callback. Do not skip the intro or force eighth-stage selection.
+
+Evidence: development/classic-seventh-combat-20261025/
+combat-progress-verification.json, next-intro-fault-symbols.json, source-audit.json;
+both cases retain raw logs, immutable summaries, process results, exact
+tested-inputs.zip and build receipts. BUDGET_ANALYSIS.json records first cutoff.
+Independent evidence audit correctly reports PARTIALLY_VERIFIED; it does not
+reclassify the failed overall runs as complete passes. No further runtime retry.
+
+Desktop default38730ae4dfc8556c0a605dec6ff0e10fdf31079b4eac855b6993b7c79402c4bd,
+last delivered candidateba618fa8074465f72d0a0748705c6ff379f7948b12d917743fef1aed5cc6e506,
+and its matching-source.zip0720e1f68e6779f7a6c42a7582939c4abd89deba503424ccc41a27d4661f7e22
+were hash-checked preserved. Discs and saves untouched. No failed experimental
+binary delivered/publicly released. Desktop update is progress notes only.
+
+MODEL UPGRADE RECOMMENDED: Sol Medium -> Sol High.
+Reason: the next intro now fails during rendering with null execution, which
+requires actual callback/ownership diagnosis, beyond the bounded input check.
+Next: inspect fn_8018564C and the actual renderer call chain in original intro32,
+then make a grounded fix and test muted. Eighth stage, later campaign, complete
+content/fidelity, physical controls and release remain unverified.
+Await Sol High confirmation or explicit authorization to continue Sol Medium.
+Goal is not complete or paused.

@@ -70,8 +70,11 @@ bool it_802D85F4(Item_GObj* item_gobj)
 #ifdef TARGET_PC
     if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT")) {
         Item* it=GET_ITEM(item_gobj);
-        OSReport("NATIVE_TARGET_DAMAGE_CALLBACK target=%p source_player=%d last_damage=%d before=%d after=%d\n",
-                 item_gobj,it->xCB0_source_ply,it->xCA0,before,stage_info.x6D4);
+        int point=-1;
+        for (int i=199;i<220;++i)
+            if (it->xDD4_itemVar.mato.x0==stage_info.x280[i]) {point=i;break;}
+        OSReport("NATIVE_TARGET_DAMAGE_CALLBACK target=%p source_player=%d last_damage=%d before=%d after=%d point=%d\n",
+                 item_gobj,it->xCB0_source_ply,it->xCA0,before,stage_info.x6D4,point);
     }
 #endif
     return true;

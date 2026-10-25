@@ -5332,7 +5332,7 @@
     },
     {
       "path": "source/src/melee/ft/kinds/ftPikachu/ftpikachuspeciallw.c",
-      "sha256": "210860b7b2e7e61d505c6dc34035a7da642123a8c6d203313ce246b65cf4c4c2"
+      "sha256": "bee049a955609620930341755df917bb7bcce98182bf8ee0b24992ff938ab3f5"
     },
     {
       "path": "source/src/melee/ft/kinds/ftPikachu/ftpikachuspeciallw.h",
@@ -5956,7 +5956,7 @@
     },
     {
       "path": "source/src/melee/gm/gmclassic.c",
-      "sha256": "ad1301bf13791376d81e3c76557c837a4b9a2364fb62797b806a0868c9a9625a"
+      "sha256": "22a3ed5a5faede39104047288f05db51004581fe761988d4a0f9658626ab3505"
     },
     {
       "path": "source/src/melee/gm/gmclassic.h",
@@ -6052,7 +6052,7 @@
     },
     {
       "path": "source/src/melee/gm/gmmain.c",
-      "sha256": "08cef223586c692483bd9ac2e4039ec2a68552297561bcfcbbd3a281922072dc"
+      "sha256": "8c43f5a247e92a2627b8cb7ec86c35e0185a7da11185f10454df48d0460c2851"
     },
     {
       "path": "source/src/melee/gm/gmmain.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "c506c6bf473d3d530d2c808da87fb053674125c8039d65dedfd42d2d22b31446"
+      "sha256": "aa1a8efdc2fb4fe654170bc59ba6262910b542721ffab209b56bb479eae7499d"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -6480,7 +6480,7 @@
     },
     {
       "path": "source/src/melee/gr/grfigureget.c",
-      "sha256": "7ed34cb21f653ece91cba52c27c0c9d63bbf83b936a0a84754105744c7356826"
+      "sha256": "1e666f40d4dd059feeafedd2b5da19e32380b06adfe56afa9048dece31d3edf9"
     },
     {
       "path": "source/src/melee/gr/grfigureget.h",
@@ -7240,7 +7240,7 @@
     },
     {
       "path": "source/src/melee/it/itcoll.c",
-      "sha256": "139156795a92130d202fd27a722f078c5ec3b75c6e5d1a9cc7b68ed7019ab250"
+      "sha256": "7fcf71233c3d316a7f702ab0f822cefe85d7799235dc05a1bf1d3230ca52a556"
     },
     {
       "path": "source/src/melee/it/itcoll.h",
@@ -7448,7 +7448,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itcoin.c",
-      "sha256": "96f7b988fadc6ecbfc225883eff5889a0601118eb00daaae8b4cead358b80213"
+      "sha256": "e49d94b3ecb8c99d1deb617c3a4b17966cd5b2ed33e6ffa8200bb1f645fc3d84"
     },
     {
       "path": "source/src/melee/it/kinds/itcoin.h",
@@ -8064,7 +8064,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itmato.c",
-      "sha256": "3ce0a35851eed58aa006e8a22d89c5e268965d5be816e20846b6b84cc56c43fc"
+      "sha256": "7a4c522e53f7390193c5800b2a3918a2ef45b1969b65f7bdf3e7e8b9e3f35f3a"
     },
     {
       "path": "source/src/melee/it/kinds/itmato.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "ebdd6146113fcb6bd0d838019ee94011a10cfc49f19e5ac8d3f58b9bccb7c811"
+      "sha256": "1b9c8f0cbbbc8e8df294523ec678587631d1c3748be39be6202c339ca7622914"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10607,6 +10607,10 @@
       "sha256": "6c61ac13f568398a12e5247f94924b12fef83826dd0a04eb2ffa39749188c35d"
     },
     {
+      "path": "source/src/pc/figure_catch_diagnostic.h",
+      "sha256": "dc08c709937ccee6e0c725aab5e3f7f072717338b727995b1c31c3ed35aa36ed"
+    },
+    {
       "path": "source/src/pc/file_digest.h",
       "sha256": "d6d537be36f0d3e3bab57ea51cc92b242faa10ef738302e3c969824a57dd7f6d"
     },
@@ -11419,6 +11423,10 @@
       "sha256": "68cbc904b8f2b430d2a926b780486239c68570d5e6e7ea4e3d8015fe7b021181"
     },
     {
+      "path": "source/src/pc/stage_figure_get_archive_plan.h",
+      "sha256": "2cdcfd79fcde17988486a87c64f99ba7f70d9418806c91df7ab5a8f0f2aa8d09"
+    },
+    {
       "path": "source/src/pc/stage_flatzone_archive_plan.h",
       "sha256": "b78e05d28c3cf82a7030c2ab36d9741b434b4e41587842d069e08ec7d2d06e70"
     },
@@ -11667,6 +11675,10 @@
       "sha256": "58920af260270495d6b8a8a8f4790dbd7462081bc3d7ba060b2aae7fc403b33d"
     },
     {
+      "path": "source/src/pc/target_route_diagnostic.h",
+      "sha256": "5114a6f1215c323980de48bd713558300c7abf5771f8da19d3fc66dfa76a293b"
+    },
+    {
       "path": "source/src/pc/tests/alarm_catchup_test.c",
       "sha256": "5d62862ad11d7dd59d54e7e216e5709051f3039d47e30a055162c610fba57821"
     },
@@ -11701,6 +11713,10 @@
     {
       "path": "source/src/pc/thread_diagnostics.h",
       "sha256": "26c511bd94e0c6dc89b5e4d419abfd96fd609a4eb05a0be63083e3bbdd4557db"
+    },
+    {
+      "path": "source/src/pc/thunder_handle.h",
+      "sha256": "166927a1b72988fc348a25e44f7a55bd4d7ecb1475757ddf7ca1ca5644186d2e"
     },
     {
       "path": "source/src/pc/tick_clock.c",

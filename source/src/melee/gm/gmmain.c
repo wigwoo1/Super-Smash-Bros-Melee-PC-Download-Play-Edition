@@ -35,6 +35,7 @@
 #include <sysdolphin/baselib/video.h>
 #ifdef TARGET_PC
 #include <stdlib.h>
+#include <pc/replay_seed.h>
 #endif
 
 static u32 arena_size;
@@ -191,6 +192,16 @@ int main(void)
 #endif
     GXSetMisc(1, 8);
     *HSD_RandSeedPtr = OSGetTick();
+#ifdef TARGET_PC
+    /* Campaign selection precedes the existing per-match replay seed. */
+    const char* startup_seed = getenv("MELEE_DIAGNOSTIC_STARTUP_SEED");
+    if (startup_seed) {
+        uint32_t seed;
+        HSD_ASSERT(0, MeleePc_ParseReplaySeed(startup_seed, &seed));
+        *HSD_RandSeedPtr = seed;
+        OSReport("NATIVE_STARTUP_REPLAY seed=%u before_campaign_selection=1\n", seed);
+    }
+#endif
     lbAudioAx_8002838C();
     lb_80019AAC(&gmMain_8015FD24);
     HSD_VISetUserPostRetraceCallback(&gmMain_8015FDA0);

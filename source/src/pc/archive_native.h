@@ -180,6 +180,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "stage_last_archive_plan.h"
 #include "stage_icemt_archive_plan.h"
 #include "stage_target_drmario_archive_plan.h"
+#include "stage_figure_get_archive_plan.h"
 #include "stage_kongo_archive_plan.h"
 #include "item_common_archive.h"
 #include "fighter_common_archive.h"
@@ -9444,6 +9445,20 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    /* Original Classic trophy-catching bonus, source-typed stage graph. */
+    if(length==444859 && body==441440 && relocs==567 && publics==36 && !externs){
+        static const char* names[]={"ALDYakuAll","Dai2_CMPR_image","Dai3_CMPR_image","GrdFiguregetBG3_C8_image","GrdFiguregetBG3_tlut","GrdFiguregetBG3_tlut_desc","GrdFiguregetColB_RGBA8_image","GrdFiguregetColW_RGBA8_image","GrdFiguregetKago_RGBA8_image","GrdFiguregetKumoUn22_IA8_image","GrdFiguregetKumoUn333_C8_image","GrdFiguregetKumoUn333_tlut","GrdFiguregetKumoUn333_tlut_desc","GrdFiguregetMark1_C8_image","GrdFiguregetMark1_tlut","GrdFiguregetMark1_tlut_desc","GrdFiguregetMark2_C8_image","GrdFiguregetMark2_tlut","GrdFiguregetMark2_tlut_desc","GrdFiguregetMetal2_RGBA8_image","GrdFiguregetMetal3_RGBA8_image","GrdFiguregetSkin5_C8_image","GrdFiguregetSkin5_tlut","GrdFiguregetSkin5_tlut_desc","GrdFiguregetSter2_I8_image","GrdFigurgetSkin3_C8_image","GrdFigurgetSkin3_tlut","GrdFigurgetSkin3_tlut_desc","PlyMario5KButton_CMPR_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};
+        static const uint32_t offsets[]={114556,124032,115840,197760,214144,214656,421536,420512,346176,132224,280224,345760,346144,422560,438944,439392,378944,395328,395840,362560,439424,399072,403168,403552,214688,403584,419968,420480,395872,114136,114280,114500,260,114720,441416,114504};
+        for(uint32_t i=0;i<publics;i++)
+            if(MeleePc_DatBe32(bytes+roots+i*8)!=offsets[i] ||
+               strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+i*8+4),names[i]))return -2;
+        int result=MeleePc_StageFigureGetBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
     /* Original DrMario Break the Targets: source-typed common stage graph. */
     if(length==228472 && body==223104 && relocs==1202 && publics==18 && !externs){
         static const char* names[]={"ALDYakuAll","GrdTargetBack00_CMPR_image","GrdTargetDrmario00_CMPR_image","GrdTargetDrmario01_CMPR_image","GrdTargetDrmario02_CMPR_image","GrdTargetDrmario03_CMPR_image","GrdTargetDrmario04_CMPR_image","GrdTargetDrmario05_CMPR_image","GrdTargetDrmario08_I4_image","GrdTargetMario06_CMPR_image","GrdTargetMario07_CMPR_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};

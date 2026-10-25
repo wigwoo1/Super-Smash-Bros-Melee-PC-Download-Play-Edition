@@ -67,6 +67,10 @@ extern unsigned int HSD_JObjDiagnosticMatchFrame;
 #include <melee/sfx/crowdsfx.h>
 #include <sysdolphin/baselib/controller.h>
 #include <sysdolphin/baselib/gobjproc.h>
+#ifdef TARGET_PC
+#include <pc/target_route_diagnostic.h>
+#include <pc/figure_catch_diagnostic.h>
+#endif
 
 static u32 lbl_803D5620[] = {
     0x7C859,
@@ -2023,7 +2027,8 @@ void gm_Scene_Vs_OnFrame(void)
                             if (target_second_stable==60)
                                 OSReport("NATIVE_TARGET_SECOND_COMPLETE frame=%u remaining=%d stable=60 stocks=%d x=%f y=%f\n",
                                          frame,stage_info.x6D4,Player_GetStocks(0),position.x,position.y);
-                            if (target_second_stable==100) {
+                            if (target_second_stable==100 && !getenv("MELEE_DIAGNOSTIC_TARGET_SURVEY") &&
+                                !getenv("MELEE_DIAGNOSTIC_TARGET_ALL")) {
                                 int queued=aurora_diagnostic_queue_quit();
                                 OSReport("NATIVE_TARGET_SECOND_CLOSE frame=%u remaining=%d stable=100 queued=%d\n",
                                          frame,stage_info.x6D4,queued);
@@ -2039,6 +2044,10 @@ void gm_Scene_Vs_OnFrame(void)
                                      waypoint_x,waypoint_y);
                     }
                 }
+                if (getenv("MELEE_DIAGNOSTIC_TARGET_SURVEY"))
+                    MeleePc_TargetRouteSurvey(frame,&input,target_second_stable>=60);
+                if (getenv("MELEE_DIAGNOSTIC_TARGET_ALL"))
+                    MeleePc_TargetRouteAll(frame,self,&input,target_second_stable>=60);
                 if ((frame%10==0 || input.button) && frame>=180)
                     OSReport("NATIVE_TARGET_INPUT frame=%u motion=%d ground=%d x=%f y=%f point=%d remaining=%d stick_x=%d stick_y=%d button=%u attack_frame=%u hit_frame=%u facing=%f latched_x=%f teeter=%f walk=%f dash=%f stick_scale=%d velocity_x=%f teeter_ready=%d\n",
                              frame,ftLib_GetMotionId(self),ftLib_GetGroundAir(self),position.x,position.y,point,
@@ -2064,7 +2073,7 @@ void gm_Scene_Vs_OnFrame(void)
                 OSReport("NATIVE_TARGET_STAGE frame=%u stage_kind=%d initial=%d remaining=%d\n",
                          frame,stage_info.grkind,stage_info.x6D2,stage_info.x6D4);
 #if defined(_WIN32)
-            if (!target_capture_armed && frame >= 180 &&
+            if (!getenv("MELEE_DIAGNOSTIC_TARGET_ALL") && !target_capture_armed && frame >= 180 &&
                 (!getenv("MELEE_DIAGNOSTIC_TARGET_HIT") ||
                  (stage_info.x6D4<stage_info.x6D2 &&
                   (target_second_mode?(stage_info.x6D4==8 && target_second_stable>=60):
@@ -2082,11 +2091,174 @@ void gm_Scene_Vs_OnFrame(void)
         if (getenv("MELEE_DIAGNOSTIC_TARGET_SECOND") && diagnostic_vs_entries==3 &&
             controller.state.unk_0==2) {
             static int target_second_end_queued;
-            if (!target_second_end_queued) {
+            if (getenv("MELEE_DIAGNOSTIC_TARGET_ALL") && stage_info.x6D4==0) {
+                if (clear_calls==1)
+                    OSReport("NATIVE_TARGET_ALL_ORIGINAL_END frame=%u remaining=0 outcome=%d stocks=%d\n",
+                             frame,controller.state.match_result,Player_GetStocks(0));
+            } else if (!target_second_end_queued) {
                 target_second_end_queued=aurora_diagnostic_queue_quit();
                 OSReport("NATIVE_TARGET_SECOND_ABORT reason=original_stage_end remaining=%d outcome=%d queued=%d\n",
                          stage_info.x6D4,controller.state.match_result,target_second_end_queued);
             }
+        }
+        if (getenv("MELEE_DIAGNOSTIC_TARGET_NEXT_COMBAT") && diagnostic_vs_entries==4) {
+            static int next_combat_closed;
+            if (controller.state.unk_0==2 && clear_calls==1)
+                OSReport("NATIVE_CLASSIC_PROGRESS_END frame=%u outcome=%d stocks=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0));
+            if (!next_combat_closed &&
+                ((controller.state.unk_0==2 && controller.state.match_result==OUTCOME_1P_GAME_OVER) ||
+                 (controller.state.unk_0==0 && frame>=3600))) {
+                next_combat_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_CLASSIC_PROGRESS_ABORT frame=%u outcome=%d stocks=%d queued=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0),next_combat_closed);
+            }
+        }
+        if (getenv("MELEE_DIAGNOSTIC_TARGET_ALL") &&
+            diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_TARGET_NEXT_COMBAT")?5:4) &&
+            controller.state.unk_0==0) {
+            memset(&input,0,sizeof(input));
+            if (getenv("MELEE_DIAGNOSTIC_TARGET_NEXT_INPUT") && self) {
+                static unsigned next_attack_frame;
+                Fighter* fp=self->user_data;
+                if (frame>=180 && frame<210) input.stickX=45;
+                if (frame>=240 && frame<270) input.stickX=-45;
+                if (frame>=360 && frame<368) input.button=PAD_BUTTON_X;
+                if (!next_attack_frame && frame>=540 && frame<850 &&
+                    (frame<700 || frame>=760) &&
+                    ftLib_GetGroundAir(self)==GA_Ground &&
+                    ftLib_GetMotionId(self)==ftCo_MS_Wait &&
+                    !(fp->input.held_buttons[0]&PAD_BUTTON_A)) {
+                    next_attack_frame=frame;
+                    OSReport("NATIVE_TARGET_NEXT_ATTACK_REQUEST frame=%u motion=%d ground=1 held=%u stocks=%d\n",
+                             frame,ftLib_GetMotionId(self),fp->input.held_buttons[0],Player_GetStocks(0));
+                }
+                if (next_attack_frame && frame-next_attack_frame<4)
+                    input.button=PAD_BUTTON_A;
+                if (frame>=720 && frame<724) input.button=PAD_BUTTON_B;
+                if (frame>=175 && frame<=890 &&
+                    (frame%5==0 || (next_attack_frame && frame-next_attack_frame<=40))) {
+                    OSReport("NATIVE_TARGET_NEXT_INPUT frame=%u requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f motion=%d ground=%d x=%f y=%f stocks=%d\n",
+                             frame,input.stickX,input.button,fp->input.held_buttons[0],
+                             fp->input.pressed_buttons,fp->input.lstick[0].x,
+                             ftLib_GetMotionId(self),ftLib_GetGroundAir(self)==GA_Ground,
+                             fp->cur_pos.x,fp->cur_pos.y,Player_GetStocks(0));
+                }
+            }
+#if defined(_WIN32)
+            static int next_capture;
+            if (frame>=180 && !next_capture && !getenv("MELEE_DIAGNOSTIC_FIGURE_GET")) {
+                char* path=NULL;size_t size=0;
+                if (_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE")==0 && path && path[0]) {
+                    next_capture=_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path)==0;
+                    OSReport("NATIVE_TARGET_NEXT_STAGE capture_armed=%d frame=%u stage_kind=%d stocks=%d\n",
+                             next_capture,frame,stage_info.grkind,Player_GetStocks(0));
+                }
+                free(path);
+            }
+#endif
+        }
+        /* Optional Figure Get proof uses normal PAD edges and read-only state. */
+        if (getenv("MELEE_DIAGNOSTIC_FIGURE_GET") && diagnostic_vs_entries==6 &&
+            stage_info.grkind==Gr_Kind_FigureGet) {
+            static int figure_capture,figure_closed;
+            memset(&input,0,sizeof(input));
+            if (controller.state.unk_0==0 && self) {
+                Fighter* fp=self->user_data;
+                if (frame>=180 && frame<210)input.stickX=45;
+                if (frame>=240 && frame<270)input.stickX=-45;
+                if (frame>=360 && frame<364)input.button=PAD_BUTTON_X;
+                if (frame>=540 && frame<544)input.button=PAD_BUTTON_A;
+                if(getenv("MELEE_DIAGNOSTIC_FIGURE_CATCH"))MeleePc_FigureCatchInput(self,&input,frame);
+                if (frame%5==0) {
+                    /* ground.c constructs these in link5/classSTAGE. Walk
+                     * the existing objects; Ground_GetStageGObj allocates. */
+                    Ground* gp=NULL;
+                    for(HSD_GObj* g=HSD_GObjPLinkHead[5];g;g=g->next){
+                        if(g->classifier==HSD_GOBJ_CLASS_STAGE && g->user_data){
+                            Ground* candidate=g->user_data;
+                            if(candidate->map_id==1 && candidate->gobj==g){gp=candidate;break;}
+                        }
+                    }
+                    OSReport("NATIVE_FIGURE_PLAY frame=%u motion=%d ground=%d x=%f y=%f stocks=%d requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f spawned=%d caught=%d lost=%d\n",
+                             frame,ftLib_GetMotionId(self),ftLib_GetGroundAir(self)==GA_Ground,
+                             fp->cur_pos.x,fp->cur_pos.y,Player_GetStocks(0),input.stickX,input.button,
+                             fp->input.held_buttons[0],fp->input.pressed_buttons,fp->input.lstick[0].x,
+                             gp?gp->u.figureget.x4:-1,gp?gp->u.figureget.x8:-1,gp?gp->u.figureget.xC:-1);
+                    for(HSD_GObj* g=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];g;g=g->next){
+                        Item* item=g->user_data;
+                        if(item && item->kind==It_Kind_Coin)
+                            OSReport("NATIVE_FIGURE_ITEM frame=%u item=%p motion=%d x=%f y=%f\n",
+                                     frame,g,item->msid,item->pos.x,item->pos.y);
+                    }
+                }
+#if defined(_WIN32)
+                if(frame>=180 && !figure_capture && !getenv("MELEE_DIAGNOSTIC_FIGURE_NEXT")){
+                    char* path=NULL;size_t size=0;
+                    if(_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE")==0 && path && path[0]){
+                        figure_capture=_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path)==0;
+                        OSReport("NATIVE_FIGURE_CAPTURE armed=%d frame=%u stage_kind=%d\n",figure_capture,frame,stage_info.grkind);
+                    }
+                    free(path);
+                }
+#endif
+            }
+            if(!figure_closed && ((controller.state.unk_0!=0 && controller.state.match_result!=OUTCOME_NONE) ||
+                                  (controller.state.unk_0==0 && frame>=1800))){
+                if(getenv("MELEE_DIAGNOSTIC_FIGURE_NEXT") && controller.state.unk_0!=0){
+                    figure_closed=1;
+                    OSReport("NATIVE_FIGURE_END frame=%u state=%u outcome=%d stocks=%d queued=0 continue=1\n",
+                             frame,controller.state.unk_0,controller.state.match_result,Player_GetStocks(0));
+                }else{
+                    figure_closed=aurora_diagnostic_queue_quit();
+                    OSReport("NATIVE_FIGURE_END frame=%u state=%u outcome=%d stocks=%d queued=%d\n",
+                             frame,controller.state.unk_0,controller.state.match_result,Player_GetStocks(0),figure_closed);
+                }
+            }
+        }
+        if(getenv("MELEE_DIAGNOSTIC_CLASSIC_SEVENTH_COMBAT") && diagnostic_vs_entries==7){
+            static int seventh_closed;
+            if(controller.state.unk_0==2 && clear_calls==1)
+                OSReport("NATIVE_CLASSIC_SEVENTH_END frame=%u outcome=%d stocks=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0));
+            if(!seventh_closed &&
+               ((controller.state.unk_0!=0 && controller.state.match_result==OUTCOME_1P_GAME_OVER) ||
+                (controller.state.unk_0==0 && frame>=3600))){
+                seventh_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_CLASSIC_SEVENTH_ABORT frame=%u outcome=%d stocks=%d queued=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0),seventh_closed);
+            }
+        }
+        if(getenv("MELEE_DIAGNOSTIC_FIGURE_NEXT") &&
+           diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_SEVENTH_COMBAT")?8:7) &&
+           controller.state.unk_0==0 && self){
+            static int next_capture;
+            static unsigned attack_frame;
+            Fighter* fp=self->user_data;
+            memset(&input,0,sizeof(input));
+            if(frame>=180 && frame<210)input.stickX=45;
+            if(frame>=240 && frame<270)input.stickX=-45;
+            if(frame>=360 && frame<364)input.button=PAD_BUTTON_X;
+            if(!attack_frame && frame>=540 && frame<850 &&
+               ftLib_GetGroundAir(self)==GA_Ground && ftLib_GetMotionId(self)==ftCo_MS_Wait &&
+               !(fp->input.held_buttons[0]&PAD_BUTTON_A))attack_frame=frame;
+            if(attack_frame && frame-attack_frame<4)input.button=PAD_BUTTON_A;
+            if(frame%5==0 || (attack_frame && frame-attack_frame<12))
+                OSReport("NATIVE_FIGURE_NEXT_INPUT frame=%u motion=%d ground=%d x=%f y=%f stocks=%d requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f attack_frame=%u\n",
+                         frame,fp->motion_id,ftLib_GetGroundAir(self)==GA_Ground,fp->cur_pos.x,fp->cur_pos.y,
+                         Player_GetStocks(0),input.stickX,input.button,fp->input.held_buttons[0],fp->input.pressed_buttons,
+                         fp->input.lstick[0].x,attack_frame);
+#if defined(_WIN32)
+            if(frame>=180 && !next_capture){
+                char* path=NULL;size_t size=0;
+                if(_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE")==0 && path && path[0]){
+                    next_capture=_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path)==0;
+                    OSReport("NATIVE_FIGURE_NEXT_STAGE capture_armed=%d frame=%u stage_kind=%d entry=%u\n",
+                             next_capture,frame,stage_info.grkind,diagnostic_vs_entries);
+                }
+                free(path);
+            }
+#endif
         }
         if (!HSD_PadStageDiagnosticInput(0, &input))
             OSReport("NATIVE_CLASSIC_COMBAT input_refused=1\n");

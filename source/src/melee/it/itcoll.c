@@ -413,6 +413,15 @@ void it_802703E8(Item_GObj* arg_item_gobj)
     PAD_STACK(16);
 
     arg_item = arg_item_gobj->user_data;
+#ifdef TARGET_PC
+    int figure_geometry=getenv("MELEE_DIAGNOSTIC_FIGURE_GEOMETRY") &&
+        arg_item->kind==It_Kind_Coin && arg_item->xDD4_itemVar.coin.x4==1 &&
+        gm_GetFrameCount()>=270 && gm_GetFrameCount()<=330;
+    if(figure_geometry)
+        OSReport("NATIVE_FIGURE_COLLISION frame=%u item=%p hurt_count=%u mode=%d ground=%d owner=%p item_scale=%f x=%f y=%f\n",
+                 gm_GetFrameCount(),arg_item_gobj,arg_item->xAC8_hurtboxNum,arg_item->xD0C,
+                 arg_item->ground_or_air,arg_item->owner,arg_item->scl,arg_item->pos.x,arg_item->pos.y);
+#endif
     if (arg_item->xAC8_hurtboxNum == 0) {
         return;
     }
@@ -443,6 +452,13 @@ void it_802703E8(Item_GObj* arg_item_gobj)
         }
         for (hit_index = 0; hit_index < 4; hit_index++) {
             hit = &fighter->x914[hit_index];
+#ifdef TARGET_PC
+            if(figure_geometry && fighter->player_idx==0)
+                OSReport("NATIVE_FIGURE_HIT_GATE frame=%u index=%u motion=%d anim=%f state=%d element=%u can_items=%u air=%u ground=%u damage=%f hit_scale=%f fighter_scale=%f\n",
+                         gm_GetFrameCount(),hit_index,fighter->motion_id,fighter->cur_anim_frame,
+                         hit->state,hit->element,hit->x42_b7,hit->x40_b2,hit->x40_b3,
+                         hit->damage,hit->scale,fighter->x34_scale.y);
+#endif
             if ((hit->state == HitCapsule_Disabled) ||
                 (hit->element == HitElement_Catch) || (hit->x42_b7 != 1) ||
                 ((!hit->x40_b2 || (arg_item->ground_or_air != GA_Air)) &&
@@ -454,9 +470,20 @@ void it_802703E8(Item_GObj* arg_item_gobj)
             for (hurt_index = 0; hurt_index < arg_item->xAC8_hurtboxNum;
                  hurt_index++)
             {
-                if (!lbColl_8000805C(
+                int overlap=lbColl_8000805C(
                         hit, &arg_item->xACC_itemHurtbox[hurt_index], NULL, 0,
-                        fighter->x34_scale.y, arg_item->scl, 0.0f))
+                        fighter->x34_scale.y, arg_item->scl, 0.0f);
+#ifdef TARGET_PC
+                if(figure_geometry && fighter->player_idx==0){
+                    HurtCapsule* hurt=&arg_item->xACC_itemHurtbox[hurt_index];
+                    OSReport("NATIVE_FIGURE_GEOMETRY frame=%u hit=%u hurt=%u overlap=%d hit_ax=%f hit_ay=%f hit_az=%f hit_bx=%f hit_by=%f hit_bz=%f hurt_ax=%f hurt_ay=%f hurt_az=%f hurt_bx=%f hurt_by=%f hurt_bz=%f hit_radius=%f hurt_scale=%f hurt_state=%d\n",
+                             gm_GetFrameCount(),hit_index,hurt_index,overlap,
+                             hit->x58.x,hit->x58.y,hit->x58.z,hit->x4C.x,hit->x4C.y,hit->x4C.z,
+                             hurt->a_pos.x,hurt->a_pos.y,hurt->a_pos.z,hurt->b_pos.x,hurt->b_pos.y,hurt->b_pos.z,
+                             hit->scale*(hit->x43_b1?1.0f:fighter->x34_scale.y),hurt->scale,hurt->state);
+                }
+#endif
+                if (!overlap)
                 {
                     continue;
                 }
@@ -869,6 +896,12 @@ void it_80270E30(Item_GObj* arg_item_gobj)
             }
             arg_item->xCB4 = item->kind;
             arg_item->xCE0 = item->pos;
+#ifdef TARGET_PC
+            if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT") && arg_item->kind==It_Kind_Mato)
+                OSReport("NATIVE_TARGET_ACCEPTED_ITEM_HIT frame=%u target=%p source_player=%d source_kind=%d damage=%f target_x=%f target_y=%f\n",
+                         gm_GetFrameCount(),arg_item->entity,arg_item->xCB0_source_ply,item->kind,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
+#endif
             if (ABS(item->x40_vel.x) < it_804D6D28->x78_float) {
                 if (arg_item->pos.x > item->pos.x) {
                     dir = -1.0f;

@@ -1,3 +1,8 @@
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#include <melee/gm/gmvs.h>
+#endif
 #include "itcoin.h"
 
 #include <melee/it/forward.h>
@@ -260,6 +265,12 @@ bool itCoin_Logic116_DmgReceived(Item_GObj* gobj)
         ip->xDD4_itemVar.coin.x8 += attr->x8;
         break;
     }
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_FIGURE_CATCH"))
+        OSReport("NATIVE_FIGURE_DAMAGE frame=%u item=%p source_player=%d damage=%d x=%f y=%f vx=%f vy=%f direction=%f ordinal=%d\n",
+                 gm_GetFrameCount(),gobj,ip->xCB0_source_ply,ip->xCA0,ip->pos.x,ip->pos.y,
+                 ip->x40_vel.x,ip->x40_vel.y,ip->xCCC_incDamageDirection,ip->xDD4_itemVar.coin.x4);
+#endif
     Item_80268E5C(gobj, 3, ITEM_UNK_0x1);
     return false;
 }

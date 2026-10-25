@@ -6,6 +6,8 @@ parser.add_argument('--runtime-build', type=pathlib.Path, default=root/'build-au
 parser.add_argument('--game-library', type=pathlib.Path, default=root/'build-melee-win32/melee.lib')
 parser.add_argument('--output', type=pathlib.Path, default=root/'melee-link-audit.exe')
 parser.add_argument('--host-object', type=pathlib.Path, help='Developer fixture host object; does not replace the production library')
+parser.add_argument('--legacy-2gb-address-space', action='store_true',
+                    help='Diagnostic comparison only: disable large-address support for the x86 executable')
 save_mode = parser.add_mutually_exclusive_group()
 save_mode.add_argument('--no-saves', dest='no_saves', action='store_true',
                        help='Select the no-save link plan and omit Aurora card storage')
@@ -70,7 +72,7 @@ if dvd_enabled:
     nod_relative = nod_library.relative_to(runtime).as_posix()
     if nod_library.is_file() and nod_relative not in libs:
         libs.insert(0,nod_relative)
-plan = {'no_saves':no_saves,'aurora_card_enabled':card_enabled,
+plan = {'no_saves':no_saves,'large_address_aware':not args.legacy_2gb_address_space,'aurora_card_enabled':card_enabled,
         'aurora_card_linked':any(pathlib.Path(lib).name.lower()=='aurora_card.lib' for lib in libs),
         'aurora_dvd_enabled':dvd_enabled,'nod_linkage':cache_string(runtime_cache,'AURORA_NOD_LINKAGE','shared'),
         'build_type':build_type,'game_build_type':game_build_type,'compiler':compiler,
@@ -84,6 +86,7 @@ command = [compiler,'--target=i686-pc-windows-msvc','-nostartfiles','-nostdlib',
            '-D_DEBUG' if is_debug else '-DNDEBUG','-D_DLL','-D_MT','-Xclang',f'--dependent-lib={crt}',
            '-fuse-ld=lld-link','-Xlinker','/subsystem:console','-Xlinker','/errorlimit:0',
            '-Xlinker','/machine:x86','-Xlinker',f'/defaultlib:{crt}','-Xlinker','/include:_main',
+           '-Xlinker','/largeaddressaware:no' if args.legacy_2gb_address_space else '/largeaddressaware',
            str(game_library),*libs,'-o',str(output)]
 command.extend(['-Xlinker','/map:'+str(output.with_suffix('.map'))])
 if args.host_object:
