@@ -2044,7 +2044,7 @@
     },
     {
       "path": "source/src/melee/ft/fighter.c",
-      "sha256": "a3721cd9d4bc60bde8fcde9ecf252871275f8539011806495aefdcdff76b7fd9"
+      "sha256": "b5ac515afe541123486f3b223156842fd92b0c049d7091e54020410c2a049307"
     },
     {
       "path": "source/src/melee/ft/fighter.h",
@@ -2488,7 +2488,7 @@
     },
     {
       "path": "source/src/melee/ft/ftlib.c",
-      "sha256": "be19ca8217a9c248714a1b43ff0e1a7efe46bc1806287b9b82c504ebf17f98c6"
+      "sha256": "ac19af7cbc26062f7e7b179a3312a7f2a64d6283d8f2499a52d9c2c78af81fd8"
     },
     {
       "path": "source/src/melee/ft/ftlib.h",
@@ -5796,7 +5796,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1832.c",
-      "sha256": "7009d1d996175e532ae403768fe59194e07d2fbdba208c29b5b7a560042b471d"
+      "sha256": "976569b419a9159815765497831f6df7f9c251b5992ba6b154a122e92c142aa6"
     },
     {
       "path": "source/src/melee/gm/gm_1832.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "aa1a8efdc2fb4fe654170bc59ba6262910b542721ffab209b56bb479eae7499d"
+      "sha256": "cc16ea9df00fc1c8fd2c93897ee59eddcca5a22f3aeae3846e04a8a36f84ed3e"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -6696,7 +6696,7 @@
     },
     {
       "path": "source/src/melee/gr/grpushon.c",
-      "sha256": "3b3e2939f1ad8b877f2d04c1747bdcf388a19a1471235a6f279cf4679b58a0a6"
+      "sha256": "b58cce5d17f08ce31c2e2ae7d3c7c140a08ceb6b9424527d90738d2b2a87f6a2"
     },
     {
       "path": "source/src/melee/gr/grpushon.h",
@@ -8936,7 +8936,7 @@
     },
     {
       "path": "source/src/melee/lb/lbvector.c",
-      "sha256": "9642aa77baf23b08f912fae32d0376fa7780d319a00bcde988ec57468486443b"
+      "sha256": "979f76fba31b1e8468b77f7afb3c3112906075a4ac5b3eb7447a1efc9a92e6af"
     },
     {
       "path": "source/src/melee/lb/lbvector.h",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "1b9c8f0cbbbc8e8df294523ec678587631d1c3748be39be6202c339ca7622914"
+      "sha256": "6aafeb9cc6a0b9b111a480874a2c8aa1335e5d6b742f44c5380dea353983d7db"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10445,6 +10445,10 @@
     {
       "path": "source/src/pc/fighter_mars_plan.h",
       "sha256": "b96ae1ac829086916e82a4a2766bc372e8e89387ab91397429454d2158eacfcd"
+    },
+    {
+      "path": "source/src/pc/fighter_masterhand_archive.h",
+      "sha256": "91017336415f156c9e742881bd95719b63191250c0ca978ed418fba7d0851063"
     },
     {
       "path": "source/src/pc/fighter_mewtwo_archive.h",
@@ -11597,6 +11601,10 @@
     {
       "path": "source/src/pc/stage_pura_archive_plan.h",
       "sha256": "94de2c7c617c17a0ff8197880ac4a9711ab2d8b17b4bce2ba538ae2fb027dee1"
+    },
+    {
+      "path": "source/src/pc/stage_pushon_archive_plan.h",
+      "sha256": "3c34ffa451017ffd78e57d311cf800762bff81f0a1b153c6c530c3fe73c79612"
     },
     {
       "path": "source/src/pc/stage_rcruise_archive_plan.h",

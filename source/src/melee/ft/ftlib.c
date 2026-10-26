@@ -1,4 +1,7 @@
 #include "ftlib.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#endif
 
 #include <melee/it/forward.h>
 
@@ -536,6 +539,13 @@ bool ftLib_UpdateScreenVisibility(HSD_GObj* gobj)
         if (camera_gobj != NULL) {
             HSD_CObj* temp_r30 = GET_COBJ(camera_gobj);
             if (temp_r30 == HSD_CObjGetCurrent()) {
+#ifdef TARGET_PC
+                if(getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW") && fp->x890_cameraBox){
+                    Vec3* v=&fp->x890_cameraBox->bone_pos;
+                    if(!(v->x>-50000.0F && v->x<50000.0F && v->y>-50000.0F && v->y<50000.0F && v->z>-50000.0F && v->z<50000.0F))
+                        OSReport("NATIVE_FIRST_DRAW_INVALID gobj=%p fp=%p kind=%d slot=%d motion=%d sleeping=%d camera=%p bone=%g,%g,%g pos=%g,%g,%g\n",gobj,fp,fp->kind,fp->player_idx,fp->motion_id,fp->is_sleeping,fp->x890_cameraBox,v->x,v->y,v->z,fp->cur_pos.x,fp->cur_pos.y,fp->cur_pos.z);
+                }
+#endif
                 if (Camera_80030CD8(fp->x890_cameraBox, &fp->x2188)) {
                     fp->x221F_b0 = false;
                     return true;

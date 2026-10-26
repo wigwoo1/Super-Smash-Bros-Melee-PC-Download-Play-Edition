@@ -601,7 +601,13 @@ void fn_802190A0(void* user_data, int joint_id, CollData* coll, int coll_x50,
                  mpLib_GroundEnum ground_kind, float delta_y)
 {
     Ground* gp = user_data;
+#ifdef TARGET_PC
+    /* The native compiler packs ECBFlagStruct in the opposite bit order.
+     * Read the same logical field initialized by ft_081B, not a PPC byte mask. */
+    if (coll->x34_flags.b1234 == 1 &&
+#else
     if (((*(u8*) &coll->x34_flags >> 3U) & 0xF) == 1 &&
+#endif
         (ground_kind - 1) <= 1U)
     {
         gp->u.map.xC4_b0 = true;

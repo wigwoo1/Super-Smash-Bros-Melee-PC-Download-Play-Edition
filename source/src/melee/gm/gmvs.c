@@ -2229,12 +2229,61 @@ void gm_Scene_Vs_OnFrame(void)
                          frame,controller.state.match_result,Player_GetStocks(0),seventh_closed);
             }
         }
+        if(getenv("MELEE_DIAGNOSTIC_CLASSIC_EIGHTH_COMBAT") && diagnostic_vs_entries==8){
+            static int eighth_closed;
+            if(controller.state.unk_0==2 && clear_calls==1)
+                OSReport("NATIVE_CLASSIC_EIGHTH_END frame=%u outcome=%d stocks=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0));
+            if(!eighth_closed &&
+               ((controller.state.unk_0!=0 && controller.state.match_result==OUTCOME_1P_GAME_OVER) ||
+                (controller.state.unk_0==0 && frame>=7200))){
+                eighth_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_CLASSIC_EIGHTH_ABORT frame=%u outcome=%d stocks=%d queued=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0),eighth_closed);
+            }
+        }
+        if(getenv("MELEE_DIAGNOSTIC_PUSHON_DOOR_EXIT") && diagnostic_vs_entries==9){
+            static int door_closed;
+            if(controller.state.unk_0==2 && clear_calls==1)
+                OSReport("NATIVE_PUSHON_EXIT_END frame=%u outcome=%d stocks=%d flags=%u point=%d\n",
+                    frame,controller.state.match_result,Player_GetStocks(0),Ground_801C1D84(),Ground_801C1DD4());
+            if(!door_closed && controller.state.unk_0==0 && frame>=1800){
+                door_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_PUSHON_EXIT_ABORT frame=%u queued=%d\n",frame,door_closed);
+            }
+        }
+        /* The tenth match reuses the normal Classic combat PAD policy above.
+         * Observe its original result, then allow the original clear/Start path
+         * to advance; never assign stocks, damage, or an outcome here. */
+        if(getenv("MELEE_DIAGNOSTIC_CLASSIC_TENTH_COMBAT") && diagnostic_vs_entries==10){
+            static int tenth_closed;
+            if(controller.state.unk_0==2 && clear_calls==1)
+                OSReport("NATIVE_CLASSIC_TENTH_END frame=%u outcome=%d stocks=%d\n",
+                    frame,controller.state.match_result,Player_GetStocks(0));
+            if(!tenth_closed &&
+               ((controller.state.unk_0!=0 && controller.state.match_result==OUTCOME_1P_GAME_OVER) ||
+                (controller.state.unk_0==0 && frame>=7200))){
+                tenth_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_CLASSIC_TENTH_ABORT frame=%u outcome=%d stocks=%d queued=%d\n",
+                    frame,controller.state.match_result,Player_GetStocks(0),tenth_closed);
+            }
+        }
         if(getenv("MELEE_DIAGNOSTIC_FIGURE_NEXT") &&
-           diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_SEVENTH_COMBAT")?8:7) &&
+           (diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_EIGHTH_COMBAT")?9:
+                                    getenv("MELEE_DIAGNOSTIC_CLASSIC_SEVENTH_COMBAT")?8:7) ||
+            (getenv("MELEE_DIAGNOSTIC_PUSHON_DOOR_EXIT") && diagnostic_vs_entries==10 &&
+             !getenv("MELEE_DIAGNOSTIC_CLASSIC_TENTH_COMBAT")) ||
+            (getenv("MELEE_DIAGNOSTIC_CLASSIC_TENTH_COMBAT") && diagnostic_vs_entries==11)) &&
            controller.state.unk_0==0 && self){
             static int next_capture;
             static unsigned attack_frame;
+            static unsigned route_stable,route_complete,route_stalled;
+            static unsigned second_stable,second_complete,second_stalled;
+            static float second_previous_x;
+            static float route_previous_x;
             Fighter* fp=self->user_data;
+            static unsigned next_input_entry;
+            if(next_input_entry!=diagnostic_vs_entries){next_input_entry=diagnostic_vs_entries;attack_frame=0;next_capture=0;}
             memset(&input,0,sizeof(input));
             if(frame>=180 && frame<210)input.stickX=45;
             if(frame>=240 && frame<270)input.stickX=-45;
@@ -2243,13 +2292,63 @@ void gm_Scene_Vs_OnFrame(void)
                ftLib_GetGroundAir(self)==GA_Ground && ftLib_GetMotionId(self)==ftCo_MS_Wait &&
                !(fp->input.held_buttons[0]&PAD_BUTTON_A))attack_frame=frame;
             if(attack_frame && frame-attack_frame<4)input.button=PAD_BUTTON_A;
+            if(getenv("MELEE_DIAGNOSTIC_PUSHON_FIRST_ROUTE") && diagnostic_vs_entries==9 && stage_info.grkind==Gr_Kind_Pushon){
+                bool grounded=ftLib_GetGroundAir(self)==GA_Ground;
+                memset(&input,0,sizeof(input));
+                if(frame>=180 && !route_complete){
+                    if(fp->cur_pos.x<104.0f)input.stickX=55;
+                    else if(fp->cur_pos.x>112.0f)input.stickX=-45;
+                    if(grounded && input.stickX && fp->cur_pos.x>route_previous_x-0.01f && fp->cur_pos.x<route_previous_x+0.01f)++route_stalled;
+                    else route_stalled=0;
+                    if(grounded && route_stalled>=30 && frame%120<4)input.button=PAD_BUTTON_X;
+                    if(grounded && fp->cur_pos.x>=95.0f && fp->cur_pos.x<=118.0f &&
+                       fp->cur_pos.y>=625.0f && fp->cur_pos.y<=665.0f && Player_GetStocks(0)>0)++route_stable;
+                    else route_stable=0;
+                    if(route_stable>=30){
+                        route_complete=frame;memset(&input,0,sizeof(input));
+                        OSReport("NATIVE_PUSHON_FIRST_COMPLETE frame=%u stable=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",
+                                 frame,route_stable,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+                    }
+                }
+                if(getenv("MELEE_DIAGNOSTIC_PUSHON_SECOND_ROUTE") && route_complete){
+                    if(frame>=route_complete+30 && !second_complete){
+                        if(fp->cur_pos.x<296.0f)input.stickX=65;
+                        else if(fp->cur_pos.x>304.0f)input.stickX=-45;
+                        if(grounded && input.stickX && fp->cur_pos.x>second_previous_x-0.01f && fp->cur_pos.x<second_previous_x+0.01f)++second_stalled;
+                        else second_stalled=0;
+                        if(grounded && second_stalled>=20 && frame%120<4)input.button=PAD_BUTTON_X;
+                        if(grounded && fp->cur_pos.x>=290.0f && fp->cur_pos.x<=312.0f &&
+                           fp->cur_pos.y>=620.0f && fp->cur_pos.y<=660.0f && Player_GetStocks(0)>0)++second_stable;
+                        else second_stable=0;
+                        if(second_stable>=30){
+                            second_complete=frame;memset(&input,0,sizeof(input));
+                            OSReport("NATIVE_PUSHON_SECOND_COMPLETE frame=%u stable=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",
+                                frame,second_stable,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+                        }
+                    }
+                    second_previous_x=fp->cur_pos.x;
+                    if(frame%5==0)OSReport("NATIVE_PUSHON_SECOND_INPUT frame=%u motion=%d ground=%d x=%f y=%f floor=%d stocks=%d damage=%d stable=%u complete=%u requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f\n",
+                        frame,fp->motion_id,grounded,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,
+                        Player_GetStocks(0),Player_GetDamage(0),second_stable,second_complete,input.stickX,input.button,
+                        fp->input.held_buttons[0],fp->input.pressed_buttons,fp->input.lstick[0].x);
+                }
+                route_previous_x=fp->cur_pos.x;
+                if(frame%5==0)OSReport("NATIVE_PUSHON_FIRST_INPUT frame=%u motion=%d ground=%d x=%f y=%f floor=%d stocks=%d damage=%d stable=%u complete=%u requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f\n",
+                    frame,fp->motion_id,grounded,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,
+                    Player_GetStocks(0),Player_GetDamage(0),route_stable,route_complete,input.stickX,input.button,
+                    fp->input.held_buttons[0],fp->input.pressed_buttons,fp->input.lstick[0].x);
+            }
             if(frame%5==0 || (attack_frame && frame-attack_frame<12))
                 OSReport("NATIVE_FIGURE_NEXT_INPUT frame=%u motion=%d ground=%d x=%f y=%f stocks=%d requested_x=%d requested_button=%u held=%u pressed=%u latched_x=%f attack_frame=%u\n",
                          frame,fp->motion_id,ftLib_GetGroundAir(self)==GA_Ground,fp->cur_pos.x,fp->cur_pos.y,
                          Player_GetStocks(0),input.stickX,input.button,fp->input.held_buttons[0],fp->input.pressed_buttons,
                          fp->input.lstick[0].x,attack_frame);
 #if defined(_WIN32)
-            if(frame>=180 && !next_capture){
+            if(frame>=180 && !next_capture &&
+               (!getenv("MELEE_DIAGNOSTIC_PUSHON_DOOR_EXIT") ||
+                diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_TENTH_COMBAT")?11:10)) &&
+               (diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_TENTH_COMBAT")?11:10) || !getenv("MELEE_DIAGNOSTIC_PUSHON_FIRST_ROUTE") ||
+                (getenv("MELEE_DIAGNOSTIC_PUSHON_SECOND_ROUTE")?second_complete:route_complete))){
                 char* path=NULL;size_t size=0;
                 if(_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_THIRD_STAGE_CAPTURE")==0 && path && path[0]){
                     next_capture=_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path)==0;

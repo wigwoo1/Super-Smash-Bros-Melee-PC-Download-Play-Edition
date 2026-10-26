@@ -10063,3 +10063,293 @@ then make a grounded fix and test muted. Eighth stage, later campaign, complete
 content/fidelity, physical controls and release remain unverified.
 Await Sol High confirmation or explicit authorization to continue Sol Medium.
 Goal is not complete or paused.
+
+
+2026-10-25 — NATIVE CLASSIC INTRO STACK OVERWRITE FIX VERIFIED
+
+Status VERIFIED for this scoped repair. Overall project estimate approximately29%; full playable release incomplete.
+
+Sol High traced the exact fn_8018564C -> fn_80185408 -> MTXOrtho call path.
+
+MTXOrtho requires64bytes (Mtx44), while the native local was48bytes (Mtx).
+
+Old compiled function allocates0x4c and passes ESP+0x1c: final matrix row
+
+[0,0,0,1] overwrites saved ESI at+0x4c, return PC at+0x50, and two arguments.
+
+That predicts the previous ESI0/EIP0 fault and zero/1.0 stack values.
+
+The TARGET_PC local now uses Mtx44. New stack allocates0x5c: matrix ends
+
+at+0x5b, below saved ESI+0x5c and returnPC+0x60. Console declaration unchanged.
+
+No callback was ignored and no intro/stage/result/stock/position was forced.
+
+All26previous tracked source inputs remain unchanged; the prior gm_1832.c
+
+matches published reviewed main5ba2d78. Build and no-save/LAA native link PASS.
+
+
+
+Muted D3D12 AND Vulkan original-route tests PASS on the identical executable.
+
+All ten original target callbacks, first-trophy jab/catch/end, seventh original
+
+victory/clear/normal Start, actual formerly crashing intro camera RETURN,
+
+natural eighth entry/stagekind3,900simulation frames,GPU-presented capture,
+
+positive stocks, and clean shutdown0 pass. Actual eighth screenshots inspected:
+
+Mario/Luigi team battle on Rainbow Cruise. No full eighth victory claim.
+
+The initial independent audit had a trace-order assumption (clear init is
+
+logged immediately before END); corrected against saved raw event order,
+
+without changing source, acceptance gates or rerunning D3D12. Raw audit retained.
+
+
+
+Evidence: development/classic-eighth-intro-20261025/native-verification.json,
+
+root-cause.json,source-audit.json,before/after disassemblies and immutable cases.
+
+Each case preserves exact tested27inputs,receipt,log,summary and GPU image.
+
+Executable: 77d500791d5570dca1dbb33d53b969f94ddaa99eca11229c1149d1554269aada
+
+Game library: fe7f65b896a397182ed660fe9048343d58e13424fa61ee8aa5c424112d0273d1
+
+Default desktop build, previous candidates, original discs and saves preserved.
+
+No public binary release implied. Eighth victory/later campaign, physical
+
+controls, full character/stage fidelity and all broader roadmap remain open.
+
+
+
+Next bounded task: original eighth team-battle combat and next Classic
+
+transition using ordinary PAD policy. Sol Medium is sufficient; recommend
+
+switching down from Sol High. Goal remains active, waiting for model choice.
+
+
+
+2026-10-25 — EIGHTH CLASSIC HORDE VICTORY VERIFIED; NINTH ARCHIVE BLOCKED
+Status PARTIALLY_VERIFIED. Overall project estimate approximately29%; full port incomplete.
+Human confirmed Sol Medium. Reused unchanged normal PAD combat policy, adding
+only optional eighth end/7200frame abort and ninth entry input/GPU capture.
+Build and no-save/LAA native link PASS,27input receipts/snapshot preserved.
+Current executable 5ffcef76456777280add19f519f44df3f3c4b8ad03d00f80aee1917a96ef6dd0; library 6cafad15413c7fa46e0fc7427d2bbb8360a666706566592e6d2e8ad4d4d79ad9.
+
+Muted D3D12 case eighth-combat-d3d12-1:
+- All ten targets, trophy hit/catch/end, seventh original victory1072/stocks3,
+  and repaired intro replayed naturally without forced stage/state/results.
+- Eighth Mario/Luigi horde at Rainbow Cruise records12positive original P1 hits.
+  Combat-hit attacker21/target0 are FIGHTER KINDs, not player indices. Original
+  ftcoll guard restricts trace to player0 attacks; selected targets have opposing
+  team metadata. No friendly target selected.
+- Original eighth victory frame1112/outcome5/stocks3; clear initialized with
+  outcome5/score412480, normal Start240, then native VS entry9.
+- MatchOutcome5 is documented OUTCOME_UNK_1P_HORDE_BATTLE_VICTORY. Initial
+  runner reused normal-battle outcome3 assertion and mislabeled victory false.
+  Raw FAIL summary and exact tested-inputs.zip remain unchanged. Independent
+  audit checks outcome5; future runner fixed without engine rebuild/rerun.
+- Ninth stage fails during typed archive conversion before gameplay/capture:
+  bytes644176, body635872, reloc1728, public45, extern0;
+  first root ALDYakuAll offset394480, GrdPushon* texture roots.
+  StageData grPushOn_StageData maps Gr_Kind_Pushon to /GrNPo.dat.
+  Runtime explicitly refuses unsupported schema and exits1 via HSD assertion.
+  Ninth initialization started; no ninth gameplay900/GPU or clean shutdown PASS.
+
+No unchanged retry on Vulkan; same missing schema is not a renderer diagnosis.
+Only one new full-route runtime attempt; stop before reverse-engineering on
+Sol Medium. Recommend Sol High for the ninth stage typed archive profile.
+Next: derive and validate original GrNPo root/relocation/parameter layouts,
+implement strict native conversion, rebuild and verify ordinary progression
+and ninth-stage gameplay muted on D3D12/Vulkan. No skips or forced outcomes.
+
+Evidence: development/classic-eighth-combat-20261025/native-verification.json,
+source-audit.json,source-diff.txt,outcome-audit.txt and immutable case snapshot.
+All test processes terminal. Previous verified intro candidate/default remain
+preserved; no new failed experimental binary delivered or published.
+Original discs and saves untouched. Ninth gameplay, later campaign, complete
+content/fidelity, physical input and broader requested roadmap remain open.
+
+
+2026-10-25 - ORIGINAL NINTH CLASSIC STAGE DECODER AND GAMEPLAY VERIFIED
+Status VERIFIED for archive conversion and bounded ninth-stage load/play.
+Overall project estimate approximately29%; complete playable release unfinished.
+Human confirmed Sol High. Added pc/stage_pushon_archive_plan.h and exact
+GrNPo.dat45root dispatch in archive_native.h. No combat/gameplay source changed.
+Source grpushon.c defines six hazard descriptor links (legacy x0 returned
+through a32bit callback), s32 count,30{s32,s16,s16} records and33{s32,s32}
+lookup pairs. Descriptor payloads are lbColl_80008D30_arg1: nine32bit words.
+Reuse existing typed stage/model/collision/lighting/script planner. Pixel,
+packed command and padding bytes preserved; no generic blanket word swap.
+
+Offline PASS: full635872byte body and claim-map oracle from independent Python
+source/schema planner;1183typed records; all1728relocations and45roots parsed
+and installed by actual i686 HSD parser with region lifetime checks. Previous
+production decoder refusal reproduced.214malformed inputs rejected without
+mutation (includes six hazard links tested outside/unaligned/short extent).
+Ten prior stage/text archives have byte-identical conversion output.
+Build and no-save/LAA native link PASS,28tracked production inputs preserved.
+Executable b2f9976b63270dd912b24bab2b9b51e7732c4e3f7566dcc9434dd53928a28abb; library 039136504d6d980eadc2915922c2d036b1a392385f6f8bdb25fa4e26df01f92f.
+
+Muted D3D12 AND Vulkan original-route tests PASS on this identical executable.
+Normal PAD input naturally clears all10targets, first trophy bonus, seventh
+match and eighth horde. Original eighth outcome5/clear/Start leads to ninth
+VS entry and original GrNPo archive parse_end644176/1728/ALDYakuAll.
+Actual stagekind39 Race to the Finish runs900simulation frames with1stock.
+Ordinary right/left walking, actual rising jump25/26 and original jab44 with
+A pressed256 verified from latched input/position/state. GPU-presented stage
+screenshots inspected on both renderers; clean shutdown0 and no scanned fault.
+No stage skip, forced outcome, position, stock, physics or count changes.
+This does NOT verify completing the bonus, hazards/contact in all rooms,
+later Classic stages, physical input or complete original-render fidelity.
+
+Evidence: development/classic-ninth-archive-20261025/stage-verification.json,
+independent-verification.json,native-verification.json,source-audit.json;
+immutable cases preserve tested-inputs.zip,build receipt,raw log/summary and
+GPU images. Existing default/previous frozen builds, discs and saves preserved.
+A separate private Desktop candidate includes matching full source/rebuild/mod
+instructions, versions and notices; see delivery-verification.json after delivery.
+No new public binary release is implied.
+
+The difficult archive-format work is complete for this profile. Sol Medium is
+sufficient for the next bounded Race to the Finish route/hazard check. Await
+human model choice; full project objective remains incomplete and unchanged.
+
+
+2026-10-25 - FIRST RACE TO FINISH CORRIDOR VERIFIED
+Overall approximately29%; full port/campaign incomplete. Sol Medium.
+Muted D3D12 normal-PAD test naturally reaches ninth stage then travels from
+spawn0/703.804/floor37 to107.972977/649.000122/floor44 atframe434.
+Stable30grounded ticks,stock1,damage0; stock remains1 through900frames.
+Post-landing GPU-presented screenshot inspected; clean exit0 and no fault.
+Existing archive decoder and gameplay physics unchanged. Only optional normal
+PAD route/read-only state and capture timing diagnostics added to gmvs.c.
+Build/no-save/LAA link and28input snapshot audit PASS. No full bonus completion
+or later-hazard claim. Evidence development/classic-ninth-first-route-20261025/
+native-verification.json and immutable first-route-d3d12-1 case snapshot.
+No duplicate Vulkan route run: no renderer/decoder changes; previous ninth
+archive/render/input checks already pass both renderers. No new binary delivery.
+Next: Sol Medium bounded next-corridor/moving-obstacle checkpoint, normal PAD.
+
+
+2026-10-25 - FIRST TWO RACE TO FINISH CORRIDORS VERIFIED
+Status VERIFIED for bounded normal-input traversal. Overall approximately29%; full port incomplete.
+Sol Medium added opt-in controller waypoints, read-only floor/stock/damage
+observations and checkpoint capture gating. No archive decoder, collision,
+physics, damage, stock, original outcome or stage-selection changes.
+Build/no-save/LAA link and28tracked input source audits PASS.
+
+First muted D3D12 case first-route-d3d12-1, in separate immutable directory:
+original Classic path to ninth; spawn0/703.804/floor37 to107.972977/649.000122/
+floor44 at434,30grounded ticks,stock1,damage0,900frames and clean exit0.
+Post-landing exact GPU-presented screenshot visually inspected.
+
+Extended muted D3D12 case second-route-d3d12-1:
+first landing repeats, then ordinary PAD travel past moving course machinery
+to310.318481/640.000122/floor52 at650,30grounded ticks,stock1,damage0.
+All observed later stock samples remain1 and maximum damage remains0;
+1800simulation frames, post-checkpoint exact GPU capture and clean shutdown0.
+Independent audit checks actual travel/drop/new floor, repeated grounded
+position samples and capture timing, not merely the completion log flag.
+Screenshot inspected: character stands by an original exit door beyond the
+first moving machinery. Door use and original bonus/next-stage transition
+are NOT yet verified; full course and later hazards/campaign remain open.
+
+Evidence: development/classic-ninth-first-route-20261025/native-verification.json
+and development/classic-ninth-second-route-20261025/native-verification.json;
+source-audit.json and exact tested-inputs.zip/build receipts preserved per case.
+Current diagnostic executable e1809aee59d00779cc294ca10748c7c77248ee55a2d6b6ae04b3c31ee089f86d; library bb9ac4e5af8bf4c8c03923e7407ed9de37f74d230fc786377046a649ead606f5.
+No Vulkan duplication for these input-only checks; preceding ninth decoder,
+GPU and basic-input checks already pass both renderers and decoder is unchanged.
+No new runtime binary delivered: existing private ninth-archive candidate and
+its frozen matching source remain the latest verified delivered build.
+Default, previous candidates, original discs and saves preserved.
+
+Next bounded task: on Sol Medium, normal original Up/door interaction at this
+checkpoint, original bonus result/clear/Start and next Classic scene. Do not
+call this full-course completion or skip/force its result. Stop and recommend
+Sol High if that introduces an unsupported archive or hard engine fault.
+No model switch currently required; goal work remains authorized.
+
+
+2026-10-25 - ORIGINAL RACE DOOR CONTACT FIX AND TENTH MATCH VERIFIED
+Status VERIFIED for native logical collision field and bounded progression.
+Overall project estimate approximately29%; full playable release incomplete.
+Sol Medium investigated original door eligibility before adding test input.
+Source fn_802190A0 shifted the raw ECBFlagStruct byte using the GameCube bit
+layout. Native x86 packs that bitfield in the opposite direction; ft_081B
+sets logical b1234=1 for fighters. TARGET_PC now reads b1234 directly.
+Console raw-mask branch retained, other callback conditions/state unchanged.
+
+Standalone actual-source callback tests use the real native Ground/CollData/
+ECBFlagStruct types: all16contact classes x16other-bit combinations x4ground
+kinds,1024checks. Previous source gives64mismatches; corrected source gives0.
+Test fixture/current production hashes recorded in contact-verification.json.
+Build/no-save/LAA native link and29input provenance audits PASS.
+Production change grpushon.c is one portable field read; gmvs changes are
+optional route/door/next-stage observations and safety bounds only.
+No original stage,result,position,stock,damage,physics or timer assignments.
+Executable d8ff822e7becc8d9f3425adc575cb9897f4331cf723af6d7e40e5745fdaae432; library f83732cc7e236da9ac93236c6c0bdae4080f3f160c7b59df454ef8f20775d1ec.
+
+Muted D3D12 AND Vulkan original-route tests pass on this same executable:
+first9stages reached by normal PAD input, first Race corridor landed, then
+walking contact triggers the original early exit atframe628/point154.
+Ground door flag16 and original bonus outcome6 withstock1 observed before
+1800frame abort or any timer expiry. Original clear and Start240 advance
+naturally to tenth Classic match/stagekind36 (Battlefield).900simulation
+frames, actual GPU-presented screenshots inspected, clean shutdown0/no fault.
+The early door is a legitimate original exit, not a full Race course clear.
+Other doors/hazards, tenth victory and later campaign remain unverified.
+No Up-button input was needed or claimed; source uses walking contact.
+
+Evidence: development/classic-ninth-door-20261025/native-verification.json,
+contact-verification.json,source-audit.json and immutable case records with
+raw logs/summaries,exact tested-inputs.zip/build receipts and GPU captures.
+The route intentionally does not require second30tick landing: original door
+activation ends the stage before that old stationary-observation checkpoint.
+Its replacement acceptance requires actual door flag16/validpoint/result6,
+original clear/Start and next match, explicitly excluding timeout/abort.
+Prior diagnostic case showed the character remaining by this door until1800;
+the targeted native callback test independently reproduces the flag mismatch.
+
+Deliver a separate private Desktop candidate with complete matching source,
+versions/notices,rebuild/mod instructions; preserve default and older frozen
+builds/source. No public binary release implied. Disc and saves untouched.
+Next bounded task: use existing combat-PAD policy to test tenth victory and
+next original Classic transition. Luna Medium is sufficient for that routine
+harness extension now the contact bug is fixed; recommend switching down
+from Sol Medium. Escalate on a new engine/archive issue or two focused failures.
+
+
+2026-10-25 — Tenth Classic match reached; next archive is a new blocker
+Build/no-save link passed. Muted native D3D12 run naturally completed the tenth match with original outcome 3 and two stocks remaining, then reached original Classic entry 11. It failed before the eleventh match could start playing: the native typed archive converter refused an unsupported 53,509-byte body with 293 relocations and a single public root named ftDataMasterhand. No game state was forced. The exact source/build/case inputs are frozen in development/classic-tenth-combat-20261025/tenth-d3d12-1/tested-inputs.zip and the checks in tenth-combat-verification.json. No second attempt was made. This is now an archive reverse-engineering task; recommend Sol High. Overall project estimate remains 29%, not a completed campaign or playable release. No new Desktop build or public binary was delivered; the prior Desktop candidate remains unchanged. Disc and saves remain untouched.
+
+
+2026-10-26 - HAND BOSS ARCHIVES CONVERT; FIRST BOSS DRAW STILL BLOCKED
+Status PARTIALLY VERIFIED. Overall project estimate29%; full release incomplete.
+Four exact source-backed profiles now convert PlMh.dat/PlMhNr.dat and PlCh.dat/PlChNr.dat. Full-file independent scalar/packed/model byte oracles, real x86 HSD relocation/lifetime checks,454 malformed atomic refusals,99 original motion archive parses, and11 unchanged archive regressions pass. Both original boss selection and standard roster-unlock policy are retained. Build/no-save/LAA link succeeds.
+
+Two distinct muted D3D12 runtime attempts are terminal(exit1,no timeout). First: Master Hand initializes, but the paired Crazy Hand archive is refused. Second, after source-backed Crazy Hand conversion: both boss main/model archives parse; Master Hand spawn/Entry motion is observed, then the first fighter draw fails the x-coordinate range check in lbVector_WorldToScreen. Crazy Hand spawn completion,900 gameplay frames,GPU capture/clean exit and Vulkan gameplay are unverified. The coordinate value/owner/producer have not been captured; no position clamp, assertion bypass, boss removal or forced outcome has been applied.
+
+Runtime imagebase006B0000 / preferred00400000 normalizes the final callback00E98860 to00BE8860: ftDrawCommon_80080E18 in the exact link map. Astra Low is recommended for the first-render coordinate/construction lifecycle investigation after two focused failed attempts. Trace the actual producer and correct it, then rerun muted D3D12 before Vulkan.
+
+Evidence: development/classic-masterhand-20261026/runtime-blocker.json, offline verification JSON, native-verification.json, immutable raw case logs and tested-inputs.zip/build receipts. New work remains only in the private work checkout; package.py is prepared but has not run. Do not publish a new binary or describe the final boss/campaign as playable. Existing default and prior Desktop candidate executable/source ZIP hashes rechecked unchanged. Disc and saves untouched.
+
+
+2026-10-26 - PROJECTION BUFFER OVERRUN FIXED; BOSS FIRST-DRAW BLOCKER PERSISTS
+Status PARTIALLY VERIFIED; overall project estimate29%, no release acceptance.
+Astra Low trace shows the final failing draw belongs to the completed DrMario object, not a partially initialized boss. No invalid camera bone anchor was logged by the opt-in precheck. The uninstalled construction-lifetime prototype was therefore not used as a fix.
+
+WorldToScreen had a concrete48byte Mtx allocation passed to actual64byte perspective/orthographic writers. TARGET_PC now uses Mtx44; original console declaration retained. Native x86 SDK-type canary tests prove2000/2000old16byteoverruns,0correctedoverruns and2000identical first12matrixvalues. Build/no-save/LAA link passes. Other current perspective/ortho destinations in cobj/text/boundary-overlay/intro paths use Mtx44. This is a verified bounds repair, not proof of the boss-rendering cause.
+
+Two muted D3D12 runs are terminal(exit1,no timeout): diagnostic-only trace, then projection repair. Both reach original tenth victory/clear/Start and entry11, but fail the same x-coordinate range assertion before900frames, screenshot or clean exit. Vulkan not retried. The actual rejected world point/caller remains unrecorded; next investigate the computed offscreen fallback in Camera_80030CFC, including sp20/extents/normalization, with direct failing-vector/caller evidence. Do not clamp positions, bypass assertions, remove a boss or force a result. Astra Medium recommended after these two focused attempts.
+
+Exact source/build snapshots, raw logs,projection-verification.json and runtime-blocker.json retained in development/boss-first-draw-20261026. Current executable a8cb68efd8a03eb1c1343d53a744de164659053abba69d2ec4c59d68d1858ec8. Prior hand-boss archive/model/motion offline checks still pass; they do not establish live gameplay. No new Desktop/public binary delivered; original discs,saves,default and frozen source/builds untouched.

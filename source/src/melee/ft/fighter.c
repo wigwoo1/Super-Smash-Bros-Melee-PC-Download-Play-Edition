@@ -885,10 +885,22 @@ Fighter_GObj* Fighter_Create(struct plAllocInfo* input)
     fp = HSD_ObjAlloc(&fighter_alloc_data);
     fp->dat_attrs_backup = HSD_ObjAlloc(&fighter_dat_attrs_alloc_data);
     GObj_InitUserData(gobj, 4U, &Fighter_Unload_8006DABC, fp);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW"))
+        OSReport("NATIVE_FIGHTER_CONSTRUCT phase=data_begin gobj=%p fp=%p intended_kind=%d slot=%d\n",gobj,fp,input->internal_id,input->slot);
+#endif
     ftData_8008572C(input->internal_id);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW"))
+        OSReport("NATIVE_FIGHTER_CONSTRUCT phase=data_end gobj=%p intended_kind=%d\n",gobj,input->internal_id);
+#endif
     Fighter_UnkInitLoad_80068914(gobj, input);
     efAsync_LoadSync(ftData_UnkBytePerCharacter[fp->kind]);
     ftData_80085820(fp->kind, fp->costume_id);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW"))
+        OSReport("NATIVE_FIGHTER_CONSTRUCT phase=costume_end gobj=%p kind=%d\n",gobj,fp->kind);
+#endif
 
     Fighter_UnkUpdateCostumeJoint_800686E4(gobj);
 

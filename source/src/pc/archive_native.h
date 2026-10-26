@@ -181,6 +181,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "stage_icemt_archive_plan.h"
 #include "stage_target_drmario_archive_plan.h"
 #include "stage_figure_get_archive_plan.h"
+#include "stage_pushon_archive_plan.h"
 #include "stage_kongo_archive_plan.h"
 #include "item_common_archive.h"
 #include "fighter_common_archive.h"
@@ -206,6 +207,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "fighter_donkey_archive.h"
 #include "fighter_sheik_archive.h"
 #include "fighter_clink_archive.h"
+#include "fighter_masterhand_archive.h"
 /* Typed runtime conversion. -2: unsupported body schema; -1: malformed.
  * All checks precede mutation. Pointer relocation remains ArchiveParse's job.
  * Rumble root entries are pointer + u8 priority + three padding bytes. */
@@ -892,7 +894,36 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    if(publics==1 && !externs && length==53509 && body==52280 && relocs==293 &&
+       MeleePc_DatBe32(bytes+roots)==19104 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataMasterhand")){
+        int result=MeleePc_MasterHandBody(bytes,length,body,relocs,19104);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    if(publics==1 && !externs && length==313338 && body==310976 && relocs==574 &&
+       MeleePc_DatBe32(bytes+roots)==41296 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"PlyMasterhand_Share_joint")){
+        int result=MeleePc_MasterHandBody(bytes,length,body,relocs,41296);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     /* Verified Captain fighter body; gameplay/motions/costumes remain separate gates. */
+    if(publics==1 && !externs &&
+       ((length==54572 && body==53336 && relocs==295 && MeleePc_DatBe32(bytes+roots)==20132 &&
+         !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataCrazyhand")) ||
+        (length==313513 && body==311104 && relocs==586 && MeleePc_DatBe32(bytes+roots)==41424 &&
+         !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"PlyCrazyhand_Share_joint")))){
+        int result=MeleePc_MasterHandBody(bytes,length,body,relocs,MeleePc_DatBe32(bytes+roots));
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     if(publics==1 && !externs && length==161726 && body==150880 && relocs==2698 &&
        MeleePc_DatBe32(bytes+roots)==39428 &&
        !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"ftDataCaptain")){
@@ -9445,6 +9476,20 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    /* Original GrNPo bonus stage, source-typed mixed hazard parameters. */
+    if(length==644176 && body==635872 && relocs==1728 && publics==45 && !externs){
+        static const char* names[]={"ALDYakuAll","GrdPushonBlue_RGB565_image","GrdPushonBord1_C4_image","GrdPushonBord1_tlut","GrdPushonBord1_tlut_desc","GrdPushonGridA_RGB565_image","GrdPushonGridAa_CMPR_image","GrdPushonGridAa_MIPMAP_CMPR_image","GrdPushonGridC_RGB565_image","GrdPushonHariB_C8_image","GrdPushonHariB_tlut","GrdPushonHariB_tlut_desc","GrdPushonHari_C8_image","GrdPushonHari_tlut","GrdPushonHari_tlut_desc","GrdPushonKoushi_C8_image","GrdPushonKoushi_tlut","GrdPushonKoushi_tlut_desc","GrdPushonLighiR_C8_image","GrdPushonLighiR_tlut","GrdPushonLighiR_tlut_desc","GrdPushonLightB_I8_image","GrdPushonLightO_C4_image","GrdPushonLightO_tlut","GrdPushonLightO_tlut_desc","GrdPushonLine1_C8_image","GrdPushonLine1_tlut","GrdPushonLine1_tlut_desc","GrdPushonLine2_C8_image","GrdPushonLine2_tlut","GrdPushonLine2_tlut_desc","GrdPushonNeon1_C8_image","GrdPushonNeon1_tlut","GrdPushonNeon1_tlut_desc","GrdPushonNoizi1_I8_image","GrdPushonT047_RGB565_image","GrdPushonYerrowB_RGB565_image","GrdPushonYerrow_RGB565_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};
+        static const uint32_t offsets[]={394480,448448,617696,618208,618240,576192,497728,505920,517504,618272,634656,634848,431520,447904,448416,533888,550272,550592,608960,617152,617664,497600,516928,517440,517472,558816,558944,559040,576000,576128,576160,559072,575456,575968,481216,398752,550624,525696,393336,393480,393700,408,395588,635848,393920};
+        for(uint32_t i=0;i<publics;i++)
+            if(MeleePc_DatBe32(bytes+roots+i*8)!=offsets[i] ||
+               strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+i*8+4),names[i]))return -2;
+        int result=MeleePc_StagePushonBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
     /* Original Classic trophy-catching bonus, source-typed stage graph. */
     if(length==444859 && body==441440 && relocs==567 && publics==36 && !externs){
         static const char* names[]={"ALDYakuAll","Dai2_CMPR_image","Dai3_CMPR_image","GrdFiguregetBG3_C8_image","GrdFiguregetBG3_tlut","GrdFiguregetBG3_tlut_desc","GrdFiguregetColB_RGBA8_image","GrdFiguregetColW_RGBA8_image","GrdFiguregetKago_RGBA8_image","GrdFiguregetKumoUn22_IA8_image","GrdFiguregetKumoUn333_C8_image","GrdFiguregetKumoUn333_tlut","GrdFiguregetKumoUn333_tlut_desc","GrdFiguregetMark1_C8_image","GrdFiguregetMark1_tlut","GrdFiguregetMark1_tlut_desc","GrdFiguregetMark2_C8_image","GrdFiguregetMark2_tlut","GrdFiguregetMark2_tlut_desc","GrdFiguregetMetal2_RGBA8_image","GrdFiguregetMetal3_RGBA8_image","GrdFiguregetSkin5_C8_image","GrdFiguregetSkin5_tlut","GrdFiguregetSkin5_tlut_desc","GrdFiguregetSter2_I8_image","GrdFigurgetSkin3_C8_image","GrdFigurgetSkin3_tlut","GrdFigurgetSkin3_tlut_desc","PlyMario5KButton_CMPR_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};
