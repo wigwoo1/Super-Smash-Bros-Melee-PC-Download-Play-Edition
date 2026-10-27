@@ -561,6 +561,14 @@ void Fighter_Spawn(Fighter_GObj* gobj)
 
     ftCo_800A101C(fp, Player_GetCpuType(fp->player_idx),
                   Player_GetCpuLevel(fp->player_idx), 0);
+#ifdef TARGET_PC
+    if ((fp->kind == Ft_Kind_MasterH || fp->kind == Ft_Kind_CrezyH) &&
+        getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW")) {
+        OSReport("NATIVE_BOSS_CPU_INIT kind=%d slot=%d static_level=%d fighter_level=%d type=%d\n",
+                 fp->kind, fp->player_idx, Player_GetCpuLevel(fp->player_idx),
+                 fp->cpu.level, Player_GetCpuType(fp->player_idx));
+    }
+#endif
 
     efAsync_QueueClear(&fp->x60C);
     ft_8007C17C(gobj);
@@ -3364,3 +3372,4 @@ void Fighter_Unload_8006DABC(void* user_data)
     HSD_ObjFree(&fighter_dat_attrs_alloc_data, fp->dat_attrs_backup);
     HSD_ObjFree(&fighter_alloc_data, fp);
 }
+

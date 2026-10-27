@@ -5,6 +5,8 @@
 #include "title_layouts.h"
 #include "game_over_scene_profile.h"
 #include "trophy_model_profile.h"
+#include "ending_scene_profile.h"
+#include "credits_scene_profile.h"
 /* Original offsets remain immutable until every typed claim is validated.
  * Packed GX/animation streams are byte payloads, never scalar arrays. */
 typedef struct { uint32_t at; unsigned type; } MeleePc_TitleNode;
@@ -404,7 +406,8 @@ static int title_finish_plan(MeleePc_TitlePlan* p,unsigned allow_untyped_local_r
     /* A DAT relocation table contains only slot offsets. For the explicitly
      * gated Sheik archive, remaining local relocation words may be converted
      * generically only when bounded and disjoint from every typed/packed claim.
-     * Other archive profiles retain the strict source-typed ownership gate. */
+     * The exact ending display profile also uses this for unreachable retained
+     * records. Other archives retain the strict source-typed ownership gate. */
     for(uint32_t i=0;i<(p->size+3)/4 && !p->error;++i)if(p->relocs[i]==1){
         if(!allow_untyped_local_relocations){p->error=-2;break;}
         uint32_t at=i*4;
@@ -432,7 +435,8 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
      * Admit only a single ToyDsp Joint/MatAnim root or the two-root pair so this
      * graph walker does not become a generic decoder for unknown archives. */
     unsigned toy_joint=0,toy_matanim=0;
-    int toy_model=(publics==1 || publics==2);
+    int ending_display=MeleePc_IsEndingDisplayProfile(bytes,body,relocs,publics,roots,strings);
+    int toy_model=(publics==1 || publics==2 || ending_display);
     if(toy_model)for(uint32_t i=0;i<publics;++i){
         const char* name=(const char*)bytes+strings+MeleePc_DatBe32(bytes+roots+i*8+4);
         size_t len=strlen(name);
@@ -441,7 +445,7 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(len>=6 && !strcmp(name+len-6,"_joint"))toy_joint++;
         else {toy_model=0;break;}
     }
-    if(toy_model && (publics==1 ?
+    if(toy_model && (ending_display ? (toy_joint!=6 || toy_matanim!=6) : publics==1 ?
        (toy_joint+toy_matanim!=1) :
        (toy_joint!=1 || toy_matanim!=1)))toy_model=0;
     for(uint32_t i=0;i<publics && !p.error;++i){
@@ -455,6 +459,14 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(!strcmp(name,"TitleMark_sobjdesc"))type=TITLE_HSD_SObjDesc;
         else if(!strcmp(name,"ScItrAllstar_scene_data"))type=TITLE_SceneDesc;
         else if(MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_SceneDesc;
+        else if(MeleePc_IsEndingSceneProfile(bytes,body,relocs,publics,roots,strings)){
+            if(i<4)type=TITLE_SceneDesc;
+            else {title_nested_archive(&p,at);continue;}
+        }
+        else if(MeleePc_IsCreditsSceneProfile(bytes,body,relocs,publics,roots,strings)){
+            if(i==0){title_array(&p,at,TITLE_DynamicModelDesc,10,0);continue;}
+            type=TITLE_SceneDesc;
+        }
         else if(strlen(name)>=9 && !strcmp(name+strlen(name)-9,"_figatree"))type=TITLE_FigaTree;
         else if(!strncmp(name,"ftDemoIntroMotionFile",21)){
             title_nested_archive(&p,at);continue;
@@ -495,7 +507,19 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
            title_u32(&p,model+16)!=model || title_u32(&p,model+20)!=0)p.error=-1;
         if(!p.error)title_array(&p,model+16,TITLE_DynamicModelDesc,0,1);
     }
-    title_finish_plan(&p,0);
+    if(!p.error && MeleePc_IsCreditsSceneProfile(bytes,body,relocs,publics,roots,strings)){
+        uint32_t table=MeleePc_DatBe32(bytes+roots);
+        for(unsigned i=0;i<10&&!p.error;++i){
+            uint32_t model=title_pointer(&p,table+i*4);
+            if(model==UINT32_MAX || !title_range(&p,model,24) ||
+               title_u32(&p,model+16)!=model || title_u32(&p,model+20)!=0){p.error=-1;break;}
+            title_array(&p,model+16,TITLE_DynamicModelDesc,0,1);
+        }
+    }
+    /* TyMcCmDs retains unreachable records preceding the published models.
+     * Only the exact audited profile may convert their bounded, disjoint
+     * relocation words; no unreachable scalar or packed body is swapped. */
+    title_finish_plan(&p,ending_display ? 1 : 0);
     free(p.claims);free(p.relocs);free(p.seen);free(p.nodes);return p.error;
 }
 static int MeleePc_IsAllstarRootSet(unsigned char* bytes,uint32_t publics,size_t roots,size_t strings){

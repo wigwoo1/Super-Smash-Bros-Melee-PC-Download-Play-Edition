@@ -1795,6 +1795,18 @@ void gm_Scene_Vs_OnFrame(void)
                          ftLib_GetMotionId(self), ftLib_GetMotionId(target), a.x,a.y,b.x,b.y,
                          input.stickX,input.substickX,input.button, diagnostic_vs_entries, target_slot,
                          controller.start.is_teams, Player_GetTeam(0), Player_GetTeam(target_slot));
+#ifdef TARGET_PC
+            if (frame >= 500 && frame <= 560 && frame % 5 == 0) {
+                Fighter* cpu_state = target ? target->user_data : NULL;
+                if (cpu_state && cpu_state->player_idx == 1)
+                    OSReport("NATIVE_CLASSIC_CPU_TRACE frame=%u entry=%u kind=%d motion=%d level=%d cmd=%d cmd_prev=%d cmd_duration=%u x80=%u seed=%08x\n",
+                             frame, diagnostic_vs_entries, cpu_state->kind,
+                             cpu_state->motion_id, cpu_state->cpu.level,
+                             cpu_state->cpu.x18, cpu_state->cpu.x1C,
+                             cpu_state->cpu.command_duration, cpu_state->cpu.x80,
+                             *HSD_RandSeedPtr);
+            }
+#endif
         } else if (controller.state.unk_0 == 2) {
             ++clear_calls;
             if (clear_calls >= 240 && clear_calls % 60 < 4)
@@ -2268,6 +2280,36 @@ void gm_Scene_Vs_OnFrame(void)
                     frame,controller.state.match_result,Player_GetStocks(0),tenth_closed);
             }
         }
+        if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_DEFEAT") && diagnostic_vs_entries==11 &&
+           controller.state.unk_0==2){
+            static int boss_clear_capture,boss_clear_closed;
+            if(clear_calls==1)
+                OSReport("NATIVE_MASTERHAND_END frame=%u outcome=%d stocks=%d\n",
+                         frame,controller.state.match_result,Player_GetStocks(0));
+            if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_ADVANCE") && clear_calls==240)
+                OSReport("NATIVE_MASTERHAND_START_ADVANCE calls=%u button=%u outcome=%d\n",
+                         clear_calls,input.button,controller.state.match_result);
+#if defined(_WIN32)
+            /* The clear overlay may change the end-graphic selector. Observe
+             * the original boss result and persistent HP instead. */
+            if(controller.state.match_result==OUTCOME_TERMINATED &&
+               Player_GetRemainingHP(2)==0 && !boss_clear_capture){
+                char* path=NULL;size_t size=0;
+                if(_dupenv_s(&path,&size,"MELEE_DIAGNOSTIC_BOSS_CLEAR_CAPTURE")==0 && path && path[0]){
+                    boss_clear_capture=_putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE",path)==0;
+                    OSReport("NATIVE_MASTERHAND_CLEAR capture_armed=%d calls=%u hp=%d end_graphic=%u\n",
+                             boss_clear_capture,clear_calls,Player_GetRemainingHP(2),controller.state.unk_B);
+                }
+                free(path);
+            }
+#endif
+            if(!boss_clear_closed && !getenv("MELEE_DIAGNOSTIC_MASTERHAND_ADVANCE") && (clear_calls>=180 ||
+               controller.state.match_result==OUTCOME_1P_GAME_OVER)){
+                boss_clear_closed=aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_MASTERHAND_CLEAR_CLOSE calls=%u outcome=%d queued=%d\n",
+                         clear_calls,controller.state.match_result,boss_clear_closed);
+            }
+        }
         if(getenv("MELEE_DIAGNOSTIC_FIGURE_NEXT") &&
            (diagnostic_vs_entries==(getenv("MELEE_DIAGNOSTIC_CLASSIC_EIGHTH_COMBAT")?9:
                                     getenv("MELEE_DIAGNOSTIC_CLASSIC_SEVENTH_COMBAT")?8:7) ||
@@ -2292,6 +2334,52 @@ void gm_Scene_Vs_OnFrame(void)
                ftLib_GetGroundAir(self)==GA_Ground && ftLib_GetMotionId(self)==ftCo_MS_Wait &&
                !(fp->input.held_buttons[0]&PAD_BUTTON_A))attack_frame=frame;
             if(attack_frame && frame-attack_frame<4)input.button=PAD_BUTTON_A;
+            if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_COMBAT") && diagnostic_vs_entries==11){
+                HSD_GObj* boss=NULL;
+                int slot;
+                memset(&input,0,sizeof(input));
+                for(slot=1;slot<6;++slot){
+                    HSD_GObj* candidate=Player_GetEntity(slot);
+                    if(candidate && ((Fighter*)candidate->user_data)->kind==Ft_Kind_MasterH){boss=candidate;break;}
+                }
+                if(boss){
+                    Fighter* hand=boss->user_data;
+                    f32 goal=hand->cur_pos.x;
+                    unsigned cycle=frame%100;
+                    if(goal>50)goal=50;
+                    if(goal< -50)goal= -50;
+                    if(frame>=180){
+                        if(fp->cur_pos.x<goal-5)input.stickX=55;
+                        else if(fp->cur_pos.x>goal+5)input.stickX=-55;
+                        if(cycle<4 && ftLib_GetGroundAir(self)==GA_Ground)input.button=PAD_BUTTON_X;
+                        if(cycle>=12 && cycle<16){input.button=PAD_BUTTON_A;input.stickY=80;}
+                    }
+                    /* Optional passive trace for reproducing nondeterministic
+                     * Master Hand route failures. This observes the fighter,
+                     * stock/damage counters, and the stage's real blast-zone
+                     * limits without changing player input or match state. */
+                    if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_FRAME_TRACE") &&
+                       frame>=3880 && frame<=3980){
+                        OSReport("NATIVE_MASTERHAND_FRAME_TRACE frame=%u stocks=%d damage=%d "
+                                 "x=%f y=%f vx=%f vy=%f motion=%d grounded=%d jumps=%u "
+                                 "outside_blast=%d blast_l=%f blast_r=%f blast_b=%f blast_t=%f "
+                                 "boss_hp=%d result=%d state=%d input_x=%d input_y=%d input_buttons=%u\n",
+                            frame,Player_GetStocks(0),Player_GetDamage(0),
+                            fp->cur_pos.x,fp->cur_pos.y,fp->self_vel.x,fp->self_vel.y,
+                            ftLib_GetMotionId(self),ftLib_GetGroundAir(self)==GA_Ground,
+                            fp->x1968_jumpsUsed,Stage_IsOutsideBlastZone(&fp->cur_pos),
+                            Stage_GetBlastZoneLeftOffset(),Stage_GetBlastZoneRightOffset(),
+                            Stage_GetBlastZoneBottomOffset(),Stage_GetBlastZoneTopOffset(),
+                            Player_GetRemainingHP(slot),controller.state.match_result,
+                            controller.state.unk_0,input.stickX,input.stickY,input.button);
+                    }
+                    if(frame%15==0)
+                        OSReport("NATIVE_MASTERHAND_COMBAT frame=%u self_x=%f self_y=%f motion=%d boss_slot=%d boss_x=%f boss_y=%f boss_motion=%d hp=%d percent=%f requested_x=%d requested_y=%d button=%u\n",
+                            frame,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,slot,
+                            hand->cur_pos.x,hand->cur_pos.y,hand->motion_id,
+                            Player_GetRemainingHP(slot),hand->dmg.x1830_percent,input.stickX,input.stickY,input.button);
+                }
+            }
             if(getenv("MELEE_DIAGNOSTIC_PUSHON_FIRST_ROUTE") && diagnostic_vs_entries==9 && stage_info.grkind==Gr_Kind_Pushon){
                 bool grounded=ftLib_GetGroundAir(self)==GA_Ground;
                 memset(&input,0,sizeof(input));

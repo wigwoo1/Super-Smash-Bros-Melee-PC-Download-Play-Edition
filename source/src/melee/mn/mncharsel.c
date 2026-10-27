@@ -2364,9 +2364,9 @@ void mnCharSel_CursorThink(HSD_GObj* gobj)
         static unsigned native_css_cursor_frame[4];
         unsigned frame = ++native_css_cursor_frame[cursor->x4];
         if (cursor->x4 == 0 &&
-            (frame == 30 || frame == 31 || frame == 32 || frame == 89 ||
-             frame == 90 || frame == 109 || frame == 110 || frame == 111 ||
-             frame == 112 || frame == 159 || frame == 160 || frame == 161)) {
+            (frame % 15 == 0 ||
+             HSD_PadCopyStatus[cursor->x4].stickX != 0 ||
+             HSD_PadCopyStatus[cursor->x4].stickY != 0)) {
             struct CSSCharModel* model = mnCharSel_804A0BD0[cursor->x4];
             CSSDoor* player_door = &mnCharSel_803F0DFC.doors[cursor->x4];
             OSReport("NATIVE_CSS_CURSOR frame=%u mode=%u held_door=%u cursor_xy=%f,%f token_xy=%f,%f selected=%u icon=%u slot=%u pad=%u trigger=%u stick=%d,%d icon0_bounds=%f,%f,%f,%f icon0_state=%u\n",

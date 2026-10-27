@@ -298,7 +298,34 @@ void gm_801A4014(GameMode* mode)
         scene->on_enter(info->enter_data);
         PC_SCENE_TRACE("scene_enter_end", kind);
     }
+#if defined(TARGET_PC) && defined(_WIN32)
+    if (kind == GS_MENU &&
+        getenv("MELEE_DIAGNOSTIC_CONGRATS_RETURN_PENDING")) {
+        char* path = NULL;
+        size_t size = 0;
+        int configured =
+            _putenv_s("MELEE_DIAGNOSTIC_CONGRATS_RETURN_PENDING", "") == 0 &&
+            _putenv_s("MELEE_DIAGNOSTIC_CONGRATS_RETURN_ACTIVE", "1") == 0 &&
+            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_COMPOSITED_PRESENT", "1") == 0 &&
+            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_VI", "1") == 0 &&
+            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_GPU_SNAPSHOT", "") == 0 &&
+            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_DELAY", "20") == 0;
+        if (_dupenv_s(&path, &size, "MELEE_DIAGNOSTIC_RETURN_CAPTURE") == 0 &&
+            path && path[0]) {
+            configured = configured &&
+                _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0;
+        }
+        OSReport("NATIVE_CONGRATS_RETURN_MENU_ENTRY kind=%d mode=%d capture_configured=%d\n",
+                 kind, gm_GetCurrentGameMode(), configured);
+        free(path);
+    }
+#endif
     PC_SCENE_TRACE("frame_loop_begin", kind);
+#ifdef TARGET_PC
+    if(kind==GS_GAMEOVER && getenv("MELEE_DIAGNOSTIC_MASTERHAND_ADVANCE"))
+        OSReport("NATIVE_POSTCLEAR_ABORT original_game_over=1 queued=%d\n",
+                 aurora_diagnostic_queue_quit());
+#endif
 #if defined(TARGET_PC) && defined(_WIN32)
     if (kind == 2 && getenv("MELEE_DIAGNOSTIC_MATCH_DRAW_UV")) {
         if (_putenv_s("AURORA_DIAGNOSTIC_DRAW_UV", "1") == 0) {

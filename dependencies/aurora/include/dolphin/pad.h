@@ -259,6 +259,9 @@ void PADHandleKeyPress(s32 scancode, bool repeat);
 void PADSetVirtualStatus(u32 port, const PADStatus* status);
 void PADClearVirtualStatus(u32 port);
 void PADClearAllVirtualStatus();
+/* Test-only, opt-in trace for the native prize-screen PAD sampling path. */
+void PADSetDiagnosticPrizeTrace(bool enabled);
+bool PADDiagnosticPrizeTraceActive(void);
 
 /**
  * Set the default controller mapping used.

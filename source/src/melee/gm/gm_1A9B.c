@@ -11,6 +11,12 @@
 /// retail anchor exactly; keeping the tables in gmregenddisp.c compiles the
 /// same instructions with displacements 0x460/0x79C/0xAB8 instead.
 #include "forward.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#include <aurora/diagnostics.h>
+#include <sysdolphin/baselib/controller.h>
+#endif
 #include "gm_1A36.h"
 #include "gm_1A3F.h"
 #include "gm_1A7A.h"
@@ -142,6 +148,55 @@ void gm_Scene_Congrats_OnEnter(UNK_T unused)
 
 void gm_Scene_Congrats_OnFrame(void)
 {
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CONGRATS")) {
+        static unsigned calls;
+        PADStatus neutral = { 0 };
+        const bool test_return = getenv("MELEE_DIAGNOSTIC_CONGRATS_RETURN") != NULL;
+        ++calls;
+        /* Exercise the original post-lock Start path once, then release it.
+         * The production input-delay, timer, and scene routing remain intact. */
+        if (test_return && calls >= 120 && calls < 124) {
+            neutral.button = PAD_BUTTON_START;
+        }
+        HSD_PadStageDiagnosticInput(0, &neutral);
+#if defined(_WIN32)
+        if (calls == 1 && !test_return) {
+            char* path = NULL;
+            size_t size = 0;
+            int configured =
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_COMPOSITED_PRESENT", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_VI", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_GPU_SNAPSHOT", "") == 0;
+            OSReport("NATIVE_CONGRATS_CAPTURE_CONFIG scene_entry_only=%d\n", configured);
+            if (_dupenv_s(&path, &size, "MELEE_DIAGNOSTIC_POSTCLEAR_CAPTURE") == 0 && path && path[0]) {
+                OSReport("NATIVE_CONGRATS capture_armed=%d\n",
+                         _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0);
+            }
+            free(path);
+        }
+#endif
+        if (calls == 1 || calls % 60 == 0) {
+            OSReport("NATIVE_CONGRATS frame=%u input_delay=%u exit_timer=%u\n",
+                     calls, gmRegend_InputDelayTimer, gmRegend_ExitTimer);
+        }
+        if (test_return && calls == 120) {
+            OSReport("NATIVE_CONGRATS_RETURN_START_STAGED frame=%u button=%u\n",
+                     calls, neutral.button);
+        }
+        if (test_return && calls > 120 && gmRegend_ExitTimer != 0) {
+            static bool start_accepted;
+            if (!start_accepted) {
+                start_accepted = true;
+                OSReport("NATIVE_CONGRATS_RETURN_START_ACCEPTED frame=%u exit_timer=%u\n",
+                         calls, gmRegend_ExitTimer);
+            }
+        }
+        if (calls == 300 && !test_return) {
+            OSReport("NATIVE_CONGRATS_CLOSE frame=%u queued=%d\n", calls, aurora_diagnostic_queue_quit());
+        }
+    }
+#endif
     if (gmRegend_InputDelayTimer != 0) {
         gmRegend_InputDelayTimer--;
     } else if (gmRegend_ExitTimer != 0) {
@@ -150,6 +205,13 @@ void gm_Scene_Congrats_OnFrame(void)
             if (gm_GetCurrentGameMode() == GM_DEBUG_GOVER) {
                 gm_801A6630(6);
             } else {
+#if defined(TARGET_PC) && defined(_WIN32)
+                if (getenv("MELEE_DIAGNOSTIC_CONGRATS_RETURN")) {
+                    _putenv_s("MELEE_DIAGNOSTIC_CONGRATS_RETURN_PENDING", "1");
+                    OSReport("NATIVE_CONGRATS_ORIGINAL_MENU_REQUEST mode=%d exit_timer=0\n",
+                             gm_GetCurrentGameMode());
+                }
+#endif
                 gm_801A6630(1);
             }
         }

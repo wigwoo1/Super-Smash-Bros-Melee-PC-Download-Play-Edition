@@ -12,6 +12,8 @@
 #include <SDL3/SDL.h>
 #include <cstdio>
 #include <cstdlib>
+#include <atomic>
+#include <chrono>
 
 #include <array>
 #include <filesystem>
@@ -314,6 +316,16 @@ std::array<PADButton, PAD_CHANMAX> g_suppressedButtons{};
 std::array<PADExtButton, PAD_CHANMAX> g_suppressedExtButtons{};
 std::array<bool, PAD_CHANMAX> g_suppressLeftTrigger{};
 std::array<bool, PAD_CHANMAX> g_suppressRightTrigger{};
+std::atomic_bool g_diagnosticPrizeTrace{false};
+std::atomic_bool g_diagnosticPrizeTraceLastA{false};
+std::atomic_uint g_diagnosticPrizeTraceWrites{0};
+std::atomic_uint g_diagnosticPrizeTraceReads{0};
+std::atomic<long long> g_diagnosticPrizeTraceWindowEndNs{0};
+
+static long long diagnostic_prize_trace_now_ns() {
+  return std::chrono::duration_cast<std::chrono::nanoseconds>(
+             std::chrono::steady_clock::now().time_since_epoch()).count();
+}
 
 bool is_mouse_scancode(const s32 scancode) { return scancode < PAD_KEY_INVALID; }
 bool is_mouse_button_pressed(const s32 scancode) {
@@ -1016,10 +1028,25 @@ u32 PADRead(PADStatus* status) {
         merge_virtual_status(status[i], g_virtualPadStatus[i]);
       }
     }
+#ifdef _WIN32
+    if (i == PAD_CHAN0 && g_diagnosticPrizeTrace.load(std::memory_order_relaxed) &&
+        diagnostic_prize_trace_now_ns() <= g_diagnosticPrizeTraceWindowEndNs.load(std::memory_order_relaxed)) {
+      const unsigned seq = g_diagnosticPrizeTraceReads.fetch_add(1, std::memory_order_relaxed);
+      if (seq < 20000) {
+        std::fprintf(stderr,
+                     "NATIVE_PRIZE_PAD_SAMPLE seq=%u time_ns=%lld virtual_active=%u virtual_button=%u sampled_button=%u focus=%u block=%u editing=%u\n",
+                     seq, diagnostic_prize_trace_now_ns(), unsigned(g_virtualPadActive[i]),
+                     unsigned(g_virtualPadStatus[i].button), unsigned(status[i].button),
+                     unsigned(g_windowFocused), unsigned(g_blockPAD), unsigned(g_controlsEditing));
+      }
+    }
+#endif
     // Opt-in readback only. Sequence counts PAD reads, not simulation ticks.
     if(i==0 && keyPresses.any() && key_tap_diagnostic())
-      std::fprintf(stderr,"NATIVE_KEY_TAP_SAMPLE count=%zu button=%x return_held=%u focus=%u block=%u editing=%u\n",
-          keyPresses.count(),unsigned(status[i].button),unsigned(aurora::input::keyboard_key_pressed(kbState,numKeys,SDL_SCANCODE_RETURN)),
+      std::fprintf(stderr,"NATIVE_KEY_TAP_SAMPLE count=%zu button=%x stick=%d,%d substick=%d,%d return_held=%u focus=%u block=%u editing=%u\n",
+          keyPresses.count(),unsigned(status[i].button),int(status[i].stickX),int(status[i].stickY),
+          int(status[i].substickX),int(status[i].substickY),
+          unsigned(aurora::input::keyboard_key_pressed(kbState,numKeys,SDL_SCANCODE_RETURN)),
           unsigned(g_windowFocused),unsigned(g_blockPAD),unsigned(g_controlsEditing));
     if (i == 1 && std::getenv("MELEE_DIAGNOSTIC_KIRBY_MEWTWO_COPY_INPUT")) {
       static unsigned readSequence = 0;
@@ -1100,6 +1127,40 @@ void PADSetVirtualStatus(const u32 port, const PADStatus* virtualStatus) {
   g_virtualPadStatus[port] = *virtualStatus;
   g_virtualPadStatus[port].err = PAD_ERR_NONE;
   g_virtualPadActive[port] = true;
+#ifdef _WIN32
+  if (port == PAD_CHAN0 && g_diagnosticPrizeTrace.load(std::memory_order_relaxed)) {
+    const bool pressed = (virtualStatus->button & PAD_BUTTON_A) != 0;
+    const bool previous = g_diagnosticPrizeTraceLastA.exchange(pressed, std::memory_order_relaxed);
+    if (pressed != previous) {
+      const long long now = diagnostic_prize_trace_now_ns();
+      g_diagnosticPrizeTraceWindowEndNs.store(now + 250000000, std::memory_order_relaxed);
+      const unsigned seq = g_diagnosticPrizeTraceWrites.fetch_add(1, std::memory_order_relaxed);
+      if (seq < 4096)
+        std::fprintf(stderr, "NATIVE_PRIZE_PAD_INJECT seq=%u time_ns=%lld pressed=%u button=%u\n",
+                     seq, now, unsigned(pressed), unsigned(virtualStatus->button));
+    }
+  }
+#endif
+}
+
+void PADSetDiagnosticPrizeTrace(bool enabled) {
+  if (enabled) {
+    g_diagnosticPrizeTraceWrites.store(0, std::memory_order_relaxed);
+    g_diagnosticPrizeTraceReads.store(0, std::memory_order_relaxed);
+    g_diagnosticPrizeTraceLastA.store(false, std::memory_order_relaxed);
+    g_diagnosticPrizeTraceWindowEndNs.store(0, std::memory_order_relaxed);
+  }
+  g_diagnosticPrizeTrace.store(enabled, std::memory_order_release);
+  std::fprintf(stderr,
+               "NATIVE_PRIZE_PAD_TRACE enabled=%u writes=%u samples=%u\n",
+               unsigned(enabled), g_diagnosticPrizeTraceWrites.load(std::memory_order_relaxed),
+               g_diagnosticPrizeTraceReads.load(std::memory_order_relaxed));
+}
+
+bool PADDiagnosticPrizeTraceActive(void) {
+  if (!g_diagnosticPrizeTrace.load(std::memory_order_acquire)) return false;
+  return diagnostic_prize_trace_now_ns() <=
+         g_diagnosticPrizeTraceWindowEndNs.load(std::memory_order_relaxed);
 }
 
 void PADClearVirtualStatus(const u32 port) {

@@ -6,6 +6,9 @@
 #include <sysdolphin/baselib/forward.h>
 
 #include <math.h>
+#ifdef TARGET_PC
+#include <stdlib.h>
+#endif
 #include <placeholder.h>
 
 #if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
@@ -2904,6 +2907,12 @@ bool Camera_8002E234(void)
         break;
     case 2:
         ret = true;
+#ifdef TARGET_PC
+        /* Unselected axes retain their defined target value. */
+        sp10 = game_camera.x35C.orbit.pitch;
+        spC = game_camera.x35C.orbit.yaw;
+        sp8 = game_camera.x35C.orbit.distance;
+#endif
         if (game_camera.x35C.orbit.b1) {
             ret &= Camera_8002E158(&sp10, game_camera.x368.orbit.pitch,
                                    game_camera.x35C.orbit.pitch);
@@ -2940,6 +2949,23 @@ bool Camera_8002E234(void)
         sp14.z *= temp_f31;
         lbVector_Add(&sp14, &game_camera.transform.interest);
         game_camera.transform.position = sp14;
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW") &&
+            (!(sp14.x > -50000.0F && sp14.x < 50000.0F) ||
+             !(sp14.y > -50000.0F && sp14.y < 50000.0F) ||
+             !(sp14.z > -50000.0F && sp14.z < 50000.0F))) {
+            OSReport("NATIVE_REJECTED_ORBIT flags=%d,%d,%d interpolation=%d start=%g,%g,%g target=%g,%g,%g applied=%g,%g,%g interest=%g,%g,%g result=%g,%g,%g caller=%p\n",
+                     game_camera.x35C.orbit.b0, game_camera.x35C.orbit.b1,
+                     game_camera.x35C.orbit.b2, game_camera.x341_b5_b6,
+                     (double)game_camera.x368.orbit.distance,
+                     game_camera.x368.orbit.pitch, game_camera.x368.orbit.yaw,
+                     (double)game_camera.x35C.orbit.distance,
+                     game_camera.x35C.orbit.pitch, game_camera.x35C.orbit.yaw,
+                     sp8, sp10, spC, game_camera.transform.interest.x,
+                     game_camera.transform.interest.y, game_camera.transform.interest.z,
+                     sp14.x, sp14.y, sp14.z, __builtin_return_address(0));
+        }
+#endif
         break;
     }
     return ret;
@@ -3167,6 +3193,31 @@ void Camera_8002EA64(Vec* arg0)
     }
 }
 
+#ifdef TARGET_PC
+/* The position union may still hold a Cartesian vector or callback. Seed every
+ * orbit component from the live eye before changing its interpretation. */
+static void Camera_InitNativeOrbit(void)
+{
+    Vec3 offset;
+    if (game_camera.x341_b3_b4 == 2) {
+        return;
+    }
+    lbVector_Diff(&game_camera.transform.position,
+                  &game_camera.transform.interest, &offset);
+    game_camera.x35C.orbit.distance = (s16) lbVector_Len(&offset);
+    game_camera.x35C.orbit.pitch =
+        atan2f(offset.y, sqrtf(offset.x * offset.x + offset.z * offset.z));
+    game_camera.x35C.orbit.yaw = atan2f(offset.x, offset.z);
+    game_camera.x35C.orbit.b0 = 0;
+    game_camera.x35C.orbit.b1 = 0;
+    game_camera.x35C.orbit.b2 = 0;
+    game_camera.x368.orbit.distance = game_camera.x35C.orbit.distance;
+    game_camera.x368.orbit.pitch = game_camera.x35C.orbit.pitch;
+    game_camera.x368.orbit.yaw = game_camera.x35C.orbit.yaw;
+    game_camera.x341_b3_b4 = 2;
+}
+#endif
+
 void Camera_8002EB5C(float arg0)
 {
     Vec3 spC;
@@ -3175,6 +3226,9 @@ void Camera_8002EB5C(float arg0)
         Camera_8002FE38();
     }
 
+#ifdef TARGET_PC
+    Camera_InitNativeOrbit();
+#endif
     if (game_camera.x341_b3_b4 != 2) {
         game_camera.x341_b3_b4 = 2;
         game_camera.x35C.orbit.b0 = 0;
@@ -3208,6 +3262,9 @@ void Camera_8002EC7C(float arg0)
         Camera_8002FE38();
     }
 
+#ifdef TARGET_PC
+    Camera_InitNativeOrbit();
+#endif
     if (game_camera.x341_b3_b4 != 2) {
         game_camera.x341_b3_b4 = 2;
         game_camera.x35C.orbit.b0 = 0;
@@ -3241,6 +3298,9 @@ void Camera_8002ED9C(float arg0)
         Camera_8002FE38();
     }
 
+#ifdef TARGET_PC
+    Camera_InitNativeOrbit();
+#endif
     if (game_camera.x341_b3_b4 != 2) {
         game_camera.x341_b3_b4 = 2;
         game_camera.x35C.orbit.b1 = 0;
@@ -4373,6 +4433,18 @@ bool Camera_80030CFC(CmSubject* cam_box, f32 tolerance)
     sp20.y *= range;
     sp20.z *= range;
     lbVector_Add(&sp20, &cam_box->bone_pos);
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW") &&
+        (!(sp20.x > -50000.0F && sp20.x < 50000.0F) ||
+         !(sp20.y > -50000.0F && sp20.y < 50000.0F) ||
+         !(sp20.z > -50000.0F && sp20.z < 50000.0F))) {
+        OSReport("NATIVE_REJECTED_SUBJECT box=%p bone=%g,%g,%g eye=%g,%g,%g interest=%g,%g,%g nearest=%g,%g,%g extent=%g tolerance=%g point=%g,%g,%g\n",
+                 cam_box, cam_box->bone_pos.x, cam_box->bone_pos.y,
+                 cam_box->bone_pos.z, eye_pos.x, eye_pos.y, eye_pos.z,
+                 interest.x, interest.y, interest.z, sp38.x, sp38.y,
+                 sp38.z, cam_box->ext.v.z, tolerance, sp20.x, sp20.y, sp20.z);
+    }
+#endif
     return Camera_80030BBC(&sp20, NULL);
 }
 

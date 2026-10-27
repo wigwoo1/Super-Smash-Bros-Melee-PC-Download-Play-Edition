@@ -1,4 +1,7 @@
 #include <Runtime/platform.h>
+#ifdef TARGET_PC
+#include <stdlib.h>
+#endif
 
 #include <sysdolphin/baselib/forward.h>
 
@@ -134,6 +137,11 @@ void fn_8017C1A4(HSD_GObj* unused)
         break;
     case 3:
         if (Player_GetRemainingHP(2) <= 0) {
+#ifdef TARGET_PC
+            if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_DEFEAT"))
+                OSReport("NATIVE_MASTERHAND_DEFEATED hp=%d stocks=%d original_phase=3 next_phase=7\n",
+                         Player_GetRemainingHP(2),Player_GetStocks(0));
+#endif
             tmp->x0 = 7;
             tmp->x8 = 0;
         } else if (Player_GetRemainingHP(2) <= 0.5F * tmp->xC && fn_8017EDDC())
@@ -211,6 +219,11 @@ void fn_8017C1A4(HSD_GObj* unused)
         } else if (tmp->x8 == temp_r28) {
             lbBgFlash_800205F0(temp_r3);
         } else if (tmp->x8 >= temp_r29_2) {
+#ifdef TARGET_PC
+            if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_DEFEAT"))
+                OSReport("NATIVE_MASTERHAND_DEFEAT_SEQUENCE_DONE hp=%d original_phase=7 end_reason=8\n",
+                         Player_GetRemainingHP(2));
+#endif
             lbAudioAx_80028B90();
             gm_SetGameSpeed(1.0f);
             gm_8016B33C(8);
@@ -765,6 +778,13 @@ void gm_8017CE34(StartMeleeData* arg0, Unk1PData* arg1, s8* arg2, u8 arg3,
             if (((s8) enemy_ckind == CKind_MasterH) ||
                 ((s8) enemy_ckind == CKind_CrezyH))
             {
+#ifdef TARGET_PC
+                if (getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW")) {
+                    OSReport("NATIVE_BOSS_SETUP count=%d difficulty=%d enemy_index=%d slot=%d kind=%d level=%d cpu_type=%d flags=%d callback=%p\n",
+                             count, arg1->x0.cpu_level, enemy_idx, player_idx,
+                             enemy_ckind, enemy_level, enemy_cpu_type, arg1->x8, arg1->x4C);
+                }
+#endif
                 arg0->players[player_idx].xC_b7 = 1;
                 arg0->players[player_idx].hp = 0x12C;
                 arg0->players[player_idx].xD_b2 = 1;

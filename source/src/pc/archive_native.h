@@ -3242,6 +3242,17 @@ static int MeleePc_DatDecode(void* data,size_t length){
         return 0;
     }
 
+    /* Original staff-roll SIS text; all glyph/metric/command payloads stay BE. */
+    if(publics==1 && !externs && length==223991 && body==211712 && relocs==3056 &&
+       MeleePc_DatBe32(bytes+roots)==0 &&
+       !strcmp((char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4),"SIS_StRollData")){
+        int result=MeleePc_ClearSisBody(bytes,length,body,relocs,0);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+
     /* Original clear-overlay bonus-name text (gmregclear/SisLib). */
     if(publics==1 && !externs && relocs==259 &&
        ((length==9861 && body==8768) || (length==90757 && body==89664)) &&
@@ -9562,13 +9573,14 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
-    if((publics==1 || publics==2) && !externs){
+    if((publics==1 || publics==2 || MeleePc_IsEndingDisplayProfile(bytes,body,relocs,publics,roots,strings)) && !externs){
         const char* first=(char*)bytes+strings+MeleePc_DatBe32(bytes+roots+4);
         const char* second=publics==2 ?
             (char*)bytes+strings+MeleePc_DatBe32(bytes+roots+12) : NULL;
         if((!strncmp(first,"ToyDsp",6) &&
            (!second || !strncmp(second,"ToyDsp",6))) ||
-           MeleePc_IsStandardTrophyModelProfile(bytes,body,relocs,publics,roots,strings)){
+           MeleePc_IsStandardTrophyModelProfile(bytes,body,relocs,publics,roots,strings) ||
+           MeleePc_IsEndingDisplayProfile(bytes,body,relocs,publics,roots,strings)){
             int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
             if(result)return result;
             for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
@@ -9583,7 +9595,9 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
-    if(!externs && MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings)){
+    if(!externs && (MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings) ||
+                   MeleePc_IsEndingSceneProfile(bytes,body,relocs,publics,roots,strings) ||
+                   MeleePc_IsCreditsSceneProfile(bytes,body,relocs,publics,roots,strings))){
         int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);

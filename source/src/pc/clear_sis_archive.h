@@ -2,6 +2,7 @@
 #define MELEE_PC_CLEAR_SIS_ARCHIVE_H
 #include "archive_external_plan.h"
 #include "stage_stadium_sis.h"
+#include "credits_sis_archive.h"
 /* Original HSD SisLib table: atlas, byte metrics, three encoded text streams.
  * Default-font US atlas points one past the body and is never dereferenced.
  * The Japanese export contains three 512-byte glyph images. Keep all text,
@@ -88,7 +89,8 @@ static int MeleePc_ClearSisBody(unsigned char* bytes,size_t length,uint32_t body
  if(!p.error)p.error=MeleePc_ArchiveExternalPlan(bytes,length,external,&external_count);
  if(!p.error&&external_count)p.error=-2;
  if(!p.error){
-  if(body==8768 || body==89664)MeleePc_DecisionSisPlan(&p,root);
+  if(body==211712)MeleePc_CreditsSisPlan(&p,root);
+  else if(body==8768 || body==89664)MeleePc_DecisionSisPlan(&p,root);
   else MeleePc_ClearSisPlan(&p,root);
  }
  while(p.head<p.count&&!p.error)title_walk(&p,p.nodes[p.head++]);

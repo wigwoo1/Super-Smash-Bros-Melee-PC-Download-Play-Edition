@@ -3,6 +3,10 @@
 #include <melee/pl/forward.h>
 
 #include <math.h>
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <pc/signed_word_division.h>
+#endif
 
 #include "ft_0877.h"
 #include "ftlib.h"
@@ -36,7 +40,19 @@ void ftBossLib_8015BD20(HSD_GObj* gobj)
 void ftBossLib_8015BD24(s32 arg0, float* arg1, float arg2, s32 arg3, s32 arg4,
                         s32 arg5)
 {
+#ifdef TARGET_PC
+    /* The original instruction runs after the random draw and does not trap
+     * for a zero CPU level. Keep the original level and random sequence. */
+    s32 random_delay = HSD_Randi(arg4 - arg5);
+    s32 quotient = MeleePc_DivideSignedWord(arg3, arg0);
+    *arg1 = (quotient + random_delay + arg5) / arg2;
+    if (getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW") && arg0 == 0) {
+        OSReport("NATIVE_BOSS_DIVISION level=%d base=%d quotient=%d random=%d delay=%g\n",
+                 arg0, arg3, quotient, random_delay, *arg1);
+    }
+#else
     *arg1 = ((arg3 / arg0) + HSD_Randi(arg4 - arg5) + arg5) / arg2;
+#endif
 }
 
 void ftBossLib_ReportGObjSlotType(HSD_GObj* gobj)

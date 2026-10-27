@@ -71,6 +71,7 @@ static void (*native_menu_start_diagnostic_callback)(void);
 static unsigned native_menu_start_diagnostic_frame;
 static void (*native_classic_match_diagnostic_callback)(void);
 static unsigned native_classic_match_diagnostic_frame;
+static unsigned native_congrats_return_menu_frames;
 static u64 native_pacing_previous_presented;
 static u64 native_pacing_previous_simulation;
 static u32 native_pacing_previous_time_ms;
@@ -652,9 +653,13 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
     PAD_STACK(28);
 #ifdef TARGET_PC
     unsigned pc_frame_index = 0;
+    const bool native_congrats_return_menu = info->scene_kind == GS_MENU &&
+        getenv("MELEE_DIAGNOSTIC_CONGRATS_RETURN_ACTIVE") != NULL;
     unsigned native_results_input_frame = 0;
     unsigned native_prize_input_frame = 0;
     unsigned native_gameover_input_frame = 0;
+    const bool native_prize_pad_trace = info->scene_kind == 39 &&
+        getenv("MELEE_DIAGNOSTIC_PRIZE_PAD_TRACE") != NULL;
     unsigned native_ordered_tick = 0;
     PADStatus native_delayed_ports[4];
     bool native_delayed_pending = false;
@@ -767,6 +772,7 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
         }
         OSReport("NATIVE_INPUT_UDP opened=1 loopback=1\n");
     }
+    if (native_prize_pad_trace) PADSetDiagnosticPrizeTrace(true);
 #endif
         PC_FRAME_PHASE("session_init_end");
 #ifdef TARGET_PC
@@ -1216,6 +1222,24 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
                     OSTime native_scene_callback_start = OSGetTime();
 #endif
                     on_frame();
+#if defined(TARGET_PC) && defined(_WIN32)
+                    if (native_congrats_return_menu) {
+                        PADStatus neutral = { 0 };
+                        ++native_congrats_return_menu_frames;
+                        HSD_ASSERT(1, HSD_PadStageDiagnosticInput(0, &neutral));
+                        if (native_congrats_return_menu_frames == 1 ||
+                            native_congrats_return_menu_frames % 60 == 0) {
+                            OSReport("NATIVE_CONGRATS_RETURN_MENU_FRAME frames=%u mode=%d\n",
+                                     native_congrats_return_menu_frames,
+                                     gm_GetCurrentGameMode());
+                        }
+                        if (native_congrats_return_menu_frames == 120) {
+                            OSReport("NATIVE_CONGRATS_RETURN_MENU_COMPLETE frames=%u queued=%d\n",
+                                     native_congrats_return_menu_frames,
+                                     aurora_diagnostic_queue_quit());
+                        }
+                    }
+#endif
 #ifdef TARGET_PC
                     if (native_pacing_trace_enabled) {
                         native_pacing_simulation_ticks++;
@@ -1435,6 +1459,7 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
         HSD_PerfInitStat();
     }
 #ifdef TARGET_PC
+    if (native_prize_pad_trace) PADSetDiagnosticPrizeTrace(false);
     if (native_udp_diagnostic) {
         HSD_ASSERT(1,MeleePc_UnregisterSessionCleanup(native_udp_cleanup,&native_udp_cleanup_data));
         native_udp_cleanup(&native_udp_cleanup_data);

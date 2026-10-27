@@ -4,6 +4,12 @@
  */
 
 #include "gmmovieend.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#include <aurora/diagnostics.h>
+#include <sysdolphin/baselib/controller.h>
+#endif
 
 #include "gm_unsplit.h"
 #include "gmmain_lib.h"
@@ -137,6 +143,36 @@ void gm_Scene_MovieEnd_OnFrame(void)
     int temp_r31;
     bool var_r30;
 
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CREDITS_COMPLETE")) {
+        static unsigned calls;
+        PADStatus neutral = { 0 };
+        ++calls;
+        HSD_PadStageDiagnosticInput(0, &neutral);
+#if defined(_WIN32)
+        if (calls == 1 && !getenv("MELEE_DIAGNOSTIC_CONGRATS")) {
+            char* path = NULL;
+            size_t size = 0;
+            int configured =
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_COMPOSITED_PRESENT", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_VI", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_GPU_SNAPSHOT", "") == 0;
+            OSReport("NATIVE_ENDING_MOVIE_CAPTURE_CONFIG scene_entry_only=%d\n", configured);
+            if (_dupenv_s(&path, &size, "MELEE_DIAGNOSTIC_POSTCLEAR_CAPTURE") == 0 && path && path[0]) {
+                OSReport("NATIVE_ENDING_MOVIE capture_armed=%d\n",
+                         _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0);
+            }
+            free(path);
+        }
+#endif
+        if (calls == 1 || calls % 60 == 0) {
+            OSReport("NATIVE_ENDING_MOVIE frame=%u movie_frame=%u\n", calls, gm_804D6738);
+        }
+        if (calls == 300 && !getenv("MELEE_DIAGNOSTIC_CONGRATS")) {
+            OSReport("NATIVE_ENDING_MOVIE_CLOSE frame=%u queued=%d\n", calls, aurora_diagnostic_queue_quit());
+        }
+    }
+#endif
     var_r30 = false;
     lbMthp_8001F578();
     temp_r31 = lbMthp_8001F5C4();
@@ -161,6 +197,12 @@ void gm_Scene_MovieEnd_OnFrame(void)
             gm_801A4B74();
             return;
         }
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_CONGRATS")) {
+            OSReport("NATIVE_ENDING_MOVIE_ORIGINAL_END movie_frame=%u buttons=%u\n",
+                     gm_804D6738, gm_GetButtonsTriggered(gm_801BF010()));
+        }
+#endif
         gm_801A4B60();
     }
 }

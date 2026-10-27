@@ -1,4 +1,10 @@
 #include "gmstaffroll.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#include <dolphin/pad.h>
+#include <aurora/diagnostics.h>
+#endif
 
 #include <melee/ft/forward.h>
 
@@ -410,7 +416,47 @@ bool gm_801AA774(s16 arg0)
 
 void gm_Scene_StaffRoll_OnFrame(void)
 {
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CREDITS")) {
+        static unsigned calls;
+        PADStatus neutral = { 0 };
+        ++calls;
+        HSD_PadStageDiagnosticInput(0, &neutral);
+#if defined(_WIN32)
+        if (calls == 1 && !getenv("MELEE_DIAGNOSTIC_CREDITS_COMPLETE")) {
+            char* path = NULL;
+            size_t size = 0;
+            /* Reserve the one-shot GPU capture for the original credits.
+             * This observes the scene; its timeline and result stay original. */
+            int configured =
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_COMPOSITED_PRESENT", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_VI", "1") == 0 &&
+                _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_GPU_SNAPSHOT", "") == 0;
+            OSReport("NATIVE_CREDITS_CAPTURE_CONFIG scene_entry_only=%d\n", configured);
+            if (_dupenv_s(&path, &size, "MELEE_DIAGNOSTIC_POSTCLEAR_CAPTURE") == 0 &&
+                path && path[0]) {
+                OSReport("NATIVE_CREDITS capture_armed=%d\n",
+                         _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0);
+            }
+            free(path);
+        }
+#endif
+        if (calls == 1 || calls % 60 == 0) {
+            OSReport("NATIVE_CREDITS frame=%u timeline=%d names=%d\n",
+                     calls, gm_804D6814, gm_804D6800);
+        }
+        if (calls == 600 && !getenv("MELEE_DIAGNOSTIC_CREDITS_COMPLETE")) {
+            OSReport("NATIVE_CREDITS_CLOSE frame=%u queued=%d\n",
+                     calls, aurora_diagnostic_queue_quit());
+        }
+    }
+#endif
     if (gm_804D6814 >= 0x134D) {
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_CREDITS_COMPLETE")) {
+            OSReport("NATIVE_CREDITS_ORIGINAL_END timeline=%d\n", gm_804D6814);
+        }
+#endif
         lbAudioAx_80028B90();
         lbAudioAx_800236DC();
         gm_801A4B60();

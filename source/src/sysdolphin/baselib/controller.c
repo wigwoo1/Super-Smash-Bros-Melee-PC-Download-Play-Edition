@@ -22,6 +22,10 @@ HSD_PadStatus HSD_PadMasterStatus[4];
 HSD_PadStatus HSD_PadCopyStatus[4];
 HSD_PadStatus HSD_PadGameStatus[4];
 #ifdef TARGET_PC
+static unsigned native_prize_pad_raw_trace_sequence;
+static unsigned native_prize_pad_master_trace_sequence;
+#endif
+#ifdef TARGET_PC
 static PADStatus diagnostic_next_input[4];
 static bool diagnostic_next_valid[4];
 static MeleePc_FrameInputOrder native_input_order;
@@ -179,6 +183,14 @@ void HSD_PadRenewRawStatus(bool err_check)
     HSD_PadRawQueueShift(p->qnum, &p->qwrite);
 
 skip:
+#ifdef TARGET_PC
+    if (PADDiagnosticPrizeTraceActive() && native_prize_pad_raw_trace_sequence < 20000) {
+        const unsigned seq = native_prize_pad_raw_trace_sequence++;
+        OSReport("NATIVE_PRIZE_PAD_RAW seq=%u button=%u err=%d qcount=%u qread=%u qwrite=%u\n",
+                 seq, now.stat[0].button, now.stat[0].err,
+                 p->qcount, p->qread, p->qwrite);
+    }
+#endif
     mask = 0;
     for (i = 0; i < 4; i++) {
         if (now.stat[i].err == -1) {
@@ -495,6 +507,15 @@ void HSD_PadRenewMasterStatus(void)
             }
             mp->trigger = mp->button & (mp->last_button ^ mp->button);
             mp->release = mp->last_button & (mp->last_button ^ mp->button);
+#ifdef TARGET_PC
+            if (i == 0 && PADDiagnosticPrizeTraceActive() &&
+                native_prize_pad_master_trace_sequence < 20000) {
+                const unsigned seq = native_prize_pad_master_trace_sequence++;
+                OSReport("NATIVE_PRIZE_PAD_MASTER seq=%u queued_button=%u sampled_button=%u previous=%u current=%u trigger=%u err=%d qcount=%u\n",
+                         seq, queued->button, qread->button, mp->last_button,
+                         mp->button, mp->trigger, mp->err, p->qcount);
+            }
+#endif
             if (mp->last_button ^ mp->button) {
                 mp->repeat = mp->trigger;
                 mp->repeat_count = p->repeat_start;

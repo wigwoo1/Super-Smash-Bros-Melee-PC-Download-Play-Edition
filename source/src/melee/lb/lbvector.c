@@ -3,6 +3,10 @@
 #include <Runtime/platform.h>
 
 #include <math.h>
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 #include <placeholder.h>
 
 #include <dolphin/gx/GXTransform.h>
@@ -384,6 +388,16 @@ Vec3* lbVector_WorldToScreen(HSD_CObj* cobj, const Vec3* pos3d,
     MtxPtr mvMtx; // modelview matrix
     float f1;
 
+#ifdef TARGET_PC
+    if (pos3d && getenv("MELEE_DIAGNOSTIC_BOSS_FIRST_DRAW") &&
+        (!(pos3d->x > -50000.0F && pos3d->x < 50000.0F) ||
+         !(pos3d->y > -50000.0F && pos3d->y < 50000.0F) ||
+         !(pos3d->z > -50000.0F && pos3d->z < 50000.0F))) {
+        OSReport("NATIVE_REJECTED_PROJECTION pos=%g,%g,%g caller=%p cobj=%p d=%d\n",
+                 pos3d->x, pos3d->y, pos3d->z,
+                 __builtin_return_address(0), cobj, d);
+    }
+#endif
     HSD_ASSERT(676, pos3d);
     HSD_ASSERT(677, pos3d->x>-50000.0F&&pos3d->x<50000.0F);
     HSD_ASSERT(678, pos3d->y>-50000.0F&&pos3d->y<50000.0F);
