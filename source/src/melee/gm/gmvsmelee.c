@@ -172,12 +172,41 @@ void gmVsMelee_ExitSss(GameModeState* state, VsModeData* vs,
     }
 }
 
+#ifdef TARGET_PC
+/* Passive session-state observation; never seeds counters or outcomes. */
+static void gmVsMelee_DiagnosticSessionStats(const char* phase)
+{
+    if (getenv("MELEE_DIAGNOSTIC_SESSION_STATS")) {
+        OSReport("NATIVE_SESSION_STATS phase=%s total=%u time=%u stock=%u coin=%u bonus=%u stamina=%u kos=%d self_destructs=%u resets=%u\n",
+                 phase, gm_GetVsPlayMatchTotal(),
+                 *gmMainLib_GetTimeMatchTotal(), *gmMainLib_GetStockMatchTotal(),
+                 *gmMainLib_GetCoinMatchTotal(), *gmMainLib_GetBonusMatchTotal(),
+                 *gmMainLib_GetStaminaMatchTotal(), *gmMainLib_GetKOTotal(),
+                 *(u32*) gmMainLib_GetSelfDestructTotal(), *gmMainLib_GetMatchResetCounter());
+    }
+}
+
+static void gmVsMelee_DiagnosticRecordsReturn(void)
+{
+    if (getenv("MELEE_DIAGNOSTIC_SESSION_RECORDS")) {
+        if (_putenv_s("MELEE_DIAGNOSTIC_MENU_VS", "") != 0 ||
+            _putenv_s("MELEE_DIAGNOSTIC_SESSION_RECORDS_READY", "1") != 0)
+            OSPanic(__FILE__, __LINE__, "Could not arm diagnostic Records return");
+        OSReport("NATIVE_SESSION_RECORDS armed=1 total=%u time=%u\n",
+                 gm_GetVsPlayMatchTotal(), *gmMainLib_GetTimeMatchTotal());
+    }
+}
+#endif
+
 void gmVsMelee_EnterVs(GameModeState* state, VsModeData* vs,
                        gm_StartMeleeCallback start_cb,
                        gm_PlayerInitCallback player_cb)
 {
     StartMeleeData* start = gm_GetGameModeStateEnterData(state);
 
+#ifdef TARGET_PC
+    gmVsMelee_DiagnosticSessionStats("match_enter");
+#endif
     gm_80167BC8(vs);
     start->rules = vs->start.rules;
 
@@ -304,6 +333,9 @@ void gmVsMelee_EnterResults(GameModeState* state)
     ResultsMatchInfo* enter_data = gm_GetGameModeStateEnterData(state);
     gm_80177724(enter_data);
     enter_data->match_end = gmVsMelee_VsExitInfo.match_end;
+#ifdef TARGET_PC
+    gmVsMelee_DiagnosticSessionStats("results_enter");
+#endif
 }
 
 void gmVsMelee_ExitResults(GameModeState* state, VsModeData* vs, u8 state_id)
@@ -316,6 +348,12 @@ void gmVsMelee_ExitResults(GameModeState* state, VsModeData* vs, u8 state_id)
     u16 foo;
 
     match_end = &gmVsMelee_VsExitInfo.match_end;
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_SESSION_STATS"))
+        OSReport("NATIVE_SESSION_STATS_RESULT outcome=%u canceled=%u kind=%u frames=%u\n",
+                 match_end->outcome, gm_WasMatchCanceled(match_end->outcome),
+                 match_end->match_kind, match_end->frame_count);
+#endif
     if (!gm_WasMatchCanceled(match_end->outcome)) {
         gm_80168638(match_end);
         gm_80168710(match_end, vs);
@@ -366,11 +404,19 @@ void gmVsMelee_ExitResults(GameModeState* state, VsModeData* vs, u8 state_id)
             }
             if (unk_bool) {
                 lbCardGame_SetupArchive();
+#ifdef TARGET_PC
+                gmVsMelee_DiagnosticSessionStats("results_exit");
+                gmVsMelee_DiagnosticRecordsReturn();
+#endif
                 return;
             }
         }
     }
 
     lbCardGame_SetupArchive();
+#ifdef TARGET_PC
+    gmVsMelee_DiagnosticSessionStats("results_exit");
+    gmVsMelee_DiagnosticRecordsReturn();
+#endif
     gm_SetNextGameModeStateId(state_id);
 }

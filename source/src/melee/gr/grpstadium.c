@@ -37,6 +37,35 @@
 #include <sysdolphin/baselib/sislib.h>
 #include <sysdolphin/baselib/wobj.h>
 
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <string.h>
+#include <aurora/diagnostics.h>
+
+/* Keep the original transition state/kind and archive selection together.
+ * Bounded forced variants are separate from passive ordinary-cycle tracing. */
+static int grStadium_DiagnosticVariant(void)
+{
+    const char* variant;
+    const char* enabled = getenv("MELEE_DIAGNOSTIC_STADIUM_WATER");
+    if (!getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) return 0;
+    variant = getenv("MELEE_DIAGNOSTIC_STADIUM_VARIANT");
+    if (variant) {
+        if (!strcmp(variant, "grass")) return 4;
+        if (!strcmp(variant, "fire")) return 3;
+        if (!strcmp(variant, "rock")) return 6;
+        if (!strcmp(variant, "water")) return 9;
+    }
+    return enabled && !strcmp(enabled, "1") ? 9 : 0;
+}
+static int grStadium_DiagnosticTrace(void)
+{
+    const char* enabled = getenv("MELEE_DIAGNOSTIC_STADIUM_TRACE");
+    return getenv("MELEE_DIAGNOSTIC_GAME_STARTUP") && enabled &&
+           !strcmp(enabled, "1") && !grStadium_DiagnosticVariant();
+}
+#endif
+
 static struct grPStadium_YakumonoParam {
     int x0;
     int x4;
@@ -327,6 +356,17 @@ void grStadium_801D13E0(Ground_GObj* gobj)
         var_r27 += randi(temp_r28 - var_r27);
     }
     gr->u.stadium.xD8 = var_r27;
+#ifdef TARGET_PC
+    if (grStadium_DiagnosticVariant()) {
+        gr->u.stadium.xD8 = 60;
+        OSReport("NATIVE_STADIUM_VARIANT initial_wait=60 kind=%d\n", grStadium_DiagnosticVariant());
+        if (grStadium_DiagnosticVariant() == 9)
+            OSReport("NATIVE_STADIUM_WATER initial_wait=60\n");
+    }
+    if (grStadium_DiagnosticTrace())
+        OSReport("NATIVE_STADIUM_TRACE initial_wait=%d minimum=%d maximum=%d override=0\n",
+                 gr->u.stadium.xD8, yakumono_param->x0, yakumono_param->x4);
+#endif
     gr->x11_flags.b012 = 1;
     mpLib_800575B0(0x55);
     mpLib_800575B0(0x6F);
@@ -1512,6 +1552,23 @@ void grStadium_801D3460(Ground_GObj* gobj)
     temp_r29_2 = gm_8016AEEC();
     HSD_SisLib_803A6B98(gp2->win_dynamic_p, 125.0F, 120.0F, "%02d:%02d %02d",
                         temp_r29_2 / 60, temp_r29_2 % 60, gm_8016AF0C());
+#ifdef TARGET_PC
+    {
+        static int capture_armed;
+        const char* capture = getenv("MELEE_DIAGNOSTIC_STADIUM_NAMES_CAPTURE");
+        if (!capture_armed && getenv("MELEE_DIAGNOSTIC_GAME_STARTUP") &&
+            capture && *capture && var_r28 > 0) {
+            capture_armed = _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0;
+            OSReport("NATIVE_STADIUM_NAMES capture=%d players=%d original_text_callback=1\n", capture_armed, var_r28);
+            for (int name = 0; name < var_r28; name++) {
+                OSReport("NATIVE_STADIUM_NAME index=%d utf8_hex=", name);
+                for (unsigned byte = 0; byte < 127 && sp38[name][byte]; byte++)
+                    OSReport("%02x", (unsigned char) sp38[name][byte]);
+                OSReport("\n");
+            }
+        }
+    }
+#endif
 }
 
 const GXColor grPs_804DAF60 = { 0xC0, 0xC0, 0xFF, 0xFF };
@@ -1889,6 +1946,11 @@ static inline void startLoad(int i)
     gp = grStadium_801D4354(map_gobj);
     HSD_ASSERT(0x99B, gp);
     gp->u.stadium.xC4_b1 = true;
+#ifdef TARGET_PC
+    if (grStadium_DiagnosticTrace())
+        OSReport("NATIVE_STADIUM_TRACE request kind=%d file=%s\n",
+                 gp->u.stadium.xDE, datfiles[i]);
+#endif
     lbFile_80016580(datfiles[i], gp->u.stadium.xCC, &gp->u.stadium.xC8,
                     fn_801D4220, 0);
 }
@@ -1896,6 +1958,18 @@ static inline void startLoad(int i)
 static inline void waitLoad(Ground* gp)
 {
     if (grStadium_801D42B8()) {
+#ifdef TARGET_PC
+        if (grStadium_DiagnosticTrace())
+            OSReport("NATIVE_STADIUM_TRACE loaded kind=%d bytes=%u\n",
+                     gp->u.stadium.xDE, gp->u.stadium.xC8);
+        if (grStadium_DiagnosticVariant()) {
+            OSReport("NATIVE_STADIUM_VARIANT loaded kind=%d bytes=%u\n",
+                     gp->u.stadium.xDE, gp->u.stadium.xC8);
+            if (grStadium_DiagnosticVariant() == 9)
+                OSReport("NATIVE_STADIUM_WATER loaded kind=%d bytes=%u\n",
+                         gp->u.stadium.xDE, gp->u.stadium.xC8);
+        }
+#endif
         gp->u.stadium.xDC = 2;
     }
 }
@@ -2016,6 +2090,29 @@ void grStadium_801D4548(Ground_GObj* gobj)
 
     gp = GET_GROUND(gobj);
     scale = Ground_801C0498();
+#ifdef TARGET_PC
+    int diagnostic_variant = grStadium_DiagnosticVariant();
+    if (diagnostic_variant && gp->u.stadium.xDE == diagnostic_variant &&
+        gp->u.stadium.xDC == 0) {
+        static unsigned water_frames;
+        ++water_frames;
+        if (water_frames == 1 || water_frames == 300) {
+            OSReport("NATIVE_STADIUM_VARIANT running frames=%u kind=%d\n", water_frames, diagnostic_variant);
+            if (diagnostic_variant == 9)
+                OSReport("NATIVE_STADIUM_WATER running frames=%u kind=9\n", water_frames);
+        }
+    }
+    if (diagnostic_variant && gp->u.stadium.xDE == 5 &&
+        gp->u.stadium.xE0 == diagnostic_variant && gp->u.stadium.xDC == 0) {
+        static unsigned normal_frames;
+        ++normal_frames;
+        if (normal_frames == 1 || normal_frames == 300) {
+            OSReport("NATIVE_STADIUM_VARIANT normal_running frames=%u kind=5 previous=%d\n", normal_frames, diagnostic_variant);
+            if (diagnostic_variant == 9)
+                OSReport("NATIVE_STADIUM_WATER normal_running frames=%u kind=5 previous=9\n", normal_frames);
+        }
+    }
+#endif
     if (gm_8018841C()) {
         return;
     }
@@ -2030,6 +2127,25 @@ void grStadium_801D4548(Ground_GObj* gobj)
         }
         return;
     }
+#ifdef TARGET_PC
+    if (grStadium_DiagnosticTrace()) {
+        static int observed_kind = -1;
+        static unsigned stable_frames;
+        if (gp->u.stadium.xDC != 0 || observed_kind != gp->u.stadium.xDE) {
+            observed_kind = gp->u.stadium.xDE;
+            stable_frames = 0;
+        } else if (gp->u.stadium.xE0 != -1 && ++stable_frames == 300) {
+            OSReport("NATIVE_STADIUM_TRACE stable kind=%d previous=%d frames=300 override=0\n",
+                     gp->u.stadium.xDE, gp->u.stadium.xE0);
+            if (gp->u.stadium.xDE == 5 &&
+                getenv("MELEE_DIAGNOSTIC_STADIUM_TRACE_CLOSE")) {
+                int queued = aurora_diagnostic_queue_quit();
+                OSReport("NATIVE_STADIUM_TRACE close_after_normal=300 queued=%d\n", queued);
+                HSD_ASSERT(1, queued);
+            }
+        }
+    }
+#endif
 
     switch (gp->u.stadium.xDC) {
     case 0:
@@ -2043,6 +2159,10 @@ void grStadium_801D4548(Ground_GObj* gobj)
             } else {
                 kind = 5;
             }
+#ifdef TARGET_PC
+            if (diagnostic_variant && kind != 5)
+                kind = diagnostic_variant;
+#endif
             gp->u.stadium.xE2 = gp->u.stadium.xE0;
             gp->u.stadium.xE0 = gp->u.stadium.xDE;
             gp->u.stadium.xDE = kind;
@@ -2178,16 +2298,48 @@ void grStadium_801D4548(Ground_GObj* gobj)
     case 6:
         grStadium_801D4354(gp->u.stadium.xE4)->u.stadium.xC4_b0 = true;
         mpLib_80058560();
+#ifdef TARGET_PC
+        if (diagnostic_variant && gp->u.stadium.xDE == diagnostic_variant) {
+            const char* capture = getenv(diagnostic_variant == 9 ?
+                "MELEE_DIAGNOSTIC_STADIUM_WATER_CAPTURE" : "MELEE_DIAGNOSTIC_STADIUM_VARIANT_CAPTURE");
+            int armed = capture && *capture &&
+                        _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0;
+            OSReport("NATIVE_STADIUM_VARIANT active kind=%d capture=%d\n", diagnostic_variant, armed);
+            if (diagnostic_variant == 9)
+                OSReport("NATIVE_STADIUM_WATER active kind=9 capture=%d\n", armed);
+        }
+#endif
         if (gp->u.stadium.xDE == 5) {
             gp->u.stadium.xD8 =
                 randi_between_2(yakumono_param->x0, yakumono_param->x4);
             grAnime_801C65B0((void*) gp->u.stadium.xCC);
             mpLib_800575B0(0x55);
             mpLib_800575B0(0x6F);
+#ifdef TARGET_PC
+            if (diagnostic_variant && gp->u.stadium.xE0 == diagnostic_variant) {
+                const char* capture = getenv("MELEE_DIAGNOSTIC_STADIUM_NORMAL_CAPTURE");
+                int armed = capture && *capture &&
+                            _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0;
+                OSReport("NATIVE_STADIUM_VARIANT normal_active kind=5 previous=%d cleanup_complete=1 capture=%d dwell=%d\n",
+                         diagnostic_variant, armed, gp->u.stadium.xD8);
+                if (diagnostic_variant == 9)
+                    OSReport("NATIVE_STADIUM_WATER normal_active kind=5 previous=9 cleanup_complete=1 capture=%d dwell=%d\n", armed, gp->u.stadium.xD8);
+            }
+#endif
         } else {
             gp->u.stadium.xD8 =
                 randi_between_2(yakumono_param->x8, yakumono_param->xC);
         }
+#ifdef TARGET_PC
+        if (grStadium_DiagnosticTrace()) {
+            const char* capture = gp->u.stadium.xDE != 5 ?
+                getenv("MELEE_DIAGNOSTIC_STADIUM_TRACE_CAPTURE") : NULL;
+            int armed = capture && *capture &&
+                        _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0;
+            OSReport("NATIVE_STADIUM_TRACE active kind=%d previous=%d dwell=%d capture=%d override=0\n",
+                     gp->u.stadium.xDE, gp->u.stadium.xE0, gp->u.stadium.xD8, armed);
+        }
+#endif
         gp->u.stadium.xDC = 0;
         break;
     }

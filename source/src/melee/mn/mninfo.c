@@ -142,6 +142,25 @@ void mnInfo_80251AFC(void)
     }
 }
 
+#ifdef TARGET_PC
+/* The console table below mixes floats, integer SIS IDs and packed strings.
+ * Native initialization gives each field its proper representation and owns
+ * the trailing padding instead of relying on a neighboring data symbol. */
+static MnInfoDataLayout mnInfo_native_layout = {
+    { 0.0F, 199.0F, 0.0F },
+    { 0x505, 0x506, 0x507, 0x508 },
+    "%s.%s.%s",
+    "%s:%s:%s",
+    "Can't get user_data.\n",
+    "mninfo.c",
+    "user_data",
+    "MenMainConCo_Top_joint",
+    "MenMainConCo_Top_animjoint",
+    "MenMainConCo_Top_matanim_joint",
+    "MenMainConCo_Top_shapeanim_joint",
+};
+#define mnInfo_803EFC08 (&mnInfo_native_layout.anim)
+#else
 static AnimLoopSettings mnInfo_803EFC08[0x12] = {
     { 0.0f, 199.0f, 0.0f },
     { 1.8e-42f, 1.802e-42f, 1.803e-42f },
@@ -162,6 +181,7 @@ static AnimLoopSettings mnInfo_803EFC08[0x12] = {
     { 7.3738955e28f, 1.5307577e19f, 1.7539375e19f },
     { 2.8395941e29f, 1.7935375e25f, 7.2243537e28f },
 };
+#endif
 #ifdef MUST_MATCH
 #pragma push
 #pragma force_active on

@@ -207,7 +207,14 @@ void lbDvd_800178E8(int arg0, const char* name, int arg2, int arg3, int arg4,
                     int arg5, int arg6, u8 arg7, int arg8)
 {
     u8 _[8];
-    int entry = DVDConvertPathToEntrynum(lbFileGetFullName(name));
+    const char* filename = lbFileGetFullName(name);
+    int entry = DVDConvertPathToEntrynum(filename);
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
+        OSReport("NATIVE_PRELOAD_SCHEDULE name=%s entry=%d type=%d effect=%d\n",
+                 filename, entry, arg0, arg8);
+    }
+#endif
     lbDvd_80017740(arg0, entry, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
@@ -405,6 +412,13 @@ void* lbDvd_GetPreloadedArchive(ssize_t entry_num)
     if (entry->load_state == 1) {
         PreloadEntry* entry = &preloadCache.entries[i];
         type = entry->type;
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
+            OSReport("NATIVE_PRELOAD_PARSE entry=%d type=%d effect=%d bytes=%u\n",
+                     (int) entry_num, (int) type, entry->effect_index,
+                     (u32) entry->size);
+        }
+#endif
 
         switch (type) {
         case 2:
@@ -445,9 +459,16 @@ static inline void preloadFile(const struct PreloadFile* file, int heap,
                                int load_score, u8 flags)
 {
     const char* name = file->name;
+    const char* filename = lbFileGetFullName(name);
     int effect_index = file->effect_index;
     u8 type = file->type;
-    int entry_num = DVDConvertPathToEntrynum(lbFileGetFullName(name));
+    int entry_num = DVDConvertPathToEntrynum(filename);
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
+        OSReport("NATIVE_PRELOAD_SCHEDULE name=%s entry=%d type=%d effect=%d\n",
+                 filename, entry_num, type, effect_index);
+    }
+#endif
     lbDvd_80017740(type, entry_num, heap, heap, 0, 1, load_score, flags,
                    effect_index);
 }

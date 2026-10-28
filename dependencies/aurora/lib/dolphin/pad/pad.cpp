@@ -305,6 +305,24 @@ bool g_initialized;
 bool g_keyboardBindingsLoaded = false;
 bool g_blockPAD = false;
 bool g_controlsEditing = false;
+struct NativeBindingCapture {
+  bool active = false, armed = false, keyboard = true, axis = false;
+  u32 port = 0;
+  u16 output = 0;
+  s32 key = PAD_KEY_INVALID;
+  Uint64 deadline = 0;
+} g_bindingCapture;
+bool g_nativeControlsPage = false, g_controlsNavigationReady = false;
+u16 g_controlsNavigationLast = 0;
+unsigned g_controlsNavigationFrames = 0;
+aurora::input::KeyboardPressLatch<SDL_SCANCODE_COUNT> g_controlsNavigationKeys;
+
+void reset_controls_navigation() {
+  g_controlsNavigationReady = false;
+  g_controlsNavigationLast = 0;
+  g_controlsNavigationFrames = 0;
+  g_controlsNavigationKeys.clear();
+}
 bool g_windowFocused = true;
 bool g_suppressHeldOnRead = false;
 aurora::input::KeyboardPressLatch<SDL_SCANCODE_COUNT> g_pendingKeyPresses;
@@ -316,6 +334,7 @@ std::array<PADButton, PAD_CHANMAX> g_suppressedButtons{};
 std::array<PADExtButton, PAD_CHANMAX> g_suppressedExtButtons{};
 std::array<bool, PAD_CHANMAX> g_suppressLeftTrigger{};
 std::array<bool, PAD_CHANMAX> g_suppressRightTrigger{};
+std::array<std::array<bool, 4>, PAD_CHANMAX> g_suppressedSticks{};
 std::atomic_bool g_diagnosticPrizeTrace{false};
 std::atomic_bool g_diagnosticPrizeTraceLastA{false};
 std::atomic_uint g_diagnosticPrizeTraceWrites{0};
@@ -702,6 +721,14 @@ static void neutralize_status(PADStatus& status) {
 }
 
 static void apply_unblock_suppression(PADStatus& status, const u32 port, const bool captureHeldInput) {
+  s8* sticks[] = {&status.stickX, &status.stickY, &status.substickX, &status.substickY};
+  for (unsigned i = 0; i < 4; ++i) {
+    if (captureHeldInput && std::abs(int(*sticks[i])) > 15) g_suppressedSticks[port][i] = true;
+    if (g_suppressedSticks[port][i]) {
+      if (std::abs(int(*sticks[i])) <= 15) g_suppressedSticks[port][i] = false;
+      else *sticks[i] = 0;
+    }
+  }
   if (captureHeldInput) {
     g_suppressedButtons[port] |= status.button;
     g_suppressedExtButtons[port] |= status.extButton;
@@ -766,7 +793,7 @@ u32 PADRead(PADStatus* status) {
 
   int numKeys = 0;
   const bool* kbState = SDL_GetKeyboardState(&numKeys);
-  const bool captureHeldInput = g_suppressHeldOnRead && !g_blockPAD && !g_controlsEditing && g_windowFocused;
+  const bool captureHeldInput = g_suppressHeldOnRead && !g_blockPAD && !g_controlsEditing && !g_bindingCapture.active && !g_nativeControlsPage && g_windowFocused;
   auto keyPresses=g_pendingKeyPresses.take();
   if(captureHeldInput)keyPresses.reset();
   g_suppressHeldOnRead = false;
@@ -1020,7 +1047,7 @@ u32 PADRead(PADStatus* status) {
         std::getenv("AURORA_DIAGNOSTIC_SDL_GAMEPAD") != nullptr;
     // Keep ordinary background-input suppression; only the opt-in diagnostic
     // virtual device may exercise PADRead while this test window is unfocused.
-    if (g_blockPAD || g_controlsEditing || (!g_windowFocused && !diagnosticVirtualGamepad)) {
+    if (g_blockPAD || g_controlsEditing || g_bindingCapture.active || g_nativeControlsPage || (!g_windowFocused && !diagnosticVirtualGamepad)) {
       neutralize_status(status[i]);
     } else {
       apply_unblock_suppression(status[i], i, captureHeldInput);
@@ -1927,18 +1954,23 @@ void PADRestoreDefaultMapping(const u32 port) {
 }
 
 void PADSetControlsEditing(const bool editing) {
+  if (g_controlsEditing != editing) reset_controls_navigation();
   if(editing)g_pendingKeyPresses.clear();
   if (g_controlsEditing && !editing) g_suppressHeldOnRead = true;
   g_controlsEditing = editing;
 }
 
 void PADSetWindowFocused(const bool focused) {
-  if(g_windowFocused!=focused)g_pendingKeyPresses.clear();
+  if (g_windowFocused != focused) {
+    g_pendingKeyPresses.clear();
+    reset_controls_navigation();
+  }
   if (!g_windowFocused && focused) g_suppressHeldOnRead = true;
   g_windowFocused = focused;
 }
 
 void PADBlockInput(const bool block) {
+  if (g_blockPAD != block) reset_controls_navigation();
   if(block)g_pendingKeyPresses.clear();
   if (g_blockPAD && !block) {
     g_suppressHeldOnRead = true;
@@ -1947,11 +1979,159 @@ void PADBlockInput(const bool block) {
 }
 
 void PADHandleKeyPress(const s32 scancode,const bool repeat) {
-  const bool accepted=g_windowFocused && !g_blockPAD && !g_controlsEditing;
+  if (g_nativeControlsPage && !g_bindingCapture.active && g_controlsNavigationReady &&
+      g_windowFocused && !g_blockPAD && !g_controlsEditing)
+    g_controlsNavigationKeys.press(scancode, repeat);
+  if (g_bindingCapture.active && g_windowFocused && !repeat &&
+      (scancode == SDL_SCANCODE_ESCAPE || scancode == SDL_SCANCODE_BACKSPACE ||
+       (g_bindingCapture.armed && g_bindingCapture.keyboard)) &&
+      g_bindingCapture.key == PAD_KEY_INVALID)
+    g_bindingCapture.key = scancode;
+  const bool accepted=g_windowFocused && !g_blockPAD && !g_controlsEditing && !g_bindingCapture.active && !g_nativeControlsPage;
   if(accepted)g_pendingKeyPresses.press(scancode,repeat);
   if(key_tap_diagnostic() && !repeat)
     std::fprintf(stderr,"NATIVE_KEY_TAP_EVENT scancode=%d accepted=%u focus=%u block=%u editing=%u\n",
         int(scancode),unsigned(accepted),unsigned(g_windowFocused),unsigned(g_blockPAD),unsigned(g_controlsEditing));
+}
+
+const char* PADGetKeyName(const s32 scancode) {
+  if (scancode == PAD_KEY_INVALID) return "Unbound";
+  if (scancode < 0) return "Mouse";
+  const char* name = SDL_GetScancodeName(static_cast<SDL_Scancode>(scancode));
+  return name && *name ? name : "Unknown";
+}
+
+void PADCancelBindingCapture() {
+  if (g_bindingCapture.active) g_suppressHeldOnRead = true;
+  g_bindingCapture.active = false;
+  reset_controls_navigation();
+  g_pendingKeyPresses.clear();
+}
+
+void PADSetControlsPageActive(const bool active) {
+  if (g_nativeControlsPage == active) return;
+  PADCancelBindingCapture();
+  g_nativeControlsPage = active;
+  g_suppressHeldOnRead = true;
+}
+
+u16 PADReadControlsNavigation() {
+  if (!g_nativeControlsPage || g_bindingCapture.active || !g_windowFocused || g_blockPAD || g_controlsEditing) return 0;
+  int count = 0;
+  const bool* keys = SDL_GetKeyboardState(&count);
+  auto taps = g_controlsNavigationKeys.take();
+  const auto key = [&](const int code) { return aurora::input::keyboard_sample_pressed(keys, count, code, taps); };
+  u16 held = 0;
+  if (key(SDL_SCANCODE_UP) || key(SDL_SCANCODE_W)) held |= PAD_BUTTON_UP;
+  if (key(SDL_SCANCODE_DOWN) || key(SDL_SCANCODE_S)) held |= PAD_BUTTON_DOWN;
+  if (key(SDL_SCANCODE_LEFT) || key(SDL_SCANCODE_A)) held |= PAD_BUTTON_LEFT;
+  if (key(SDL_SCANCODE_RIGHT) || key(SDL_SCANCODE_D)) held |= PAD_BUTTON_RIGHT;
+  if (key(SDL_SCANCODE_RETURN) || key(SDL_SCANCODE_KP_ENTER)) held |= PAD_BUTTON_A;
+  if (key(SDL_SCANCODE_ESCAPE)) held |= PAD_BUTTON_B;
+  for (u32 port = 0; port < PAD_CHANMAX; ++port) {
+    const auto* controller = aurora::input::get_controller_for_player(port);
+    if (!controller) continue;
+    SDL_Gamepad* pad = controller->m_controller;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_UP) || SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_LEFTY) < -16384) held |= PAD_BUTTON_UP;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_DOWN) || SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_LEFTY) > 16384) held |= PAD_BUTTON_DOWN;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_LEFT) || SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_LEFTX) < -16384) held |= PAD_BUTTON_LEFT;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_DPAD_RIGHT) || SDL_GetGamepadAxis(pad, SDL_GAMEPAD_AXIS_LEFTX) > 16384) held |= PAD_BUTTON_RIGHT;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_SOUTH)) held |= PAD_BUTTON_A;
+    if (SDL_GetGamepadButton(pad, SDL_GAMEPAD_BUTTON_EAST)) held |= PAD_BUTTON_B;
+  }
+  if (!g_controlsNavigationReady) {
+    if (!held) g_controlsNavigationReady = true;
+    return 0;
+  }
+  const u16 pressed = held & ~g_controlsNavigationLast;
+  g_controlsNavigationFrames = held && held == g_controlsNavigationLast ? g_controlsNavigationFrames + 1 : 0;
+  g_controlsNavigationLast = held;
+  const u16 directions = PAD_BUTTON_UP | PAD_BUTTON_DOWN | PAD_BUTTON_LEFT | PAD_BUTTON_RIGHT;
+  return pressed | (g_controlsNavigationFrames >= 24 && (g_controlsNavigationFrames % 6) == 0 ? held & directions : 0);
+}
+
+static s32 g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_NONE;
+
+s32 PADGetBindingCaptureRefusal() { return g_bindingCaptureRefusal; }
+
+BOOL PADBeginBindingCapture(const u32 port, const bool keyboard, const bool axis, const u16 output) {
+  g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_NONE;
+  if (port >= PAD_CHANMAX) g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_PORT;
+  else if (g_bindingCapture.active) g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_ACTIVE;
+  else if (g_controlsEditing) g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_EDITOR;
+  else if (g_blockPAD) g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_BLOCKED;
+  else if (!g_windowFocused) g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_FOCUS;
+  const bool trace = std::getenv("AURORA_DIAGNOSTIC_BINDING_CAPTURE") != nullptr;
+  if (trace)
+    std::fprintf(stderr, "NATIVE_BINDING_BEGIN port=%u keyboard=%u axis=%u output=%u active=%u editing=%u block=%u focus=%u native_page=%u\n",
+                 port, unsigned(keyboard), unsigned(axis), unsigned(output), unsigned(g_bindingCapture.active),
+                 unsigned(g_controlsEditing), unsigned(g_blockPAD), unsigned(g_windowFocused), unsigned(g_nativeControlsPage));
+  if (g_bindingCaptureRefusal != PAD_BINDING_REFUSAL_NONE) {
+    if (trace) std::fprintf(stderr, "NATIVE_BINDING_BEGIN refused=guard reason=%d\n", g_bindingCaptureRefusal);
+    return FALSE;
+  }
+  u32 count = 0;
+  bool found = false;
+  if (keyboard && axis) {
+    const auto* mappings = PADGetKeyAxisBindings(port, &count);
+    for (u32 i = 0; mappings && i < count; ++i) found |= mappings[i].padAxis == output;
+  } else if (keyboard) {
+    const auto* mappings = PADGetKeyButtonBindings(port, &count);
+    for (u32 i = 0; mappings && i < count; ++i) found |= mappings[i].padButton == output;
+  } else if (axis) {
+    const auto* mappings = PADGetAxisMappings(port, &count);
+    for (u32 i = 0; mappings && i < count; ++i) found |= mappings[i].padAxis == output;
+  } else {
+    const auto* mappings = PADGetButtonMappings(port, &count);
+    for (u32 i = 0; mappings && i < count; ++i) found |= mappings[i].padButton == output;
+  }
+  if (!found) {
+    g_bindingCaptureRefusal = PAD_BINDING_REFUSAL_MAPPING;
+    if (trace) std::fprintf(stderr, "NATIVE_BINDING_BEGIN refused=mapping count=%u\n", count);
+    return FALSE;
+  }
+  g_bindingCapture = {true, false, keyboard, axis, port, output, PAD_KEY_INVALID, SDL_GetTicks() + 15000};
+  g_pendingKeyPresses.clear();
+  if (trace) std::fputs("NATIVE_BINDING_BEGIN accepted=1\n", stderr);
+  return TRUE;
+}
+
+s32 PADPollBindingCapture() {
+  auto& capture = g_bindingCapture;
+  if (!capture.active) return 3;
+  if (!g_windowFocused || g_blockPAD || SDL_GetTicks() >= capture.deadline ||
+      (!capture.keyboard && PADGetIndexForPort(capture.port) < 0) || capture.key == SDL_SCANCODE_ESCAPE) {
+    PADCancelBindingCapture();
+    return 3;
+  }
+  if (!capture.armed) {
+    int count = 0;
+    const bool* keys = SDL_GetKeyboardState(&count);
+    for (int i = 0; i < count; ++i) if (keys[i]) return 0;
+    for (u32 port = 0; port < PAD_CHANMAX; ++port) {
+      if (PADGetNativeButtonPressed(port) >= 0 || PADGetNativeAxisPulled(port).nativeAxis >= 0) return 0;
+    }
+    capture.armed = true;
+    return 1;
+  }
+  bool unbind = capture.key == SDL_SCANCODE_BACKSPACE;
+  BOOL accepted = FALSE;
+  if (capture.keyboard) {
+    if (capture.key == PAD_KEY_INVALID) return 1;
+    const s32 key = unbind ? PAD_KEY_INVALID : capture.key;
+    if (capture.axis) accepted = PADTrySetKeyAxisBinding(capture.port, {key, capture.output, 100});
+    else accepted = PADTrySetKeyButtonBinding(capture.port, {key, capture.output});
+  } else {
+    const s32 button = PADGetNativeButtonPressed(capture.port);
+    const PADSignedNativeAxis axis = PADGetNativeAxisPulled(capture.port);
+    if (!unbind && button < 0 && (!capture.axis || axis.nativeAxis < 0)) return 1;
+    if (capture.axis) accepted = PADTrySetAxisMapping(capture.port,
+        {unbind || button >= 0 ? PADSignedNativeAxis{-1, AXIS_SIGN_POSITIVE} : axis,
+         unbind ? -1 : button, capture.output});
+    else accepted = PADTrySetButtonMapping(capture.port, {static_cast<u32>(unbind ? -1 : button), capture.output});
+  }
+  PADCancelBindingCapture();
+  return accepted ? 2 : 4;
 }
 
 SDL_Gamepad* PADGetSDLGamepadForIndex(const u32 index) {

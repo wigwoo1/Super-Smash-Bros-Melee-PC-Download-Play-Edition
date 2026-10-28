@@ -16,5 +16,10 @@
 /* 2591BC */ void mnGallery_802591BC(HSD_GObj* gobj);
 /* 25963C */ void mnGallery_8025963C(void);
 /* 259868 */ void mnGallery_80259868(void);
+#ifdef TARGET_PC
+/* Passive diagnostic query: private gallery state (1 ready, 3 playing),
+ * selection 0 Special Movie / 1 How to Play; -1 outside Archives. */
+int mnGallery_DiagnosticState(int* selection);
+#endif
 
 #endif

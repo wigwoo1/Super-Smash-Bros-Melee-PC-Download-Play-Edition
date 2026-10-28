@@ -1,4 +1,8 @@
 #include "mngallery.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
 
 #include "inlines.h"
 #include <melee/gm/gmhowto.h>
@@ -41,6 +45,22 @@ struct mnGallery_804D6C88_userdata {
     HSD_GObj* gobjs[2];
 };
 ASSERT_SIZE(struct mnGallery_804D6C88_userdata, 0x24);
+#ifdef TARGET_PC
+static OSTime mnGallery_diagnostic_movie_start;
+
+int mnGallery_DiagnosticState(int* selection)
+{
+    struct mnGallery_804D6C88_userdata* data;
+    if (mn_804A04F0.cur_menu != MENU_KIND_DATA_ARCHIVES || !mnGallery_804D6C88)
+        return -1;
+    data = GET_804D6C88(mnGallery_804D6C88);
+    if (!data)
+        return -1;
+    if (selection)
+        *selection = data->unk15;
+    return data->state;
+}
+#endif
 
 #define GET_mnGallery_child_userdata(gobj)                                    \
     ((struct mnGallery_child_userdata*) HSD_GObjGetUserData(gobj))
@@ -166,6 +186,13 @@ static void mnGallery_80258BC4(struct mnGallery_804D6C88_userdata* data)
         break;
     }
     data->unk0 = 1;
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_ARCHIVES_MOVIE")) {
+        mnGallery_diagnostic_movie_start = OSGetTime();
+        OSReport("NATIVE_ARCHIVES_MOVIE started mode=%d file=%s\n", mode,
+                 mode == 0 ? "MvOmake15.mth" : "MvHowTo.mth");
+    }
+#endif
 }
 
 static void mnGallery_80258D50(struct mnGallery_804D6C88_userdata* data)
@@ -206,6 +233,13 @@ static void mnGallery_80258DBC(HSD_GObj* gobj,
     }
     pressed = buttons & 0x1300;
     if (pressed != 0 || data->unk1 > 0x32 || skip != 0) {
+#ifdef TARGET_PC
+        if (getenv("MELEE_DIAGNOSTIC_ARCHIVES_MOVIE"))
+            OSReport("NATIVE_ARCHIVES_MOVIE finished mode=%u reason=%s tick=%u complete=%d elapsed_ms=%u\n",
+                     data->unk2, pressed ? "input" : data->unk1 > 0x32 ? "natural" : "skip_flag",
+                     lbMthp_8001F5C4(), lbMthp_8001F604(),
+                     (u32) OSTicksToMilliseconds(OSGetTime() - mnGallery_diagnostic_movie_start));
+#endif
         if (pressed != 0) {
             sfxBack();
         }

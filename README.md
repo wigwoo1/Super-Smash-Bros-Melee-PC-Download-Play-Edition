@@ -2,15 +2,18 @@
 
 An unfinished native Windows PC port research project based on [doldecomp/melee](https://github.com/doldecomp/melee) and [Aurora](https://github.com/AxioDL/aurora). This is native game code with a replacement host runtime. It is not a finished playable release.
 
-**Current estimate: approximately 28% of the planned project.** This is a rough engineering estimate, not measured feature coverage. The separate browser/Download Play build and production multiplayer are planned, not available.
+**Current estimate: approximately 30% of the planned project.** This is a rough engineering estimate, not measured feature coverage. The separate browser/Download Play build and production multiplayer are planned, not available.
 
 ## Current diagnostic checkpoint
 
+- Reviewed October 28 source includes the native Data/Special metadata repair, scoped Archives playback checks, and original Records-page checks. The full Special Movie finished naturally on muted D3D12 at its original schedule; How to Play finished on D3D12 and Vulkan. Full Special Movie completion on Vulkan remains unverified.
+- Session-only statistics passed an original short Time match, Sudden Death, Results and return to Misc. Records on muted D3D12 and Vulkan: the actual screen displayed VS./Time match totals of 1, without save storage or injected scores. Other statistics and populated bonus rows remain unverified.
+- Ordinary Windows Enter/S/J/K menu input passed a D3D12 control with the title timeout held. Ordinary unheld startup and physical keyboard/controller acceptance remain open; this exception is not claimed as ordinary startup verification.
 - Newer source includes focused Kirby Ice Shot collision tracing: a muted 1,500-frame native test followed one projectile through a Popo hit and verified damage increasing from 8% to 13%. Scripted pad input was used; no damage was injected. This does not establish all-match or physical-controller acceptance.
 - Kirby's Game & Watch hat visibility now uses the hat's own model table. Focused renderer checks passed; broader stability remains unaccepted.
 - Cached uniform diagnostic flags passed over 540,000 live byte-equivalence comparisons in one workload. Timing comparisons favored the candidate but varied substantially; no stable percentage speedup is claimed.
 - Bounded muted D3D12, Vulkan and D3D11 checks passed on the test machine. The latest D3D11 timing check kept simulation near 60 Hz; older hardware is not verified.
-- Full roster/stage fidelity, physical controls, performance, multiplayer and release readiness remain unfinished. Overall estimate remains approximately 28%.
+- Full roster/stage fidelity, physical controls, performance, multiplayer and release readiness remain unfinished. Overall estimate remains approximately 30%.
 
 These results concern newer private diagnostic candidates and current source. The October 18 prerelease remains pinned to its original source and does not contain these newer changes. See [progress notes](docs/PORT_PROGRESS.txt) for scoped evidence; older verification files describe historical candidates.
 

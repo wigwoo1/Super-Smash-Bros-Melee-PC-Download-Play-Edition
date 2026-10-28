@@ -1,5 +1,12 @@
 #include <stdarg.h>
 #include <stdio.h>
+#ifdef TARGET_PC
+#include <pc/sis_utf8.h>
+#include <string.h>
+#define SIS_FORMAT_ENCODED_CAPACITY 1024
+#else
+#define SIS_FORMAT_ENCODED_CAPACITY 128
+#endif
 
 #include "gobjobject.h"
 #include "sislib.h"
@@ -135,6 +142,10 @@ static void sisEndKerning(u8* data, s32* out_idx, s32* has_kerning)
 /// @return length of encoded string
 s32 HSD_SisLib_803A67EC(u8* data, u8* string)
 {
+#ifdef TARGET_PC
+    u8 source_sjis[128];
+    if (MeleePc_SisSourceToSjis(source_sjis, string)) string = source_sjis;
+#endif
     u8* str_cursor;
     s32 lut_idx;
     s32 in_idx;
@@ -220,7 +231,7 @@ s32 HSD_SisLib_803A67EC(u8* data, u8* string)
 int HSD_SisLib_803A6B98(HSD_Text* text, float x, float y, const char* fmt, ...)
 {
     u8 buffer[128];
-    u8 encoded[128];
+    u8 encoded[SIS_FORMAT_ENCODED_CAPACITY];
     s32 x_coord;
     s32 y_coord;
     u8* old_buf;
@@ -238,7 +249,13 @@ int HSD_SisLib_803A6B98(HSD_Text* text, float x, float y, const char* fmt, ...)
     encoded[0] = 0;
     if (fmt) {
         va_start(args, fmt);
+#ifdef TARGET_PC
+        int native_written = vsnprintf((char*) buffer, sizeof(buffer), fmt, args);
+        if (native_written >= (int) sizeof(buffer))
+            MeleePc_SisTrimUtf8Tail(buffer);
+#else
         vsnprintf((char*) buffer, -1, fmt, args);
+#endif
         va_end(args);
         encoded_len = HSD_SisLib_803A67EC(encoded, buffer);
     }
@@ -345,7 +362,7 @@ end:
 s32 HSD_SisLib_803A70A0(HSD_Text* text, s32 entry_idx, char* fmt, ...)
 {
     u8 buffer[128];
-    u8 encoded[128];
+    u8 encoded[SIS_FORMAT_ENCODED_CAPACITY];
     u8* old_buf;
     u8* playhead;
     SisBuffer* alloc;
@@ -367,7 +384,13 @@ s32 HSD_SisLib_803A70A0(HSD_Text* text, s32 entry_idx, char* fmt, ...)
         playhead = entry + 0xE;
         if (fmt != NULL) {
             va_start(args, fmt);
+#ifdef TARGET_PC
+            int native_written = vsnprintf((char*) buffer, sizeof(buffer), fmt, args);
+            if (native_written >= (int) sizeof(buffer))
+                MeleePc_SisTrimUtf8Tail(buffer);
+#else
             vsnprintf((char*) buffer, -1, fmt, args);
+#endif
             va_end(args);
             new_size = HSD_SisLib_803A67EC(encoded, buffer);
         } else {
@@ -395,17 +418,28 @@ s32 HSD_SisLib_803A70A0(HSD_Text* text, s32 entry_idx, char* fmt, ...)
                 HSD_SisLib_Free(old_buf);
                 playhead = alloc->end - tail_len;
             }
+#ifdef TARGET_PC
+            /* Move only the suffix after the old glyphs, including its NUL. */
+            memmove(playhead + new_size, playhead + old_size,
+                    (size_t) (tail_len - old_size) + 1);
+#else
             for (i = tail_len; i > 0; i--) {
                 playhead[result + i] = playhead[i];
             }
+#endif
             alloc->end += result;
         } else if (old_size > new_size) {
             s32 shrink_size = old_size - new_size;
             s32 tail_len = alloc->end - playhead;
 
+#ifdef TARGET_PC
+            memmove(playhead + new_size, playhead + old_size,
+                    (size_t) (tail_len - old_size) + 1);
+#else
             for (i = 0; i < tail_len; i++) {
                 playhead[i] = playhead[shrink_size + i];
             }
+#endif
             alloc->end -= shrink_size;
         }
         for (i = 0; i < new_size; i++) {

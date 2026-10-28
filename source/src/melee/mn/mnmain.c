@@ -4,11 +4,13 @@
 
 #include <math.h>
 #ifdef TARGET_PC
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <aurora/aurora.h>
 #include <aurora/diagnostics.h>
 #include <dolphin/os.h>
+#include <melee/gm/gm_1601.h>
 #endif
 
 #include "forward.h"
@@ -771,6 +773,100 @@ static inline u8 mn_80229A04_dontinline(MenuKind kind, int selection)
     return mn_80229A04(kind, selection);
 }
 
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+static bool mnMain_NoSavePreviewActive(MenuKind menu_kind, int selection)
+{
+    return menu_kind == MENU_KIND_MAIN &&
+           (selection == SEL_MAIN_SETTINGS || selection == SEL_MAIN_DATA);
+}
+
+static void mnMain_NoSaveMenuDraw(HSD_GObj* gp, intptr_t pass)
+{
+    MainMenuData* data = gp->user_data;
+    HSD_JObj* preview = data->tree[14];
+    if (mnMain_NoSavePreviewActive(data->menu_kind, data->hovered_selection)) {
+        /* DispAll gates both a node and its descendants with these render
+         * bits. Preserve authored visibility and any matrix updates made by
+         * the normal draw callback; no flag survives this draw override. */
+        const u32 mask = JOBJ_ROOT_MASK | JOBJ_UNK_B18 | JOBJ_UNK_B19 |
+                         JOBJ_UNK_B20 | JOBJ_HIDDEN;
+        const u32 saved = preview->flags & mask;
+        preview->flags = (preview->flags & ~mask) | JOBJ_HIDDEN;
+        HSD_GObj_JObjCallback(gp, pass);
+        preview->flags = (preview->flags & ~mask) | saved;
+    } else {
+        HSD_GObj_JObjCallback(gp, pass);
+    }
+}
+
+static void mnMain_NoSavePreviewClear(MainMenuData* data)
+{
+    int i;
+    for (i = 0; i < 4; ++i) {
+        if (data->no_save_preview[i] != NULL) {
+            HSD_SisLib_803A5CC4(data->no_save_preview[i]);
+            data->no_save_preview[i] = NULL;
+        }
+    }
+}
+
+/* The original hover artwork contains Erase Data and Snapshots even when
+ * their menu entries are omitted. Use the same SIS owner/context as the
+ * description, so the preview follows its transition and scene cleanup. */
+static void mnMain_NoSavePreviewCreate(MainMenuData* data, MenuKind menu_kind,
+                                     int selection)
+{
+    static const char* settings[] = { "Rumble", "Sound", "Screen Display", "Language" };
+    static const int settings_selection[] = {
+        SEL_SETTINGS_RUMBLE, SEL_SETTINGS_SOUND,
+        SEL_SETTINGS_DISPLAY, SEL_SETTINGS_LANG,
+    };
+    static const char* entries[] = { "Archives", "Sound Test", "Melee Records", "Special" };
+    static const int data_selection[] = {
+        SEL_DATA_ARCHIVES, SEL_DATA_SOUND, SEL_DATA_RECORDS, SEL_DATA_SPECIAL,
+    };
+    const char* const* labels;
+    const int* selections;
+    MenuKind submenu;
+    int i, row = 0;
+    GXColor color = { 204, 214, 224, 255 };
+
+    if (!mnMain_NoSavePreviewActive(menu_kind, selection))
+        return;
+    if (selection == SEL_MAIN_SETTINGS) {
+        labels = settings;
+        selections = settings_selection;
+        submenu = MENU_KIND_SETTINGS;
+    } else {
+        labels = entries;
+        selections = data_selection;
+        submenu = MENU_KIND_DATA;
+    }
+    for (i = 0; i < 4; ++i) {
+        HSD_Text* line;
+        if (!mn_80229938(submenu, selections[i]))
+            continue;
+        line = HSD_SisLib_803A6754(0, mn_804D6BB4);
+        data->no_save_preview[row] = line;
+        line->pos_x = 8.0F;
+        line->pos_y = -3.1F + 1.4F * (f32) row;
+        line->pos_z = 17.0F;
+        line->font_size.x = line->font_size.y = 0.021F;
+        line->box_size_x = 210.0F;
+        line->box_size_y = 32.0F;
+        line->default_kerning = 1;
+        line->default_alignment = 0;
+        line->hidden = data->state != MENU_STATE_IDLE;
+        HSD_SisLib_803A6B98(line, 0.0F, 0.0F, "%s", labels[i]);
+        HSD_SisLib_803A74F0(line, 0, &color);
+        ++row;
+    }
+    if (getenv("MELEE_DIAGNOSTIC_NO_SAVE_PREVIEW"))
+        OSReport("NATIVE_NO_SAVE_PREVIEW selection=%u rows=%d storage_actions=0\n",
+                 selection, row);
+}
+#endif
+
 /// @brief creates the description text for the hovered selection
 static void mn_80229A7C(MainMenuData* data, MenuKind menu_kind, int selection)
 {
@@ -778,6 +874,9 @@ static void mn_80229A7C(MainMenuData* data, MenuKind menu_kind, int selection)
     HSD_Text* text;
     u16* sis_idx;
 
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    mnMain_NoSavePreviewClear(data);
+#endif
     if (data->description != NULL) {
         HSD_SisLib_803A5CC4(data->description);
         data->description = NULL;
@@ -791,6 +890,9 @@ static void mn_80229A7C(MainMenuData* data, MenuKind menu_kind, int selection)
         text->font_size.y = 0.0521f;
         HSD_SisLib_803A6368(text, sis_idx[selection]);
     }
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    mnMain_NoSavePreviewCreate(data, menu_kind, selection);
+#endif
 }
 
 static inline void mn_80229A7C_dontinline(void* arg0, int arg1, int arg2)
@@ -1172,6 +1274,14 @@ void mn_8022ADD8(HSD_GObj* gp, bool selection_changed)
         }
         break;
     }
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    {
+        int i;
+        for (i = 0; i < 4; ++i)
+            if (data->no_save_preview[i] != NULL)
+                data->no_save_preview[i]->hidden = data->state != MENU_STATE_IDLE;
+    }
+#endif
 }
 
 void fn_8022AF10(HSD_GObj* gp)
@@ -1357,6 +1467,9 @@ void fn_8022AFEC(HSD_GObj* gp)
         break;
     case MENU_STATE_EXIT_FROM:
     case MENU_STATE_ENTER_FROM:
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+        mnMain_NoSavePreviewClear(final_data);
+#endif
         if (final_data->description != NULL) {
             final_data = gp->user_data;
             HSD_SisLib_803A5CC4(final_data->description);
@@ -1438,7 +1551,11 @@ HSD_GObj* mn_8022B3A0(u8 state)
     gobj = GObj_Create(6, 7, 0x80);
     root_jobj = HSD_JObjLoadJoint(model->joint);
     HSD_GObjObject_80390A70(gobj, HSD_GObj_JObjKind, root_jobj);
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    GObj_SetupGXLink(gobj, mnMain_NoSaveMenuDraw, 4, 0x80);
+#else
     GObj_SetupGXLink(gobj, HSD_GObj_JObjCallback, 4, 0x80);
+#endif
     HSD_GObj_SetupProc(gobj, fn_8022AFEC, 0);
     HSD_JObjAddAnimAll(root_jobj, model->animjoint, model->matanim_joint,
                        model->shapeanim_joint);
@@ -1450,6 +1567,10 @@ HSD_GObj* mn_8022B3A0(u8 state)
     user_data->hovered_selection = mn_804A04F0.hovered_selection;
     user_data->state = state;
     user_data->description = NULL;
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    for (idx = 0; idx < 4; ++idx)
+        user_data->no_save_preview[idx] = NULL;
+#endif
     for (idx = 0; idx < (int) ARRAY_SIZE(user_data->tree); idx++) {
         lb_80011E24(root_jobj, &user_data->tree[idx], idx, -1);
     }
@@ -2749,14 +2870,178 @@ void mn_8022DB10(HSD_GObj* gp)
     }
 }
 
+#ifdef TARGET_PC
+/* Opt-in entry/Back verification uses the same staged PAD path as the other
+ * menu diagnostics. It observes real menu changes, never assigns menu state. */
+static void mnMain_DataEntryDiagnostic(PADStatus* status, unsigned frames,
+                                       MenuKind target, int movie_mode)
+{
+    static unsigned phase, active_frames, returned_frames;
+    static unsigned movie_capture, movie_returned_frames;
+    static unsigned records_return_frames;
+    const bool records_child = target == MENU_KIND_RECORDS_VS ||
+                               target == MENU_KIND_RECORDS_BONUS || target == MENU_KIND_RECORDS_MISC;
+    const unsigned records_selection = target == MENU_KIND_RECORDS_MISC ? SEL_RECORDS_MISC :
+                                       target == MENU_KIND_RECORDS_BONUS ? SEL_RECORDS_BONUS : SEL_RECORDS_VS;
+    const int selection = target == MENU_KIND_DATA_SPECIAL ? SEL_DATA_SPECIAL :
+                          target == MENU_KIND_RECORDS || records_child ? SEL_DATA_RECORDS : SEL_DATA_ARCHIVES;
+    const char* label = target == MENU_KIND_DATA_SPECIAL ? "special" :
+                        target == MENU_KIND_RECORDS_MISC ? "records-misc" :
+                        target == MENU_KIND_RECORDS_BONUS ? "records-bonus" :
+                        target == MENU_KIND_RECORDS_VS ? "records-vs" :
+                        target == MENU_KIND_RECORDS ? "records" : "archives";
+    if (frames < 720)
+        return;
+    status->button = 0;
+    if (phase == 0) {
+        if (mn_804A04F0.cur_menu == target) {
+            phase = 1;
+            OSReport("NATIVE_DATA_ENTRY entered=%s menu=%u frame=%u\n",
+                     label, mn_804A04F0.cur_menu, frames);
+        } else if (mn_804A04F0.cur_menu == MENU_KIND_DATA && frames % 30 < 10) {
+            status->button = mn_804A04F0.hovered_selection == selection ?
+                             PAD_BUTTON_A : PAD_BUTTON_DOWN;
+        } else if (records_child && mn_804A04F0.cur_menu == MENU_KIND_RECORDS && frames % 30 < 10) {
+            status->button = mn_804A04F0.hovered_selection == records_selection ?
+                             PAD_BUTTON_A : PAD_BUTTON_DOWN;
+        }
+    } else if (phase == 1) {
+        if (mn_804A04F0.cur_menu != target)
+            OSPanic(__FILE__, __LINE__, "Data-entry page left before Back");
+        ++active_frames;
+        if (movie_mode >= 0) {
+            int selected = -1;
+            int state = mnGallery_DiagnosticState(&selected);
+            if (state == 3) {
+                phase = 5;
+                OSReport("NATIVE_DATA_MOVIE playing mode=%d\n", movie_mode);
+            } else if (state == 1 && active_frames >= 120 && frames % 30 < 10) {
+                status->button = selected == movie_mode ? PAD_BUTTON_A : PAD_BUTTON_DOWN;
+            }
+            return;
+        }
+        if (active_frames == 180) {
+            if (target == MENU_KIND_RECORDS_MISC && getenv("MELEE_DIAGNOSTIC_SESSION_RECORDS_READY"))
+                OSReport("NATIVE_SESSION_RECORDS counters total=%u time=%u stock=%u resets=%u\n",
+                         gm_GetVsPlayMatchTotal(), *gmMainLib_GetTimeMatchTotal(),
+                         *gmMainLib_GetStockMatchTotal(), *gmMainLib_GetMatchResetCounter());
+            if (target == MENU_KIND_RECORDS_BONUS)
+                OSReport("NATIVE_BONUS_RECORDS available=%d scope=current_session\n", mnInfoBonus_802528F8());
+            const char* capture = getenv("MELEE_DIAGNOSTIC_DATA_ENTRY_CAPTURE");
+            if (capture && *capture &&
+                _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture) == 0)
+                OSReport("NATIVE_DATA_ENTRY capture=%s frames=%u\n", label, active_frames);
+        }
+        if (active_frames == 300) {
+            OSReport("NATIVE_DATA_ENTRY active=%s frames=%u\n", label, active_frames);
+            phase = 2;
+        }
+    } else if (phase == 2) {
+        if (records_child && mn_804A04F0.cur_menu == MENU_KIND_RECORDS && records_return_frames < 120) {
+            if (mn_804A04F0.hovered_selection != records_selection)
+                OSPanic(__FILE__, __LINE__, "Records child Back restored wrong selection");
+            if (++records_return_frames == 1)
+                OSReport("NATIVE_RECORDS_CHILD returned=%s selection=%u\n", label, records_selection);
+            if (records_return_frames == 120)
+                OSReport("NATIVE_RECORDS_CHILD return_stable=%s frames=120\n", label);
+        } else if (mn_804A04F0.cur_menu == MENU_KIND_DATA) {
+            if (records_child && records_return_frames != 120)
+                OSPanic(__FILE__, __LINE__, "Records child skipped parent-menu return");
+            if (mn_804A04F0.hovered_selection != selection)
+                OSPanic(__FILE__, __LINE__, "Data-entry Back restored wrong selection");
+            phase = 3;
+            returned_frames = 0;
+            OSReport("NATIVE_DATA_ENTRY returned=%s selection=%u\n", label, selection);
+        } else if ((mn_804A04F0.cur_menu == target ||
+                    (records_child && mn_804A04F0.cur_menu == MENU_KIND_RECORDS && records_return_frames == 120)) &&
+                   frames % 30 < 10) {
+            status->button = PAD_BUTTON_B;
+        }
+    } else if (phase == 3) {
+        if (mn_804A04F0.cur_menu != MENU_KIND_DATA)
+            OSPanic(__FILE__, __LINE__, "Data-entry return did not remain in Data");
+        if (++returned_frames == 120) {
+            phase = 4;
+            OSReport("NATIVE_DATA_ENTRY return_stable=%s frames=%u\n", label, returned_frames);
+            if (getenv("MELEE_DIAGNOSTIC_DATA_ENTRY_CLOSE")) {
+                if (!aurora_diagnostic_queue_quit())
+                    OSPanic(__FILE__, __LINE__, "Data-entry Quit queue failed");
+                OSReport("NATIVE_DATA_ENTRY close_queued=%s owner=1\n", label);
+            }
+        }
+    } else if (phase == 5) {
+        int state = mnGallery_DiagnosticState(NULL);
+        unsigned tick = (unsigned) lbMthp_8001F5C4();
+        if (state == 1) {
+            phase = 6;
+            OSReport("NATIVE_DATA_MOVIE original_menu_restored mode=%d\n", movie_mode);
+        } else if (state == 3) {
+            if (!movie_capture && tick >= 360) {
+                const char* path = getenv("MELEE_DIAGNOSTIC_ARCHIVES_MOVIE_CAPTURE");
+                if (path && *path && _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0) {
+                    movie_capture = 1;
+                    OSReport("NATIVE_DATA_MOVIE capture mode=%d tick=%u\n", movie_mode, tick);
+                }
+            }
+            if (getenv("MELEE_DIAGNOSTIC_ARCHIVES_MOVIE_SKIP") &&
+                tick >= 600 && frames % 30 < 10)
+                status->button = PAD_BUTTON_B;
+        } else {
+            OSPanic(__FILE__, __LINE__, "Archives movie left unexpected state");
+        }
+    } else if (phase == 6) {
+        if (mnGallery_DiagnosticState(NULL) != 1)
+            OSPanic(__FILE__, __LINE__, "Archives movie menu return was unstable");
+        if (++movie_returned_frames == 120) {
+            OSReport("NATIVE_DATA_MOVIE menu_stable mode=%d frames=120\n", movie_mode);
+            phase = 2;
+        }
+    }
+}
+#endif
+
 void mnMain_Scene_OnFrame(void)
 {
     MenuExitData* data;
 #ifdef TARGET_PC
-    if (getenv("MELEE_DIAGNOSTIC_MENU_NO_SAVE")) {
+    if (getenv("MELEE_DIAGNOSTIC_SESSION_RECORDS_READY")) {
+        static unsigned return_frames;
+        PADStatus status = { 0 };
+        ++return_frames;
+        if (mn_804A04F0.cur_menu == MENU_KIND_DATA ||
+            mn_804A04F0.cur_menu == MENU_KIND_RECORDS ||
+            mn_804A04F0.cur_menu == MENU_KIND_RECORDS_MISC) {
+            mnMain_DataEntryDiagnostic(&status, return_frames + 720,
+                                      MENU_KIND_RECORDS_MISC, -1);
+        } else if (return_frames % 30 < 10) {
+            if (mn_804A04F0.cur_menu == MENU_KIND_MAIN)
+                status.button = mn_804A04F0.hovered_selection == SEL_MAIN_DATA ?
+                                PAD_BUTTON_A : PAD_BUTTON_DOWN;
+            else
+                status.button = PAD_BUTTON_B;
+        }
+        if (!HSD_PadStageDiagnosticInput(0, &status))
+            OSReport("NATIVE_SESSION_RECORDS input_refused=1 frame=%u\n", return_frames);
+        if (return_frames == 1 || return_frames % 60 == 0)
+            OSReport("NATIVE_SESSION_RECORDS menu_frame=%u menu=%u selection=%u\n",
+                     return_frames, mn_804A04F0.cur_menu, mn_804A04F0.hovered_selection);
+    } else if (getenv("MELEE_DIAGNOSTIC_MENU_NO_SAVE")) {
         static unsigned no_save_frames;
         const char* route = getenv("MELEE_DIAGNOSTIC_MENU_NO_SAVE");
+        const bool movie_route = !strcmp(route, "data-movie") || !strcmp(route, "data-howto");
+        const bool data_entry = !strcmp(route, "data-archives") ||
+                                !strcmp(route, "data-special") ||
+                                !strcmp(route, "data-records") ||
+                                !strcmp(route, "data-records-vs") ||
+                                !strcmp(route, "data-records-bonus") ||
+                                !strcmp(route, "data-records-misc") || movie_route;
+        const char* renderer_direction =
+            getenv("MELEE_DIAGNOSTIC_RENDERER_DIRECTION");
         const unsigned graphics_route = route[0] == 'g';
+        const unsigned controls_route = strcmp(route, "graphics-controls") == 0;
+        const unsigned controls_refusal_route = controls_route &&
+            getenv("MELEE_DIAGNOSTIC_CONTROLS_REFUSE_ONCE") != NULL;
+        const unsigned fps_route = strcmp(route, "graphics-fps") == 0;
         const unsigned renderer_graphics_route =
             graphics_route && strcmp(route, "graphics-renderer") == 0;
         const unsigned full_graphics_match_route =
@@ -2780,12 +3065,13 @@ void mnMain_Scene_OnFrame(void)
             graphics_route &&
             (strcmp(route, "graphics-full") == 0 || renderer_graphics_route ||
              full_graphics_match_route);
-        const unsigned steps = route[0] == 'd' ? 4 : 3;
+        const unsigned steps = strcmp(route, "preview-wrap") == 0 ? 5 :
+                               route[0] == 'd' ? 4 : 3;
         /* The settings verifier samples eight navigation edges so it can
          * exercise wraparound twice. The old three-edge schedule stopped at
          * the same selection the verifier expected to leave, making the
          * recorded cursor trace impossible to pass. */
-        const unsigned settings_steps = graphics_route ? 2 : 8;
+        const unsigned settings_steps = data_entry ? 0 : graphics_route ? 2 : 8;
         unsigned close_frame = 1050;
         unsigned graphics_scroll;
         unsigned full_graphics_scroll;
@@ -2800,6 +3086,18 @@ void mnMain_Scene_OnFrame(void)
                 close_frame = (unsigned) parsed;
         }
         ++no_save_frames;
+        if (no_save_frames == (getenv("MELEE_DIAGNOSTIC_NO_SAVE_PREVIEW_SUBMENU") ? 660 : 515) &&
+            getenv("MELEE_DIAGNOSTIC_NO_SAVE_PREVIEW_CAPTURE")) {
+            char path[1024];
+            int count = snprintf(path, sizeof(path), "%s-%s.ppm",
+                getenv("MELEE_DIAGNOSTIC_NO_SAVE_PREVIEW_CAPTURE"),
+                no_save_frames == 515 ? "main" : "submenu");
+            if (count > 0 && count < (int) sizeof(path) &&
+                _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path) == 0)
+                OSReport("NATIVE_NO_SAVE_PREVIEW_CAPTURE frame=%u menu=%u selection=%u\n",
+                         no_save_frames, mn_804A04F0.cur_menu,
+                         mn_804A04F0.hovered_selection);
+        }
         if (texture_pack_route && no_save_frames ==
             (texture_quality_route && getenv("MELEE_DIAGNOSTIC_PACK_CAPTURE_ORIGINAL") ? 1660 : 1300)) {
             const char* capture = getenv("MELEE_DIAGNOSTIC_PACK_MENU_CAPTURE");
@@ -2844,7 +3142,10 @@ void mnMain_Scene_OnFrame(void)
             status.button = PAD_BUTTON_RIGHT;
         if (renderer_graphics_route && no_save_frames >= 1065 &&
             no_save_frames < 1075)
-            status.button = PAD_BUTTON_RIGHT;
+            status.button = renderer_direction != NULL &&
+                                    strcmp(renderer_direction, "left") == 0
+                                ? PAD_BUTTON_LEFT
+                                : PAD_BUTTON_RIGHT;
         /* Exercise the native restart row only in the focused diagnostic
          * route, after the requested Vulkan choice has been staged. */
         if (renderer_graphics_route && no_save_frames >= 1080 &&
@@ -2902,7 +3203,64 @@ void mnMain_Scene_OnFrame(void)
             OSReport("NATIVE_PACK_MATCH_NAV frame=%u menu=%u selection=%u pack=%u quality=%u\n",
                      no_save_frames, mn_804A04F0.cur_menu, mn_804A04F0.hovered_selection,
                      aurora_get_texture_pack(), aurora_get_texture_quality());
-        if (no_save_frames <= (graphics_match_route ? 1820 : texture_quality_route ? 1640 : texture_pack_route ? 1180 : renderer_graphics_route ? 1120 : 1100)) {
+        if (controls_route && no_save_frames >= 840) {
+            status.button = 0;
+            if (no_save_frames >= 870 && no_save_frames < 880) status.button = PAD_BUTTON_UP;
+            if ((no_save_frames >= 930 && no_save_frames < 940) ||
+                (no_save_frames >= 1070 && no_save_frames < 1080) ||
+                (no_save_frames >= 1190 && no_save_frames < 1200)) status.button = PAD_BUTTON_A;
+            if ((no_save_frames >= 990 && no_save_frames < 1000) ||
+                (no_save_frames >= 1030 && no_save_frames < 1040) ||
+                (no_save_frames >= 1110 && no_save_frames < 1120) ||
+                (no_save_frames >= 1150 && no_save_frames < 1160)) status.button = PAD_BUTTON_DOWN;
+            if (!controls_refusal_route && no_save_frames == 1240) PADHandleKeyPress(19, false); /* SDL P, raw capture event. */
+            if (!controls_refusal_route && no_save_frames == 1300) {
+                const char* path = getenv("MELEE_DIAGNOSTIC_CONTROLS_CAPTURE");
+                if (path && *path) _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path);
+            }
+            if ((no_save_frames >= 1450 && no_save_frames < 1460) ||
+                (no_save_frames >= 1530 && no_save_frames < 1540)) status.button = PAD_BUTTON_B;
+            if (controls_refusal_route) {
+                /* Explicit fault fixture only: refuse the first ordinary A
+                 * edge, capture its feedback, restore the focus owner, retry. */
+                if (no_save_frames >= 1190 && no_save_frames < 1200)
+                    PADSetWindowFocused(false);
+                if (no_save_frames == 1230) PADSetWindowFocused(true);
+                if (no_save_frames >= 1270 && no_save_frames < 1280)
+                    status.button = PAD_BUTTON_A;
+                if (no_save_frames == 1320) PADHandleKeyPress(19, false);
+                if (no_save_frames == 1205) {
+                    const char* path = getenv("MELEE_DIAGNOSTIC_CONTROLS_CAPTURE");
+                    if (path && *path) _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", path);
+                }
+            }
+        }
+        if (fps_route && no_save_frames >= 840) {
+            status.button = 0;
+            /* Ordinary menu edges: wrap to Controls, then up to Show FPS. */
+            if ((no_save_frames >= 870 && no_save_frames < 880) ||
+                (no_save_frames >= 900 && no_save_frames < 910))
+                status.button = PAD_BUTTON_UP;
+            if ((no_save_frames >= 930 && no_save_frames < 940) ||
+                (no_save_frames >= 1050 && no_save_frames < 1060) ||
+                (no_save_frames >= 1170 && no_save_frames < 1180))
+                status.button = PAD_BUTTON_RIGHT;
+            if (no_save_frames == (getenv("MELEE_DIAGNOSTIC_FPS_CAPTURE_OFF") ? 1110 : 1300)) {
+                const char* capture = getenv("MELEE_DIAGNOSTIC_FPS_MENU_CAPTURE");
+                if (capture && *capture) _putenv_s("AURORA_DIAGNOSTIC_COLOR_CAPTURE", capture);
+            }
+            if (no_save_frames >= 1380 && no_save_frames < 1390)
+                status.button = PAD_BUTTON_B;
+        }
+        if (data_entry)
+            mnMain_DataEntryDiagnostic(&status, no_save_frames,
+                                       !strcmp(route, "data-special") ? MENU_KIND_DATA_SPECIAL :
+                                       !strcmp(route, "data-records-misc") ? MENU_KIND_RECORDS_MISC :
+                                       !strcmp(route, "data-records-bonus") ? MENU_KIND_RECORDS_BONUS :
+                                       !strcmp(route, "data-records-vs") ? MENU_KIND_RECORDS_VS :
+                                       !strcmp(route, "data-records") ? MENU_KIND_RECORDS : MENU_KIND_DATA_ARCHIVES,
+                                       movie_route ? !strcmp(route, "data-howto") : -1);
+        if (data_entry || no_save_frames <= (fps_route ? 1450 : controls_route ? 1640 : graphics_match_route ? 1820 : texture_quality_route ? 1640 : texture_pack_route ? 1180 : renderer_graphics_route ? 1120 : 1100)) {
             if (!HSD_PadStageDiagnosticInput(0, &status))
                 OSReport("NATIVE_NO_SAVE_MENU_INPUT_REFUSED frame=%u\n",
                          no_save_frames);
@@ -3006,6 +3364,8 @@ static void mnMain_SetControlsAvailable(bool available)
 void mnMain_Scene_OnExit(void* unused)
 {
     (void)unused;
+    PADCancelBindingCapture();
+    PADSetControlsPageActive(false);
     mnMain_SetControlsAvailable(false);
 }
 #endif

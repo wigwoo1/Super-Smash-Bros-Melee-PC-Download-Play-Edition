@@ -154,6 +154,8 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "hud_scene_archive.h"
 #include "player_common_archive.h"
 #include "stage_archive_plan.h"
+#include "stage_stadium_water_archive_plan.h"
+#include "stage_stadium_variant_identity.h"
 #include "stage_castle_archive_plan.h"
 #include "stage_story_archive_plan.h"
 #include "stage_battle_archive_plan.h"
@@ -9482,6 +9484,17 @@ static int MeleePc_DatDecode(void* data,size_t length){
     }
     if(stadium){
         int result=MeleePc_StageStadiumBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Exact original transformation identities, separate from GrPs.usd. */
+    if(MeleePc_StageStadiumWaterKnown(bytes,length) ||
+       MeleePc_StageStadiumGrassKnown(bytes,length) ||
+       MeleePc_StageStadiumFireKnown(bytes,length) ||
+       MeleePc_StageStadiumRockKnown(bytes,length)){
+        int result=MeleePc_StageStadiumVariantBody(bytes,length,body,relocs,publics,roots,strings);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);

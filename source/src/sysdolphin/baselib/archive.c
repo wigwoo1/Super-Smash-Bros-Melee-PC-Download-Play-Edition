@@ -1,5 +1,6 @@
 #include "archive.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include <dolphin/os.h>
@@ -125,6 +126,70 @@ static void MeleePc_LogUnsupportedArchive(const u8* src, size_t file_size)
     }
     OSReport("\n");
 }
+
+/* Opt-in private diagnostic capture for Stadium transformation archives.
+ * This does not change decoder acceptance or mutate the archive. The size
+ * and typed-table counts are bounded, and at least one exported root must
+ * identify one of Stadium's four transformation families. */
+static void MeleePc_DumpUnsupportedStadiumArchive(const u8* src, size_t file_size)
+{
+    const char* path = getenv("MELEE_DIAGNOSTIC_DUMP_ARCHIVE_PATH");
+    size_t cursor = sizeof(HSD_ArchiveHeader);
+    size_t symbol_offset;
+    u32 body_size, reloc_count, public_count, extern_count, i;
+    FILE* out;
+
+    if (path == NULL || path[0] == '\0' || src == NULL ||
+        file_size < sizeof(HSD_ArchiveHeader)) {
+        return;
+    }
+    body_size = MeleePc_DatBe32(src + 4);
+    reloc_count = MeleePc_DatBe32(src + 8);
+    public_count = MeleePc_DatBe32(src + 12);
+    extern_count = MeleePc_DatBe32(src + 16);
+    if (file_size < 200000 || file_size > 350000 ||
+        body_size > file_size - cursor || reloc_count < 400 ||
+        reloc_count > 1400 || public_count < 20 || public_count > 50 ||
+        extern_count < 60 || extern_count > 140) {
+        return;
+    }
+    cursor += body_size;
+    if (reloc_count > (file_size - cursor) / 4) return;
+    cursor += (size_t) reloc_count * 4;
+    if (public_count > (file_size - cursor) / 8) return;
+    cursor += (size_t) public_count * 8;
+    if (extern_count > (file_size - cursor) / 8) return;
+    cursor += (size_t) extern_count * 8;
+    symbol_offset = cursor;
+
+    for (i = 0; i < public_count; ++i) {
+        size_t entry = sizeof(HSD_ArchiveHeader) + body_size +
+                       (size_t) reloc_count * 4 + (size_t) i * 8;
+        u32 symbol = MeleePc_DatBe32(src + entry + 4);
+        size_t remaining = file_size - symbol_offset;
+        const char* name;
+        bool stadium_root;
+        if (symbol >= remaining) continue;
+        name = (const char*) src + symbol_offset + symbol;
+        if (memchr(name, 0, remaining - symbol) == NULL) continue;
+        stadium_root = strncmp(name, "GrdPSGrass", 10) == 0 ||
+                       strncmp(name, "GrdPSRock", 9) == 0 ||
+                       strncmp(name, "GrdPSWater", 10) == 0 ||
+                       strncmp(name, "GrdPSFire", 9) == 0;
+        if (!stadium_root) continue;
+        out = fopen(path, "wb");
+        if (out == NULL) {
+            OSReport("NATIVE_ARCHIVE dump_failed open bytes=%u\n", (u32) file_size);
+            return;
+        }
+        if (fwrite(src, 1, file_size, out) != file_size || fclose(out) != 0) {
+            OSReport("NATIVE_ARCHIVE dump_failed write bytes=%u\n", (u32) file_size);
+            return;
+        }
+        OSReport("NATIVE_ARCHIVE dump_ok bytes=%u\n", (u32) file_size);
+        return;
+    }
+}
 #endif
 
 static inline void Locate(HSD_Archive* archive)
@@ -196,6 +261,7 @@ s32 HSD_ArchiveParse(HSD_Archive* archive, u8* src, size_t file_size)
                          MeleePc_DatBe32(src + 16));
                 if (result == -2) {
                     MeleePc_LogUnsupportedArchive(src, file_size);
+                    MeleePc_DumpUnsupportedStadiumArchive(src, file_size);
                 }
             }
             OSReport("Native archive conversion refused: %s, bytes=%u\n",

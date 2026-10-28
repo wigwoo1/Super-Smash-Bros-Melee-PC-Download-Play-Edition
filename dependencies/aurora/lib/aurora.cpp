@@ -176,6 +176,15 @@ extern "C" int aurora_set_controls_available(const bool available) {
   return 1;
 }
 
+extern "C" int aurora_set_fps_counter_enabled(int enabled) {
+  if (!diagnostic_on_owner() || (enabled != 0 && enabled != 1)) return 0;
+  aurora::imgui::set_fps_counter_enabled(enabled != 0);
+  return 1;
+}
+extern "C" int aurora_get_fps_counter_enabled(void) {
+  return aurora::imgui::fps_counter_enabled() ? 1 : 0;
+}
+
 extern "C" int aurora_set_render_height(const uint32_t height) {
   if (!diagnostic_on_owner()) return 0;
   return aurora::window::try_set_render_height(height) ? 1 : 0;

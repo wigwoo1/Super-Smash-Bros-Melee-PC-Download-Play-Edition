@@ -309,7 +309,10 @@ void gm_801A4014(GameMode* mode)
             _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_COMPOSITED_PRESENT", "1") == 0 &&
             _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_VI", "1") == 0 &&
             _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_REQUIRE_GPU_SNAPSHOT", "") == 0 &&
-            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_DELAY", "20") == 0;
+            /* Let the original menu transition finish before the one-shot
+             * diagnostic screenshot. This is enabled only by the explicit
+             * congratulations-return diagnostic environment switch. */
+            _putenv_s("AURORA_DIAGNOSTIC_CAPTURE_DELAY", "180") == 0;
         if (_dupenv_s(&path, &size, "MELEE_DIAGNOSTIC_RETURN_CAPTURE") == 0 &&
             path && path[0]) {
             configured = configured &&

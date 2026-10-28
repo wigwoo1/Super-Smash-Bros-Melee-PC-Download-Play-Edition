@@ -6,6 +6,7 @@
 
 #if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
 #include <aurora/aurora.h>
+#include <dolphin/pad.h>
 #include "../../pc/renderer_restart.h"
 #endif
 
@@ -45,7 +46,8 @@ extern HSD_GObj* mnDeflicker_804D6C38;
  * The values below are session-only renderer preferences; none are written
  * to the memory-card backend. Keep this UI in SIS so it is drawn by the game
  * scene rather than Aurora's separate host-side ImGui dock. */
-#define MN_PC_GRAPHICS_LINE_COUNT 24
+#define MN_PC_GRAPHICS_ROW_COUNT 11
+#define MN_PC_GRAPHICS_LINE_COUNT (3 + 2 * MN_PC_GRAPHICS_ROW_COUNT + 3)
 static HSD_Text* mnDeflicker_pc_graphics_lines[MN_PC_GRAPHICS_LINE_COUNT];
 static HSD_Text* mnDeflicker_pc_graphics_text;
 static u8 mnDeflicker_pc_graphics_selection;
@@ -56,6 +58,177 @@ static AuroraBackend mnDeflicker_pc_renderer_choices[4];
 static u32 mnDeflicker_pc_renderer_choice_count;
 static u32 mnDeflicker_pc_renderer_choice;
 static int mnDeflicker_pc_renderer_restart_pending;
+static bool mnControls_open;
+static bool mnControls_controller;
+static bool mnControls_capturing;
+static u8 mnControls_port;
+static u8 mnControls_selection;
+static u8 mnControls_page;
+static s32 mnControls_capture_status;
+static char mnControls_feedback[72];
+
+static void mnDeflicker_pc_graphics_draw(void);
+
+static const char* mnControls_refusal_message(void)
+{
+    switch (PADGetBindingCaptureRefusal()) {
+    case PAD_BINDING_REFUSAL_PORT: return "That player port is unavailable";
+    case PAD_BINDING_REFUSAL_ACTIVE: return "Finish or cancel the current binding first";
+    case PAD_BINDING_REFUSAL_EDITOR: return "Close the other input editor first";
+    case PAD_BINDING_REFUSAL_BLOCKED: return "Input is blocked; close the active dialog";
+    case PAD_BINDING_REFUSAL_FOCUS: return "Focus the game window, then try again";
+    case PAD_BINDING_REFUSAL_MAPPING: return "Enable keyboard or assign a controller first";
+    default: return "Select a listed binding to change";
+    }
+}
+
+/* Five bindings per page keep all four player ports, stick directions and
+ * triggers readable inside the original SIS settings frame. */
+static u32 mnControls_count(void)
+{
+    return PAD_BUTTON_COUNT + PAD_AXIS_COUNT;
+}
+
+static u16 mnControls_output(u32 index)
+{
+    static const u16 buttons[PAD_BUTTON_COUNT] = {
+        PAD_BUTTON_A, PAD_BUTTON_B, PAD_BUTTON_X, PAD_BUTTON_Y,
+        PAD_BUTTON_START, PAD_TRIGGER_Z, PAD_TRIGGER_L, PAD_TRIGGER_R,
+        PAD_BUTTON_UP, PAD_BUTTON_DOWN, PAD_BUTTON_LEFT, PAD_BUTTON_RIGHT,
+    };
+    return index < PAD_BUTTON_COUNT ? buttons[index] : (u16)(index - PAD_BUTTON_COUNT);
+}
+
+static void mnControls_labels(char labels[10][32], char values[10][32])
+{
+    u32 i, count;
+    const char* name;
+    snprintf(labels[0], 32, "Player port");
+    snprintf(values[0], 32, "Player %u", mnControls_port + 1);
+    snprintf(labels[1], 32, "Input device");
+    snprintf(values[1], 32, "%s", mnControls_controller ? "Controller" : "Keyboard");
+    snprintf(labels[2], 32, "%s", mnControls_controller ? "Assigned controller" : "Keyboard layout");
+    name = PADGetName(mnControls_port);
+    snprintf(values[2], 32, "%s", mnControls_controller ? (name ? name : "None") : "A: reset and enable");
+    snprintf(labels[3], 32, "Bindings page");
+    snprintf(values[3], 32, "%u of %u", mnControls_page + 1, (mnControls_count() + 4) / 5);
+    for (i = 0; i < 5; ++i) {
+        u32 index = mnControls_page * 5 + i;
+        u16 output = mnControls_output(index);
+        labels[i + 4][0] = values[i + 4][0] = '\0';
+        if (index >= mnControls_count()) continue;
+        name = index < PAD_BUTTON_COUNT ? PADGetButtonName(output) : PADGetAxisDirectionLabel(output);
+        snprintf(labels[i + 4], 32, "%s", name ? name : "Unknown");
+        if (!mnControls_controller) {
+            s32 key = PAD_KEY_INVALID;
+            if (index < PAD_BUTTON_COUNT) {
+                PADKeyButtonBinding* mappings = PADGetKeyButtonBindings(mnControls_port, &count);
+                if (mappings && index < count) key = mappings[index].scancode;
+            } else {
+                PADKeyAxisBinding* mappings = PADGetKeyAxisBindings(mnControls_port, &count);
+                if (mappings && index - PAD_BUTTON_COUNT < count) key = mappings[index - PAD_BUTTON_COUNT].scancode;
+            }
+            snprintf(values[i + 4], 32, "%s", PADGetKeyName(key));
+        } else if (index < PAD_BUTTON_COUNT) {
+            PADButtonMapping* mappings = PADGetButtonMappings(mnControls_port, &count);
+            name = mappings && index < count ? PADGetNativeButtonName(mappings[index].nativeButton) : NULL;
+            snprintf(values[i + 4], 32, "%s", name ? name : "Unbound");
+        } else {
+            PADAxisMapping* mappings = PADGetAxisMappings(mnControls_port, &count);
+            index -= PAD_BUTTON_COUNT;
+            if (!mappings || index >= count) snprintf(values[i + 4], 32, "Unbound");
+            else if (mappings[index].nativeAxis.nativeAxis >= 0) {
+                name = PADGetNativeAxisName(mappings[index].nativeAxis);
+                snprintf(values[i + 4], 32, "%s %s", name ? name : "Unknown", mappings[index].nativeAxis.sign < 0 ? "-" : "+");
+            } else {
+                name = PADGetNativeButtonName(mappings[index].nativeButton);
+                snprintf(values[i + 4], 32, "%s", name ? name : "Unbound");
+            }
+        }
+    }
+    snprintf(labels[9], 32, "Back to graphics");
+    values[9][0] = '\0';
+}
+
+static void mnControls_think(void)
+{
+    u64 events;
+    int direction;
+    if (mnControls_capturing) {
+        s32 status = PADPollBindingCapture();
+        if (status != mnControls_capture_status) {
+            mnControls_capture_status = status;
+            snprintf(mnControls_feedback, sizeof(mnControls_feedback), "%s",
+                     status == 0 ? "Release all keys, buttons and sticks" :
+                     status == 1 ? "Press input. Esc cancels. Backspace unbinds" :
+                     status == 2 ? "Binding updated for this session" :
+                     status == 3 ? "Capture cancelled; binding unchanged" :
+                                   "Unsupported input; binding unchanged");
+            if (status >= 2) mnControls_capturing = false;
+            mnDeflicker_pc_graphics_draw();
+            if (getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE"))
+                OSReport("NATIVE_CONTROLS_CAPTURE status=%d port=%u controller=%u\n", status, mnControls_port, mnControls_controller);
+        }
+        return;
+    }
+    {
+        u16 raw = PADReadControlsNavigation();
+        events = 0;
+        if (raw & PAD_BUTTON_UP) events |= MenuInput_Up;
+        if (raw & PAD_BUTTON_DOWN) events |= MenuInput_Down;
+        if (raw & PAD_BUTTON_LEFT) events |= MenuInput_Left;
+        if (raw & PAD_BUTTON_RIGHT) events |= MenuInput_Right;
+        if (raw & PAD_BUTTON_A) events |= MenuInput_Confirm;
+        if (raw & PAD_BUTTON_B) events |= MenuInput_Back;
+        /* Only the explicit scripted route may supply virtual menu edges. */
+        if (getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE")) events |= Menu_GetAllInputs();
+    }
+    if ((events & MenuInput_Back) ||
+        (mnControls_selection == 9 && (events & (MenuInput_Confirm | MenuInput_AButton)))) {
+        mnControls_open = false;
+        PADSetControlsPageActive(false);
+        sfxBack();
+    } else if (events & (MenuInput_Up | MenuInput_Down)) {
+        mnControls_selection = (mnControls_selection + ((events & MenuInput_Up) ? 9 : 1)) % 10;
+        sfxMove();
+    } else if (events & (MenuInput_Left | MenuInput_Right | MenuInput_Confirm | MenuInput_AButton)) {
+        direction = (events & MenuInput_Left) ? -1 : 1;
+        if (mnControls_selection == 0) mnControls_port = (mnControls_port + direction + 4) % 4;
+        else if (mnControls_selection == 1) mnControls_controller = !mnControls_controller;
+        else if (mnControls_selection == 2 && !mnControls_controller) {
+            if (events & (MenuInput_Confirm | MenuInput_AButton))
+                snprintf(mnControls_feedback, sizeof(mnControls_feedback), "%s", PADInstallKeyboardPreset(mnControls_port) ? "Standard keyboard layout enabled" : "Keyboard layout unavailable");
+        } else if (mnControls_selection == 2) {
+            /* Index is the stable map ordinal used by the existing device API. */
+            s32 index = PADGetIndexForPort(mnControls_port);
+            s32 next = index + direction;
+            s32 count = (s32)PADCount();
+            if (next < -1) next = count - 1;
+            if (next >= count) next = -1;
+            if (next < 0) PADClearPort(mnControls_port);
+            else if (!PADTrySetPortForIndex(next, mnControls_port))
+                snprintf(mnControls_feedback, sizeof(mnControls_feedback), "Controller assignment failed");
+        } else if (mnControls_selection == 3) {
+            u32 pages = (mnControls_count() + 4) / 5;
+            mnControls_page = (mnControls_page + direction + pages) % pages;
+        } else if (mnControls_selection >= 4 && mnControls_selection <= 8 &&
+                   (events & (MenuInput_Confirm | MenuInput_AButton))) {
+            u32 index = mnControls_page * 5 + mnControls_selection - 4;
+            if (index < mnControls_count() && PADBeginBindingCapture(mnControls_port, !mnControls_controller,
+                    index >= PAD_BUTTON_COUNT, mnControls_output(index))) {
+                mnControls_capturing = true;
+                mnControls_capture_status = -1;
+                snprintf(mnControls_feedback, sizeof(mnControls_feedback), "Release the input that opened capture");
+            } else {
+                snprintf(mnControls_feedback, sizeof(mnControls_feedback), "%s", mnControls_refusal_message());
+                if (getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE"))
+                    OSReport("NATIVE_CONTROLS_CAPTURE_REFUSED reason=%d port=%u controller=%u index=%u\n",
+                             PADGetBindingCaptureRefusal(), mnControls_port, mnControls_controller, index);
+            }
+        }
+    } else return;
+    mnDeflicker_pc_graphics_draw();
+}
 
 static const u32 mnDeflicker_pc_render_heights[] = {
     0, 240, 360, 480, 720, 1080, 1440, 2160, 4320,
@@ -143,8 +316,8 @@ static void mnDeflicker_pc_graphics_draw(void)
     static const GXColor panel_color = { 0x05, 0x0A, 0x17, 0xFC };
     u32 height;
     u32 i;
-    char labels[9][32];
-    char values[9][32];
+    char labels[MN_PC_GRAPHICS_ROW_COUNT][32] = { 0 };
+    char values[MN_PC_GRAPHICS_ROW_COUNT][32] = { 0 };
     char row_label[40];
     char feedback[72];
 
@@ -187,6 +360,16 @@ static void mnDeflicker_pc_graphics_draw(void)
              aurora_is_hd_texture_pack_available() ? "Original" : "Original only");
     snprintf(feedback, sizeof(feedback), "%s",
              mnDeflicker_pc_graphics_feedback);
+    snprintf(labels[9], sizeof(labels[9]), "Show FPS");
+    snprintf(values[9], sizeof(values[9]), "%s",
+             enabled[aurora_get_fps_counter_enabled() != 0]);
+    snprintf(labels[10], sizeof(labels[10]), "Controls");
+    snprintf(values[10], sizeof(values[10]), "A: keyboard / controller");
+    if (mnControls_open) {
+        mnControls_labels(labels, values);
+        labels[10][0] = values[10][0] = '\0';
+        snprintf(feedback, sizeof(feedback), "%s", mnControls_feedback);
+    }
 
     /* Keep the native SIS font and frame, but place the list in the clear right
      * side of the Screen Display card so it does not collide with its authored
@@ -220,29 +403,29 @@ static void mnDeflicker_pc_graphics_draw(void)
             line->bg_color = panel_color;
             color = panel_color;
         } else if (i == 1) {
-            content = "Graphics Settings";
+            content = mnControls_open ? "Controls" : "Graphics Settings";
             line->pos_x = -2.8F;
             line->pos_y = -5.55F;
             line->font_size.x = line->font_size.y = 0.030F;
             color = selected_color;
         } else if (i == 2) {
-            content = "Display and performance";
+            content = mnControls_open ? "Bindings last for this session" : "Display and performance";
             line->pos_x = -2.8F;
             line->pos_y = -4.55F;
             line->font_size.x = line->font_size.y = 0.021F;
             color = help_color;
-        } else if (i < 21) {
-            f32 y = -3.45F + (0.84F * (f32) row);
+        } else if (i < 3 + 2 * MN_PC_GRAPHICS_ROW_COUNT) {
+            f32 y = -3.45F + ((mnControls_open ? 0.73F : 0.66F) * (f32) row);
             line->pos_y = y;
-            line->font_size.x = line->font_size.y = 0.023F;
-            color = row == mnDeflicker_pc_graphics_selection
+            line->font_size.x = line->font_size.y = mnControls_open ? 0.023F : 0.021F;
+            color = row == (mnControls_open ? mnControls_selection : mnDeflicker_pc_graphics_selection)
                         ? selected_color
                         : normal_color;
-            if (row == 8 && !aurora_is_hd_texture_pack_available())
+            if (!mnControls_open && row == 8 && !aurora_is_hd_texture_pack_available())
                 color = help_color;
             if (column == 0) {
                 snprintf(row_label, sizeof(row_label), "%s%s",
-                         row == mnDeflicker_pc_graphics_selection ? "> " : "  ",
+                         row == (mnControls_open ? mnControls_selection : mnDeflicker_pc_graphics_selection) ? "> " : "  ",
                          labels[row]);
                 content = row_label;
                 line->pos_x = -3.15F;
@@ -250,14 +433,14 @@ static void mnDeflicker_pc_graphics_draw(void)
                 content = values[row];
                 line->pos_x = 6.7F;
             }
-        } else if (i == 21) {
+        } else if (i == 3 + 2 * MN_PC_GRAPHICS_ROW_COUNT) {
             content = "Up and down select    Left and right adjust";
             line->pos_x = -2.8F;
             line->pos_y = 4.3F;
             line->font_size.x = line->font_size.y = 0.019F;
             color = help_color;
-        } else if (i == 22) {
-            content = "A restarts renderer    B returns";
+        } else if (i == 4 + 2 * MN_PC_GRAPHICS_ROW_COUNT) {
+            content = mnControls_open ? "Arrows / WASD / Dpad    Enter / A binds    Esc / B returns" : "A opens controls / restarts renderer    B returns";
             line->pos_x = -2.8F;
             line->pos_y = 5.1F;
             line->font_size.x = line->font_size.y = 0.019F;
@@ -274,6 +457,10 @@ static void mnDeflicker_pc_graphics_draw(void)
     }
     menu->text = mnDeflicker_pc_graphics_lines[0];
     mnDeflicker_pc_graphics_text = menu->text;
+    if (getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE"))
+        OSReport("NATIVE_CONTROLS_PAGE open=%u selection=%u port=%u controller=%u page=%u capturing=%u\n", mnControls_open, mnControls_selection, mnControls_port, mnControls_controller, mnControls_page, mnControls_capturing);
+    if (mnControls_open && getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE"))
+        OSReport("NATIVE_CONTROLS_FIRST_BINDING label=%s value=%s\n", labels[4], values[4]);
     if (getenv("MELEE_DIAGNOSTIC_GRAPHICS_MENU_TRACE")) {
         OSReport("NATIVE_PC_GRAPHICS_MENU selection=%u aspect=%u render_height=%u shadows=%u shadow_size=%u texture_quality=%u lighting=%u low_poly=%u renderer_choice=%u renderer=%s active=%s texture_pack=%u pack_available=%d pack_pending=%d\n",
                  mnDeflicker_pc_graphics_selection,
@@ -289,6 +476,9 @@ static void mnDeflicker_pc_graphics_draw(void)
                  mnDeflicker_pc_renderer_label(aurora_get_backend()),
                  aurora_get_texture_pack(), aurora_is_hd_texture_pack_available(),
                  aurora_is_texture_pack_pending());
+        OSReport("NATIVE_PC_GRAPHICS_FPS selection=%u enabled=%d\n",
+                 mnDeflicker_pc_graphics_selection,
+                 aurora_get_fps_counter_enabled());
     }
 }
 
@@ -378,6 +568,9 @@ static void mnDeflicker_pc_graphics_adjust(int direction)
                  sizeof(mnDeflicker_pc_graphics_feedback),
                  "Applying texture choice...");
         break;
+    case 9:
+        applied = aurora_set_fps_counter_enabled(!aurora_get_fps_counter_enabled());
+        break;
     }
     if ((mnDeflicker_pc_graphics_selection != 7 &&
          mnDeflicker_pc_graphics_selection != 8) || !applied)
@@ -433,6 +626,9 @@ static void mnDeflicker_pc_graphics_apply_renderer(void)
 static void mnDeflicker_pc_graphics_destroy(void)
 {
     u32 i;
+    PADCancelBindingCapture();
+    PADSetControlsPageActive(false);
+    mnControls_open = mnControls_capturing = false;
     /* The page transition owns/frees line zero through menu->text. */
     for (i = 1; i < MN_PC_GRAPHICS_LINE_COUNT; ++i) {
         if (mnDeflicker_pc_graphics_lines[i] != NULL) {
@@ -465,6 +661,10 @@ void mnDeflicker_8024A168(HSD_GObj* gobj)
     }
 #if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
     if (mnDeflicker_pc_graphics_text != NULL) {
+        if (mnControls_open) {
+            mnControls_think();
+            return;
+        }
         if (mnDeflicker_pc_drawn_pack != aurora_get_texture_pack() ||
             mnDeflicker_pc_drawn_pack_pending != aurora_is_texture_pack_pending()) {
             snprintf(mnDeflicker_pc_graphics_feedback,
@@ -501,18 +701,25 @@ void mnDeflicker_8024A168(HSD_GObj* gobj)
             return;
         } else if (events & MenuInput_Up) {
             mnDeflicker_pc_graphics_selection =
-                (mnDeflicker_pc_graphics_selection + 8) % 9;
+                (mnDeflicker_pc_graphics_selection + MN_PC_GRAPHICS_ROW_COUNT - 1) % MN_PC_GRAPHICS_ROW_COUNT;
             sfxMove();
             mnDeflicker_pc_graphics_draw();
         } else if (events & MenuInput_Down) {
             mnDeflicker_pc_graphics_selection =
-                (mnDeflicker_pc_graphics_selection + 1) % 9;
+                (mnDeflicker_pc_graphics_selection + 1) % MN_PC_GRAPHICS_ROW_COUNT;
             sfxMove();
             mnDeflicker_pc_graphics_draw();
         } else if (events & (MenuInput_Left | MenuInput_Right |
                              MenuInput_Confirm | MenuInput_AButton)) {
             int direction = (events & MenuInput_Left) ? -1 : 1;
-            if (mnDeflicker_pc_graphics_selection == 7 &&
+            if (mnDeflicker_pc_graphics_selection == 10) {
+                if (events & (MenuInput_Confirm | MenuInput_AButton)) {
+                    mnControls_open = true;
+                    PADSetControlsPageActive(true);
+                    mnControls_selection = 0;
+                    snprintf(mnControls_feedback, sizeof(mnControls_feedback), "Select a player and input device");
+                }
+            } else if (mnDeflicker_pc_graphics_selection == 7 &&
                 (events & (MenuInput_Confirm | MenuInput_AButton)))
                 mnDeflicker_pc_graphics_apply_renderer();
             else

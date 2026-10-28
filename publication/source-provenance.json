@@ -5860,7 +5860,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.c",
-      "sha256": "65c5b883fc30736d919eb7d33d81b92e1f0a93f1e395baa190b76e2f00a5ed3e"
+      "sha256": "6ca982793ead2a8b8e13006f3bcdb815762f5d794ad4e788b6b7cde71b09314e"
     },
     {
       "path": "source/src/melee/gm/gm_1A3F.h",
@@ -6196,7 +6196,7 @@
     },
     {
       "path": "source/src/melee/gm/gmscene.c",
-      "sha256": "1eae93b21e10dcfbd5c7a7af9f3a4adc5fab7c06ec66e9411890ca0b3288bf5d"
+      "sha256": "dff693907fd6503ee74fd4c464b1f17b41759163530c600eb93980817fa8b8c3"
     },
     {
       "path": "source/src/melee/gm/gmscene.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "34798bd7c1f2511742d04aa2ddcd4cccf8ab7dc33820be9eb63231700329531f"
+      "sha256": "03a31153b41d4000e35b8cede8e4e894917f9fdb19e13098d937622492f40e64"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -6356,7 +6356,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvsmelee.c",
-      "sha256": "fb42f331e9698d7dac287de5e64f96ebba9487e317e69e4906cf3366cf748ee1"
+      "sha256": "f52783dafc715392f5444e0e9b33b8005fd9cb0c41a17b58ac97ec4e1c41dd69"
     },
     {
       "path": "source/src/melee/gm/gmvsmelee.h",
@@ -6680,7 +6680,7 @@
     },
     {
       "path": "source/src/melee/gr/grpstadium.c",
-      "sha256": "c0f6b9d1fd3ea9f81e0f7d8459e454209f9bb86090a4cdb524aa4be858e95471"
+      "sha256": "bd822cd44b3a6cc9bd933c3760a23bd7b4690135ff054182c9a07e649fadc38e"
     },
     {
       "path": "source/src/melee/gr/grpstadium.h",
@@ -8832,7 +8832,7 @@
     },
     {
       "path": "source/src/melee/lb/lbdvd.c",
-      "sha256": "c547ce15217326ac6dbc6c32e3847d5bab2dea6dec60bcb317f6ee0e9ad27e82"
+      "sha256": "4525586489b6d60e50b65b692f82bdae4fc97ca885a65b602735ab1542af971d"
     },
     {
       "path": "source/src/melee/lb/lbdvd.h",
@@ -8880,7 +8880,7 @@
     },
     {
       "path": "source/src/melee/lb/lbmthp.c",
-      "sha256": "eab7f060ba5ab5180377dfbe7b4009973ccae41bbbe991717b6710556fd85d76"
+      "sha256": "0ece21958e533c6b69d482dd7007c9fdc66620c9044ae606fa879b36dfd1f537"
     },
     {
       "path": "source/src/melee/lb/lbmthp.h",
@@ -8960,7 +8960,7 @@
     },
     {
       "path": "source/src/melee/mn/mncharsel.c",
-      "sha256": "23c574fba026177bb2da28cbb8c42b3f2945aad79c921859e7db0af19381a4f7"
+      "sha256": "28f91218209e622937f38db64640507744abc15dbc719adcfa04d31c1fae14c4"
     },
     {
       "path": "source/src/melee/mn/mncharsel.h",
@@ -8984,7 +8984,7 @@
     },
     {
       "path": "source/src/melee/mn/mndeflicker.c",
-      "sha256": "c259033575761762c4f931ca083dd6c8ad95c6b1a7607b1bcb4c7d58d4d7c422"
+      "sha256": "8b266482818b5fc8aff835c85565ae2cda3db5a4c4b52b1898608fbf5bdd5a03"
     },
     {
       "path": "source/src/melee/mn/mndeflicker.h",
@@ -9024,11 +9024,11 @@
     },
     {
       "path": "source/src/melee/mn/mngallery.c",
-      "sha256": "b7a4f8297e2d5f5724e508b8f9d963093889af404b26312ea7a6130e97be8e5a"
+      "sha256": "e230f5feb099b5e7b86ef96b463d636832cc248fcaa1aa2d117cbc6f617102b1"
     },
     {
       "path": "source/src/melee/mn/mngallery.h",
-      "sha256": "3285068dfc0b570f2dc488489cffbeb4fc18cfa5c17bf8f897721971ec2cc3b2"
+      "sha256": "3d918924f949df389e9aa320faaaa8bd0a03c9b5679800b497f24f97cef4b836"
     },
     {
       "path": "source/src/melee/mn/mnhyaku.c",
@@ -9040,7 +9040,7 @@
     },
     {
       "path": "source/src/melee/mn/mninfo.c",
-      "sha256": "5febaae8a95c2ec54cfe41557d3f44d42ef75d10f514bb01c105d4b201eb6c23"
+      "sha256": "40f32fc1a85179c0bf1637519b0304589e73f28f0c599509e96ed3f08a1046ce"
     },
     {
       "path": "source/src/melee/mn/mninfo.h",
@@ -9072,11 +9072,11 @@
     },
     {
       "path": "source/src/melee/mn/mnmain.c",
-      "sha256": "c18f9779d70245a6b04b18dc34da55ecd98c57e2e35267118b26a36597120abd"
+      "sha256": "75b5f54cc9a967431a3d0574128ba1fb0e734d075e26c26e33cf6a6b364c9376"
     },
     {
       "path": "source/src/melee/mn/mnmain.h",
-      "sha256": "4264ea99fbc15e604ee28b6643f5409ad60a95dbd441277dc37fd8049e154be8"
+      "sha256": "914e73b98b8101c387816f9fcc5867e1c0b198980e6c2113979c9b67a55997bf"
     },
     {
       "path": "source/src/melee/mn/mnmainrule.c",
@@ -9480,7 +9480,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "95a44f38161533486e8ed58566b84aafaa3bb8c173f0c7a4df4bc6de00b0d4c8"
+      "sha256": "0ad9a4d3f632ef1ad9ead9e2b82a0793268807a2da4223c718bfa4028d66be22"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -11399,6 +11399,10 @@
       "sha256": "9fadf4509be291c6d328a143aed5b30baefee50ec6c6ef78d1890d97310261fb"
     },
     {
+      "path": "source/src/pc/sis_utf8.h",
+      "sha256": "6108dc03a3d6e6283c54f957d64de5340038c41c61ad568abb2f10775ddfc465"
+    },
+    {
       "path": "source/src/pc/stage_archive_plan.h",
       "sha256": "2eb9ee3d86c0e30bfb05337b4467e1d08e317d414d9aac9978ade9952f26c0f4"
     },
@@ -11655,6 +11659,18 @@
       "sha256": "befcb08a76361d61a9563fbdfce11f04b2e79b8e976d1665f0b358956e3c7163"
     },
     {
+      "path": "source/src/pc/stage_stadium_variant_archive_plan.h",
+      "sha256": "b705bc72a36c69b41d4150e98a01f32c676b52958a26d802abcdefe3b4120eea"
+    },
+    {
+      "path": "source/src/pc/stage_stadium_variant_identity.h",
+      "sha256": "ba42d5305aee495b6af82d30e8ef964ddd1ce43ef007726ab1b7d0fe29d593e3"
+    },
+    {
+      "path": "source/src/pc/stage_stadium_water_archive_plan.h",
+      "sha256": "91ffe1d2ac8a7122a8855b6ee230d5d16fe2327f882c1d40320d602828dfb261"
+    },
+    {
       "path": "source/src/pc/stage_story_archive_plan.h",
       "sha256": "f52bb8f5a098dce137308f9466b665aac1e2fec38c1a46592b4fe1eb66277cbf"
     },
@@ -11820,7 +11836,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/archive.c",
-      "sha256": "150ecc46b447608f4b51948e330aebd1950dd11209d68871116c43fef796ae87"
+      "sha256": "b50d609c4515eff454b01e256ebd800aedb635b822785250028377578cd6771f"
     },
     {
       "path": "source/src/sysdolphin/baselib/archive.h",
@@ -11900,7 +11916,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/devcom.c",
-      "sha256": "daf410e87638658c186984bd698badcf264d9a9f73b105af13d71fdf83d4c240"
+      "sha256": "75d89b400709b2d74e40d8eb2c4152329072e7d4d53a0f86d236c90bb51cbbea"
     },
     {
       "path": "source/src/sysdolphin/baselib/devcom.h",
@@ -12084,7 +12100,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/hsd_3A64.c",
-      "sha256": "9208dd62a7e30b47e54edac1e2dd3e2f9e638acf829429631bb6e7a1e528e7ea"
+      "sha256": "04ba0bc6973ecc18e43c02698437ce56b0ba1ac995cc7d2c1c786313208dae08"
     },
     {
       "path": "source/src/sysdolphin/baselib/hsd_3A76.c",
@@ -12980,7 +12996,7 @@
     },
     {
       "path": "dependencies/aurora/include/aurora/aurora.h",
-      "sha256": "cc50e6ce6735f6f2a068f4a35531fd89387b105be42e8cd957b1398975c6e834"
+      "sha256": "e85dc15bef56cf47d0e5de356986dea7fc6ee1d4b59b56bffc6f0b33e3c303b9"
     },
     {
       "path": "dependencies/aurora/include/aurora/diagnostics.h",
@@ -13404,7 +13420,7 @@
     },
     {
       "path": "dependencies/aurora/include/dolphin/pad.h",
-      "sha256": "e50eacfef457eadec04f5cf8f49f3e2dac1ea50d55caf5d288e154c10a6623cb"
+      "sha256": "1fc2aa8df57842ab7f6d1a5f3571fe66752bdb83dca92dd8730674be5aa90306"
     },
     {
       "path": "dependencies/aurora/include/dolphin/perf.h",
@@ -13484,7 +13500,7 @@
     },
     {
       "path": "dependencies/aurora/lib/aurora.cpp",
-      "sha256": "6f5a60b0180c70e15455812e87ec22c05aedce478685e05cddc45218b4a36fb2"
+      "sha256": "ff280e2c1372094ecd1d69ed59a3e0e537599a163562021c39ebf6d10e182028"
     },
     {
       "path": "dependencies/aurora/lib/binding_diagnostics.hpp",
@@ -13848,7 +13864,7 @@
     },
     {
       "path": "dependencies/aurora/lib/dolphin/pad/pad.cpp",
-      "sha256": "d01e2580acff255dcfa6b595748c75e2cd62b9c2bd4596d66f66c3107717c9a7"
+      "sha256": "a02deba4889a5cb2a3094cd78d15289cb938143165379b436095917ed22b2a43"
     },
     {
       "path": "dependencies/aurora/lib/dolphin/si/si.cpp",
@@ -14296,11 +14312,11 @@
     },
     {
       "path": "dependencies/aurora/lib/imgui.cpp",
-      "sha256": "157e996290c7155868abb0eee40eb35d9ed7c138a53dd0c78d747ee560cadd65"
+      "sha256": "fb00df59d4ec971dc240cc960fdf7884e52688a302479ce5348099197925a626"
     },
     {
       "path": "dependencies/aurora/lib/imgui.hpp",
-      "sha256": "15f7eaa954ef2f84d4a6875acfcb12ba7796259483f9884a28556c0e3a7fed0e"
+      "sha256": "4a9becbb7b850c3c9bfaea6137648b624d0d008107784bf462a2e883b43a942f"
     },
     {
       "path": "dependencies/aurora/lib/imgui_config.cpp",

@@ -28,6 +28,8 @@ private:
 };
 
 void set_controls_available(bool available) noexcept;
+void set_fps_counter_enabled(bool enabled) noexcept;
+bool fps_counter_enabled() noexcept;
 void create_context() noexcept;
 void initialize() noexcept;
 void shutdown() noexcept;

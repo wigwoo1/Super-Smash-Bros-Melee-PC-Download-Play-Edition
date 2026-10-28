@@ -251,6 +251,32 @@ void PADRestoreDefaultMapping(u32 port);
 void PADBlockInput(bool block);
 /* Independent input capture owned by the native controls editor. */
 void PADSetControlsEditing(bool editing);
+/* Owner-thread native-menu binding capture. Poll while the page is open.
+ * The opening input must be released; captured input never reaches PADRead.
+ * Escape cancels, Backspace unbinds, and focus loss/disconnect/15s cancels.
+ * Return values: 0 waiting for release, 1 waiting for input, 2 applied,
+ * 3 cancelled, 4 rejected. No mappings are serialized. */
+BOOL PADBeginBindingCapture(u32 port, bool keyboard, bool axis, u16 output);
+/* Reason for the last Begin request. Failed requests preserve the current
+ * capture/mappings; a successful Begin resets this to NONE. Owner thread. */
+enum {
+  PAD_BINDING_REFUSAL_NONE,
+  PAD_BINDING_REFUSAL_PORT,
+  PAD_BINDING_REFUSAL_ACTIVE,
+  PAD_BINDING_REFUSAL_EDITOR,
+  PAD_BINDING_REFUSAL_BLOCKED,
+  PAD_BINDING_REFUSAL_FOCUS,
+  PAD_BINDING_REFUSAL_MAPPING,
+};
+s32 PADGetBindingCaptureRefusal(void);
+s32 PADPollBindingCapture(void);
+void PADCancelBindingCapture(void);
+const char* PADGetKeyName(s32 scancode);
+/* Fixed navigation survives rebinding/unbinding game navigation actions.
+ * Arrow keys/Enter/Escape; controller dpad/left stick/south/east buttons.
+ * Page input is independent of gameplay, suppressed until opening release. */
+void PADSetControlsPageActive(bool active);
+u16 PADReadControlsNavigation(void);
 // Independent window-focus owner; resuming suppresses held input until release.
 void PADSetWindowFocused(bool focused);
 // SDL primary-window key-down delivery; normal focus/editor gates apply.

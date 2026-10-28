@@ -158,6 +158,9 @@ bool aurora_begin_scene_frame(void);
 int aurora_set_ready_xfb_refresh(void (*callback)(void));
 /* Owner-only menu/lobby lifecycle; disabling closes editor and releases its input capture. */
 int aurora_set_controls_available(bool available);
+/* Session-only, noninteractive presented-FPS counter. Owner setter; 0/1. */
+int aurora_set_fps_counter_enabled(int enabled);
+int aurora_get_fps_counter_enabled(void);
 /* Owner-only session render height: 0 = window resolution, otherwise 240..4320.
  * Refuses dimensions beyond device limits without changing the current scale. */
 int aurora_set_render_height(uint32_t height);

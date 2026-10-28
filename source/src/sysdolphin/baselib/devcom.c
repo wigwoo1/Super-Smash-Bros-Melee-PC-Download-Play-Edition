@@ -7,6 +7,7 @@
 #include <dolphin/dvd.h>
 #ifdef TARGET_PC
 #include <stdio.h>
+#include <stdlib.h>
 #endif
 
 struct HSD_DevCom {
@@ -524,8 +525,22 @@ int HSD_DevComCancelEx(int dcReq, u32 flags, HSD_DevComCallback cb,
         for (i = 0; i < 2; i++) {
             HSD_DevCom* dc = HSD_DevCom_804D77FC[i];
             if (dc != NULL && dc->dcReq == dcReq) {
+#ifdef TARGET_PC
+                /* Native ARQ completion can remain queued after DVD unlink.
+                 * Apply the same replacement flags as the linked-request
+                 * branch: flags=0 must retain the loader's completion, so
+                 * cancellation can retire its outstanding sound-bank load. */
+                HSD_DevComCallback original_cb = dc->callback;
+                uintptr_t original_args = dc->args;
+                if (flags & 1) dc->callback = cb;
+                if (flags & 2) dc->args = args;
+                if (getenv("MELEE_DIAGNOSTIC_DEVCOM_CANCEL"))
+                    fprintf(stderr,"NATIVE_DEVCOM_CANCEL relay=%d request=%d flags=%u callback_preserved=%d args_preserved=%d\n",
+                            i,dcReq,flags,dc->callback==original_cb,dc->args==original_args);
+#else
                 dc->callback = cb;
                 dc->args = args;
+#endif
                 HSD_DevCom_804D77FC[i]->cancelflag = true;
             }
         }

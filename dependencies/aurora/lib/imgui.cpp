@@ -1,6 +1,8 @@
 #include "imgui.hpp"
 
 #include <cstddef>
+#include <cfloat>
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <cstdio>
@@ -11,6 +13,7 @@
 #include <vector>
 
 #include <webgpu/webgpu_cpp.h>
+#include <aurora/gfx.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_render.h>
 #include <SDL3/SDL_keyboard.h>
@@ -38,6 +41,7 @@ bool g_controlsAvailable = false;
 bool g_controlsOpen = false;
 bool g_graphicsOpen = false;
 bool g_graphicsDiagnosticInitialized = false;
+std::atomic_bool g_fpsCounterEnabled = false;
 
 std::vector<SDL_Texture*> g_sdlTextures;
 std::vector<wgpu::Texture> g_wgpuTextures;
@@ -92,6 +96,7 @@ struct DrawData::Impl {
 void create_context() noexcept {
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  g_fpsCounterEnabled = false;
   ImGuiIO& io = ImGui::GetIO();
   g_imguiSettings = g_config.userPath ? std::string{g_config.userPath} + "/imgui.ini" : std::string{};
   g_imguiLog = std::string{g_config.cachePath} + "/imgui.log";
@@ -260,6 +265,10 @@ void controller_shared_bindings(u32 port) {
 }
 void controls_panel() {
   if (!g_config.sessionOnlyPreferences) return;
+  // Normal control editing belongs to the native game menu. Keep the old
+  // host editor only for explicitly requested development diagnostics.
+  if (!std::getenv("AURORA_DIAGNOSTIC_CONTROLS_OPEN") &&
+      !std::getenv("AURORA_DIAGNOSTIC_GRAPHICS_OPEN")) return;
   // Lets native-menu tests inspect the game's actual composition without the
   // separate host-side options dock obscuring the letterbox area.
   if (std::getenv("AURORA_DIAGNOSTIC_HIDE_NATIVE_OPTIONS")) return;
@@ -275,16 +284,9 @@ void controls_panel() {
   static int port = 0;
   static const char* feedback = "";
   if (ImGui::IsKeyPressed(ImGuiKey_F10, false)) open = !open;
-  if (ImGui::IsKeyPressed(ImGuiKey_F11, false)) {
-    g_graphicsOpen = !g_graphicsOpen;
-    if (std::getenv("AURORA_DIAGNOSTIC_GRAPHICS_PROBE"))
-      std::fputs("NATIVE_GRAPHICS_HOTKEY received=1\n", stderr);
-  }
   ImGui::SetNextWindowPos(ImVec2(8, 8), ImGuiCond_FirstUseEver);
-  if (ImGui::Begin("Native options", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-    if (ImGui::Button("Controls (F10)")) open = !open;
-    ImGui::SameLine();
-    if (ImGui::Button("Graphics (F11)")) g_graphicsOpen = !g_graphicsOpen;
+  if (ImGui::Begin("Input setup", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (ImGui::Button("Configure controls (F10)")) open = !open;
   }
   ImGui::End();
   if (open) {
@@ -471,6 +473,31 @@ void set_controls_available(const bool available) noexcept {
   if (!available) { g_controlsOpen = false; g_graphicsOpen = false; PADSetControlsEditing(false); }
 }
 
+void set_fps_counter_enabled(bool enabled) noexcept { g_fpsCounterEnabled.store(enabled); }
+bool fps_counter_enabled() noexcept { return g_fpsCounterEnabled.load(); }
+
+static void fps_counter() noexcept {
+  if (!g_fpsCounterEnabled) return;
+  char label[32];
+  const float fps = aurora_get_fps();
+  std::snprintf(label, sizeof(label), "FPS: %.1f", std::isfinite(fps) ? fps : 0.f);
+  const float scale = g_scale > 0.f ? g_scale : 1.f;
+  const float fontSize = 18.f * scale;
+  const ImVec2 pos{10.f * scale, 10.f * scale};
+  auto* draw = ImGui::GetForegroundDrawList();
+  const ImVec2 extent = ImGui::GetFont()->CalcTextSizeA(fontSize, FLT_MAX, 0.f, label);
+  draw->AddRectFilled({pos.x - 4.f * scale, pos.y - 2.f * scale},
+                      {pos.x + extent.x + 4.f * scale, pos.y + extent.y + 2.f * scale},
+                      IM_COL32(5, 10, 23, 210), 3.f * scale);
+  draw->AddText(ImGui::GetFont(), fontSize, pos, IM_COL32(232, 226, 210, 255), label);
+  if (std::getenv("AURORA_DIAGNOSTIC_FPS_COUNTER")) {
+    static unsigned samples;
+    if ((samples++ % 120) == 0)
+      std::fprintf(stderr, "NATIVE_FPS_COUNTER drawn=1 fps=%.3f vertices=%d session_only=1 input_capture=0\n",
+                   fps, draw->VtxBuffer.Size);
+  }
+}
+
 void new_frame(const AuroraWindowSize& size) noexcept {
   ZoneScoped;
   ImVec2 framebufferScale{
@@ -517,6 +544,7 @@ void new_frame(const AuroraWindowSize& size) noexcept {
   ImGui::GetIO().DisplaySize = displaySize;
   ImGui::NewFrame();
   controls_panel();
+  fps_counter();
 }
 
 DrawData freeze() noexcept {

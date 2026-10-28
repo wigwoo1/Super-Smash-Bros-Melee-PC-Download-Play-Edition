@@ -623,10 +623,13 @@ void lbMthp_8001F578(void)
     MoviePlayer.unk_84 = MoviePlayer.unk_80;
     OSRestoreInterrupts(intr);
 #ifdef TARGET_PC
-    if(getenv("MELEE_DIAGNOSTIC_GAME_STARTUP") && MoviePlayer.unk_84%120==0) {
+    if(getenv("MELEE_DIAGNOSTIC_GAME_STARTUP")) {
         static u32 last=UINT32_MAX;
-        if(last!=MoviePlayer.unk_84) {
-            last=MoviePlayer.unk_84;
+        /* A render callback can observe 119 then 121, or only odd ticks.
+         * Sample interval crossings instead of requiring an exact tick. */
+        u32 interval=MoviePlayer.unk_84/120;
+        if(last!=interval) {
+            last=interval;
             OSReport("NATIVE_MOVIE tick=%u frame=%u total=%u decoded_slot=%d display_slot=%u available=%d reads=%u complete=%d\n",
                 MoviePlayer.unk_84,MoviePlayer.unk_7C,MoviePlayer.unk_40,
                 MoviePlayer.unk_94,MoviePlayer.unk_90,MoviePlayer.unk_108,

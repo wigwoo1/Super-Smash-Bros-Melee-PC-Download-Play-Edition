@@ -5380,7 +5380,21 @@ void mnCharSel_Scene_OnFrame(void)
     struct GameCache* cache;
     int i;
 #ifdef TARGET_PC
-    if (getenv("MELEE_DIAGNOSTIC_CSS_SELECT")) {
+    if (getenv("MELEE_DIAGNOSTIC_SESSION_RECORDS_READY")) {
+        static unsigned return_frames;
+        PADStatus status = { 0 };
+        ++return_frames;
+        /* Original CSS cancellation requires a released edge then >30 held
+         * B samples. Repeat bounded holds without assigning scene state. */
+        if (return_frames >= 60 && (return_frames - 60) % 180 < 90)
+            status.button = PAD_BUTTON_B;
+        PADSetVirtualStatus(0, &status);
+        status.button = 0;
+        PADSetVirtualStatus(1, &status);
+        if (return_frames == 1 || return_frames % 60 == 0)
+            OSReport("NATIVE_SESSION_CSS_BACK frame=%u pending=%u\n",
+                     return_frames, mnCharSel_804D6CF6);
+    } else if (getenv("MELEE_DIAGNOSTIC_CSS_SELECT")) {
         static unsigned frames;
         PADStatus status = { 0 };
         ++frames;

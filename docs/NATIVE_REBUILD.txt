@@ -83,3 +83,4 @@ controlled diagnostic comparisons. The link-plan JSON records the setting;
 verify the PE header and the actual runtime memory samples when comparing builds.
 Keep this linker script with the exact source and build receipt of each new build.
 The existing installed Desktop build has not been replaced by this source change.
+2026-10-28 Controls-page navigation follow-up: rebuilt Release Aurora PAD and Melee libraries after adding W/A/S/D as fixed navigation aliases, then relinked a no-card desktop development candidate. Production PAD capture fixture and all 11 no-save contracts passed. Normal muted D3D12 and Vulkan startups reached Controls, exercised W/A/S/D navigation and setting restoration, returned to Graphics Settings and exited cleanly. This is not physical hardware, full gameplay, or release acceptance. See development/native-controls-wasd-nav-20261028/VERIFICATION.json and Desktop development/native-controls-20261028/BUILD_RECEIPT.json.

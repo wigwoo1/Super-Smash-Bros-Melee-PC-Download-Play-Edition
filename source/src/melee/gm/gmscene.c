@@ -1233,7 +1233,7 @@ void gm_801A4D34(void (*on_frame)(void), UNUSED GameSceneInfo* info)
                                      native_congrats_return_menu_frames,
                                      gm_GetCurrentGameMode());
                         }
-                        if (native_congrats_return_menu_frames == 120) {
+                        if (native_congrats_return_menu_frames == 300) {
                             OSReport("NATIVE_CONGRATS_RETURN_MENU_COMPLETE frames=%u queued=%d\n",
                                      native_congrats_return_menu_frames,
                                      aurora_diagnostic_queue_quit());

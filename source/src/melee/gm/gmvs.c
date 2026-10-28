@@ -2359,7 +2359,7 @@ void gm_Scene_Vs_OnFrame(void)
                      * stock/damage counters, and the stage's real blast-zone
                      * limits without changing player input or match state. */
                     if(getenv("MELEE_DIAGNOSTIC_MASTERHAND_FRAME_TRACE") &&
-                       frame>=3880 && frame<=3980){
+                       frame>=3818 && frame<=3828){
                         OSReport("NATIVE_MASTERHAND_FRAME_TRACE frame=%u stocks=%d damage=%d "
                                  "x=%f y=%f vx=%f vy=%f motion=%d grounded=%d jumps=%u "
                                  "outside_blast=%d blast_l=%f blast_r=%f blast_b=%f blast_t=%f "
