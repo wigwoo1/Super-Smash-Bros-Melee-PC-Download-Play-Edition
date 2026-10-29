@@ -1,4 +1,10 @@
 #include "itzgshell.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <melee/gm/gmvs.h>
+#include <melee/gm/gm_unsplit.h>
+#include <melee/ft/ftlib.h>
+#endif
 
 #include "inlines.h"
 #include "itnokonoko.h"
@@ -328,6 +334,10 @@ void it_2725_Logic11_PickedUp(Item_GObj* gobj)
     ip->xDD4_itemVar.zgshell.xE0C = 0;
     ip->xDD4_itemVar.zgshell.xE1C_b0 = 0;
     Item_80268E5C(gobj, 2, 2);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_SHELL_INTERACTION"))
+        OSReport("NATIVE_SHELL_PICKUP_CALLBACK frame=%u shell=%p owner=%p owner_player=%d kind=%d motion=%d x=%f y=%f vx=%f vy=%f\n",gm_GetFrameCount(),gobj,ip->owner,ip->owner && ftLib_IsFighter(ip->owner)?ftLib_GetPlayerIndex(ip->owner):-1,ip->kind,ip->msid,ip->pos.x,ip->pos.y,ip->x40_vel.x,ip->x40_vel.y);
+#endif
 }
 
 bool itZrshell_UnkMotion2_Anim(Item_GObj* arg0)
@@ -353,6 +363,10 @@ void itZGShell_Logic11_Thrown(Item_GObj* gobj)
 
     Item_80268E5C((HSD_GObj*) gobj, 3, 6);
     Item_8026AE84(ip, 0xF2, 0x7FU, 0x40U);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_SHELL_INTERACTION"))
+        OSReport("NATIVE_SHELL_THROW_CALLBACK frame=%u shell=%p owner=%p owner_player=%d kind=%d motion=%d x=%f y=%f vx=%f vy=%f\n",gm_GetFrameCount(),gobj,ip->owner,ip->owner && ftLib_IsFighter(ip->owner)?ftLib_GetPlayerIndex(ip->owner):-1,ip->kind,ip->msid,ip->pos.x,ip->pos.y,ip->x40_vel.x,ip->x40_vel.y);
+#endif
 }
 
 bool itZrshell_UnkMotion3_Anim(Item_GObj* gobj)

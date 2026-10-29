@@ -1,5 +1,11 @@
 #include "mnsound.h"
 
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+#include <aurora/audio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#endif
+
 #include <melee/it/forward.h>
 
 #include "inlines.h"
@@ -32,6 +38,114 @@ static AnimLoopSettings volume_left = { 0.0F, 3.0F, -0.1F };
 static AnimLoopSettings volume_right = { 4.0F, 7.0F, -0.1F };
 /* 4A08A8 */ static StaticModelDesc mnSound_804A08A8;
 /* 4D6C30 */ static HSD_GObj* mnSound_804D6C30;
+
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+#define MN_PC_SOUND_LINES 10
+static HSD_Text* mnSound_pc_lines[MN_PC_SOUND_LINES];
+static int mnSound_pc_status = -1;
+static u32 mnSound_pc_effective;
+
+static void mnSound_pc_draw(void)
+{
+    Menu* menu = GET_MENU(mnSound_804D6C30);
+    static const GXColor normal = { 0xE8, 0xE2, 0xD2, 0xFF };
+    static const GXColor selected = { 0xA6, 0x81, 0x3D, 0xFF };
+    static const GXColor help = { 0xA9, 0xB5, 0xC5, 0xFF };
+    static const GXColor panel = { 0x05, 0x0A, 0x17, 0xFC };
+    char mix[32], active[48];
+    const char* status;
+    u32 i;
+    mnSound_pc_status = aurora_ax_output_status();
+    mnSound_pc_effective = aurora_ax_output_channels();
+    snprintf(mix, sizeof(mix), "%d", (s8) menu->unk3);
+    snprintf(active, sizeof(active), "Active output: %s",
+             mnSound_pc_effective == 6 ?
+                 (aurora_ax_stereo_upmix_enabled() ? "5.1 upmix" : "5.1 output") : "Stereo");
+    switch (mnSound_pc_status) {
+    case AURORA_AUDIO_OUTPUT_PENDING: status = "Applying output; please wait"; break;
+    case AURORA_AUDIO_OUTPUT_UNAVAILABLE: status = "5.1 unavailable. Using Stereo"; break;
+    case AURORA_AUDIO_OUTPUT_ERROR: status = "Output change failed; check active output"; break;
+    default: status = aurora_ax_stereo_upmix_enabled() && mnSound_pc_effective == 6 ?
+        "Stereo expanded to extra speakers" : "Changes last for this session"; break;
+    }
+    /* Original center text is replaced by the game-owned SIS panel. Line zero
+     * remains menu->text, so the page transition has one clear owner. */
+    if (mnSound_pc_lines[0] == NULL && menu->text != NULL)
+        HSD_SisLib_803A5CC4(menu->text);
+    for (i = 0; i < MN_PC_SOUND_LINES; ++i) {
+        HSD_Text* line;
+        GXColor color = normal;
+        const char* content;
+        if (mnSound_pc_lines[i] != NULL)
+            HSD_SisLib_803A5CC4(mnSound_pc_lines[i]);
+        line = HSD_SisLib_803A6754(0, mn_804D6BB4);
+        mnSound_pc_lines[i] = line;
+        line->pos_z = 17.0F;
+        line->pos_x = -13.5F;
+        line->box_size_x = 800.0F;
+        line->box_size_y = 28.0F;
+        line->default_kerning = 1;
+        line->default_alignment = 0;
+        line->font_size.x = line->font_size.y = 0.025F;
+        switch (i) {
+        case 0:
+            content = ""; line->pos_x = -14.5F; line->pos_y = -8.2F;
+            line->font_size.x = line->font_size.y = 0.030F;
+            line->box_size_x = 900.0F; line->box_size_y = 560.0F;
+            line->bg_color = panel; color = panel; break;
+        case 1:
+            content = "Sound Settings"; line->pos_y = -6.0F;
+            line->font_size.x = line->font_size.y = 0.033F;
+            color = selected; break;
+        case 2:
+            content = "Audio output and music balance"; line->pos_y = -4.6F;
+            line->font_size.x = line->font_size.y = 0.021F; color = help; break;
+        case 3:
+            content = menu->unk2 == 0 ? "> Output" : "  Output";
+            line->pos_y = -2.5F; color = menu->unk2 == 0 ? selected : normal; break;
+        case 4:
+            content = aurora_ax_requested_output_channels() == 6 ?
+                (aurora_ax_stereo_upmix_enabled() ? "5.1 upmix" : "5.1 output") : "Stereo";
+            line->pos_x = 1.5F; line->pos_y = -2.5F;
+            color = menu->unk2 == 0 ? selected : normal; break;
+        case 5:
+            content = menu->unk2 == 1 ? "> Music / effects" : "  Music / effects";
+            line->pos_y = 0.0F; color = menu->unk2 == 1 ? selected : normal; break;
+        case 6:
+            content = mix; line->pos_x = 1.5F; line->pos_y = 0.0F;
+            color = menu->unk2 == 1 ? selected : normal; break;
+        case 7:
+            content = active; line->pos_y = 1.8F; color = help; break;
+        case 8:
+            content = status; line->pos_y = 3.1F;
+            line->font_size.x = line->font_size.y = 0.021F; color = help; break;
+        default:
+            content = "Up / down select   Left / right adjust   B returns";
+            line->pos_y = 5.4F;
+            line->font_size.x = line->font_size.y = 0.018F; color = help; break;
+        }
+        HSD_SisLib_803A6B98(line, 0.0F, 0.0F, "%s", content);
+        HSD_SisLib_803A74F0(line, 0, &color);
+    }
+    menu->text = mnSound_pc_lines[0];
+    if (getenv("MELEE_DIAGNOSTIC_AUDIO_MENU"))
+        OSReport("NATIVE_SOUND_MENU selection=%u requested=%u effective=%u status=%d mix=%d upmix=%d\n",
+                 menu->unk2, aurora_ax_requested_output_channels(), mnSound_pc_effective,
+                 mnSound_pc_status, (s8) menu->unk3, aurora_ax_stereo_upmix_enabled());
+}
+
+static void mnSound_pc_destroy(void)
+{
+    u32 i;
+    for (i = 1; i < MN_PC_SOUND_LINES; ++i) {
+        if (mnSound_pc_lines[i] != NULL)
+            HSD_SisLib_803A5CC4(mnSound_pc_lines[i]);
+        mnSound_pc_lines[i] = NULL;
+    }
+    mnSound_pc_lines[0] = NULL;
+    mnSound_pc_status = -1;
+}
+#endif
 
 static f32 getVolumePosition(u8 sound_music_mix, const Vec3* pos_0,
                              const Vec3* pos_1)
@@ -112,6 +226,46 @@ void mnSound_802492CC(HSD_GObj* gobj)
         return;
     }
     events = Menu_GetAllInputs();
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    if (mnSound_pc_lines[0] != NULL) {
+        if (aurora_ax_output_status() == AURORA_AUDIO_OUTPUT_PENDING)
+            return;
+        if (events & MenuInput_Back) {
+            sfxBack();
+            mn_804A04F0.entering_menu = 0;
+            gmMainLib_8015ED80(menu->unk3);
+            mn_80229894(4, 1, 3);
+            return;
+        }
+        if (events & (MenuInput_Up | MenuInput_Down)) {
+            menu->unk2 = !menu->unk2;
+            sfxMove();
+            mnSound_pc_draw();
+        } else if (events & (MenuInput_Left | MenuInput_Right)) {
+            if (menu->unk2 == 0) {
+                u32 channels = aurora_ax_requested_output_channels() == 6 ? 2 : 6;
+                if (aurora_ax_request_output_channels(channels)) {
+                    aurora_ax_set_stereo_upmix(channels == 6);
+                    sfxMove();
+                }
+            } else {
+                int value = (s8) menu->unk3 + ((events & MenuInput_Left) ? -5 : 5);
+                if (value >= -100 && value <= 100) {
+                    Vec3 pos_0, pos_1;
+                    HSD_JObj *anim_0, *anim_1, *anim_2;
+                    menu->unk3 = value;
+                    updateVolumeAnim(GET_JOBJ(mnSound_804D6C30), menu->unk3,
+                                     (events & MenuInput_Left) ? -1 : 1,
+                                     &pos_0, &pos_1, &anim_0, &anim_1, &anim_2);
+                    gmMainLib_8015ED80(menu->unk3);
+                    sfxMove();
+                }
+            }
+            mnSound_pc_draw();
+        }
+        return;
+    }
+#endif
     if (events & MenuInput_Back) {
         sfxBack();
         mn_804A04F0.entering_menu = 0;
@@ -247,6 +401,22 @@ void fn_80249A1C(HSD_GObj* gobj)
     HSD_JObj* volume_cursor_jobj;
     u8 cursor_timer;
     PAD_STACK(8);
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    if (mnSound_pc_lines[0] != NULL) {
+        if (mn_804A04F0.cur_menu != MENU_KIND_SETTINGS_SOUND) {
+            HSD_Text* owned_text = menu->text;
+            mnSound_pc_destroy();
+            HSD_SisLib_803A5CC4(owned_text);
+            HSD_GObjFree(gobj);
+            return;
+        }
+        HSD_JObjSetFlagsAll(jobj, JOBJ_HIDDEN);
+        if (mnSound_pc_status != aurora_ax_output_status() ||
+            mnSound_pc_effective != aurora_ax_output_channels())
+            mnSound_pc_draw();
+        return;
+    }
+#endif
     if (mn_804A04F0.cur_menu != MENU_KIND_SETTINGS_SOUND) {
         HSD_GObjFree(gobj);
         HSD_SisLib_803A5CC4(menu->text);
@@ -360,6 +530,12 @@ void mnSound_80249C08(int unused)
         HSD_JObjAnimAll(channel_selection_jobj);
         HSD_JObjSetFlagsAll(jobj, JOBJ_HIDDEN);
     }
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    /* Keep the original front-bus source mix in stereo. Output layout is a
+     * separate native preference, not a false new console sound-mode value. */
+    lbAudioAx_80024C08(0);
+    mnSound_pc_draw();
+#endif
 }
 
 void mnSound_8024A09C(int arg0)

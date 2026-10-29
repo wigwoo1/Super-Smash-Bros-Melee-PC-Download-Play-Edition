@@ -1,7 +1,8 @@
 #include <dolphin/ax.h>
 #include <dolphin/ai.h>
 #include "../audio/voice_pool.hpp"
-#include "../audio/ax_voice_mixer.hpp"
+#include "../audio/ax_block_mixer.hpp"
+#include "../audio/ax_output_layout.hpp"
 #include "../audio/ax_schedule.hpp"
 #include "../audio/stream_gain.hpp"
 #include "../audio/aux_ring.hpp"
@@ -43,6 +44,32 @@ static bool renderingEffects=false;
 static std::array<aurora::audio::AuxRing,2> auxRings;
 static bool has_aux(){return auxRings[0].callback || auxRings[1].callback;}
 static std::atomic<uint32_t> sourceRate{32000};
+static aurora::audio::AxOutputLayout outputLayout;
+static bool stereoUpmix=false;
+static int device_channels(){
+  SDL_AudioSpec spec{};
+  return stream && SDL_GetAudioDeviceFormat(SDL_GetAudioStreamDevice(stream),&spec,nullptr)?spec.channels:0;
+}
+struct SdlOutputStream {
+  int device_channels(){return ::device_channels();}
+  bool flush(){return SDL_FlushAudioStream(stream);}
+  int queued(){return SDL_GetAudioStreamQueued(stream);}
+  int available(){return SDL_GetAudioStreamAvailable(stream);}
+  uint64_t now_ms(){return SDL_GetTicks();}
+  bool set_format(uint32_t channels,uint32_t rate){
+    const SDL_AudioSpec next{SDL_AUDIO_S16,static_cast<int>(channels),static_cast<int>(rate)};
+    SDL_AudioSpec actual{};
+    return SDL_SetAudioStreamFormat(stream,&next,nullptr) &&
+      SDL_GetAudioStreamFormat(stream,&actual,nullptr) && actual.channels==next.channels &&
+      actual.freq==next.freq && actual.format==next.format;
+  }
+};
+static int apply_output_request(){
+  SdlOutputStream adapter;
+  const int result=outputLayout.service(adapter,sourceRate.load());
+  if(result<0)serviceFailed=true;
+  return result;
+}
 static std::atomic<uint8_t> streamLeft{255},streamRight{255};
 static std::atomic_bool aiInitialized{false};
 static void require_voice_impl(AXVPB* voice,const char* api){
@@ -73,6 +100,16 @@ void AXInit(){
     std::fprintf(stderr,"NATIVE_DIAGNOSTIC_AUDIO_MUTED gain=0 mixing_active=1\n");
   }
   AURORA_ASSERT(SDL_ResumeAudioStreamDevice(stream),"Native AX playback device could not resume");
+  if(const char* channels=std::getenv("AURORA_DIAGNOSTIC_AUDIO_CHANNELS")){
+    AURORA_ASSERT(!std::strcmp(channels,"2") || !std::strcmp(channels,"6"),"Invalid diagnostic audio output request");
+    AURORA_ASSERT(aurora_ax_request_output_channels(!std::strcmp(channels,"6")?6:2),"Diagnostic audio request rejected");
+    std::fprintf(stderr,"NATIVE_AUDIO_OUTPUT_START requested=%u effective=%u device=%d status=%d physical_51_verified=0\n",
+        outputLayout.requested,aurora_ax_output_channels(),device_channels(),outputLayout.status);
+  }
+  if(const char* upmix=std::getenv("AURORA_DIAGNOSTIC_STEREO_UPMIX")){
+    AURORA_ASSERT(!std::strcmp(upmix,"0") || !std::strcmp(upmix,"1"),"Invalid diagnostic upmix request");
+    AURORA_ASSERT(aurora_ax_set_stereo_upmix(!std::strcmp(upmix,"1")),"Diagnostic upmix request rejected");
+  }
 }
 void AXQuit(){
   if(!stream)return;
@@ -83,7 +120,7 @@ void AXQuit(){
   schedule={};userCallback=nullptr;callbackGate=nullptr;serviceFailed=false;
   sourceRate=32000;
   aiInitialized=false;
-  auxRings={};
+  auxRings={};outputLayout={};stereoUpmix=false;
 }
 AXVPB* AXAcquireVoice(u32 priority,void(*callback)(void*),u32 context){
   return stream && !renderingEffects?pool.acquire(priority,callback,context):nullptr;
@@ -129,58 +166,58 @@ void AXSetVoiceVe(AXVPB* p,AXPBVE* ve){require_voice(p);AURORA_ASSERT(ve,"Null A
 void AXSetVoiceVeDelta(AXVPB* p,s16 delta){require_voice(p);p->pb.ve.currentDelta=delta;p->sync|=AX_SYNC_FLAG_SWAPVOL;}
 void AXSetVoiceItdOn(AXVPB* p){require_voice(p);p->pb.itd.flag=1;p->pb.itd.shiftL=p->pb.itd.shiftR=p->pb.itd.targetShiftL=p->pb.itd.targetShiftR=0;p->sync&=~AX_SYNC_FLAG_COPYTSHIFT;p->sync|=AX_SYNC_FLAG_COPYITD;}
 void AXSetVoiceItdTarget(AXVPB* p,u16 l,u16 r){require_voice(p);AURORA_ASSERT(l<=31 && r<=31,"AX interaural delay outside 32-sample buffer");p->pb.itd.targetShiftL=l;p->pb.itd.targetShiftR=r;p->sync|=AX_SYNC_FLAG_COPYTSHIFT;}
-int aurora_ax_render_frames(int16_t* stereo,uint32_t frames){
-  if(!stream || !pool.on_owner() || !stereo || !frames || frames>240 || renderingEffects || serviceFailed)return 0;
+int aurora_ax_request_output_channels(uint32_t channels){
+  if(!stream || !pool.on_owner() || servicing || renderingEffects || serviceFailed ||
+     !aurora::audio::ax_output_channels_valid(channels))return 0;
+  if(!outputLayout.request(channels))return 0;
+  const int result=apply_output_request();
+  if(std::getenv("AURORA_DIAGNOSTIC_AUDIO_OUTPUT"))
+    std::fprintf(stderr,"NATIVE_AUDIO_OUTPUT requested=%u source=%u device=%d status=%d pending=%d\n",
+                 outputLayout.requested,outputLayout.channels,device_channels(),outputLayout.status,outputLayout.pending);
+  return result>=0;
+}
+uint32_t aurora_ax_requested_output_channels(){return stream && pool.on_owner()?outputLayout.requested:0;}
+uint32_t aurora_ax_output_channels(){return stream && pool.on_owner()?(outputLayout.channels==6 && device_channels()==6?6:2):0;}
+int aurora_ax_output_status(){return stream && pool.on_owner()?outputLayout.status:AURORA_AUDIO_OUTPUT_ERROR;}
+int aurora_ax_surround_available(){return stream && pool.on_owner() && device_channels()==6;}
+int aurora_ax_set_stereo_upmix(int enabled){
+  if(!stream || !pool.on_owner() || servicing || renderingEffects || serviceFailed || (enabled!=0 && enabled!=1))return 0;
+  stereoUpmix=enabled!=0;
+  if(std::getenv("AURORA_DIAGNOSTIC_AUDIO_OUTPUT"))
+    std::fprintf(stderr,"NATIVE_AUDIO_UPMIX enabled=%d source=%u device=%d effective=%d\n",
+        stereoUpmix,outputLayout.channels,device_channels(),stereoUpmix && aurora_ax_output_channels()==6);
+  return 1;
+}
+int aurora_ax_stereo_upmix_enabled(){return stream && pool.on_owner() && stereoUpmix;}
+int aurora_ax_render_output_frames(int16_t* samples,uint32_t frames,uint32_t capacity){
+  if(!stream || !pool.on_owner() || !samples || !frames || frames>240 ||
+     capacity<frames*outputLayout.channels || renderingEffects || serviceFailed || outputLayout.pending)return 0;
   const bool effects=has_aux();
   if(effects && (frames!=160 || sourceRate!=32000 || !callbackGate || !callbackGate()))return 0;
-  // Stereo device output has no main-surround route yet. Refuse configured
-  // surround sends instead of accepting an inaudible effect return.
-  if(effects)for(unsigned i=0;i<AX_MAX_VOICES;i++)if(pool.used[i] && pool.voices[i].pb.state){
-    const auto& m=pool.voices[i].pb.mix;
-    if(m.vAuxAS || m.vAuxBS || m.vDeltaAuxAS || m.vDeltaAuxBS)return 0;
-    if(!auxRings[0].callback && (m.vAuxAL || m.vAuxAR || m.vDeltaAuxAL || m.vDeltaAuxAR))return 0;
-    if(!auxRings[1].callback && (m.vAuxBL || m.vAuxBR || m.vDeltaAuxBL || m.vDeltaAuxBR))return 0;
-  }
-  auto voices=pool.voices;auto next=mixers;auto tags=generations;std::array<int16_t,480> output{};
-  auto rings=auxRings;
-  if(effects)for(auto& ring:rings)ring.blocks[ring.write]={};
+  auto next=mixers;auto tags=generations;
   for(unsigned i=0;i<AX_MAX_VOICES;i++)if(tags[i]!=pool.age[i]){next[i]={};tags[i]=pool.age[i];}
-  for(unsigned frame=0;frame<frames;frame++){
-    int64_t left=0,right=0;
-    aurora::audio::AxAuxSample sends;
-    for(unsigned i=0;i<AX_MAX_VOICES;i++)if(pool.used[i] && !pool.reserved[i] && !aurora::audio::ax_mix_voice(voices[i],next[i],aurora::audio::read_aram_sample_bytes,nullptr,left,right,effects?&sends:nullptr)){
-      const auto& pb=voices[i].pb;
-      Log.error("AX voice render rejected: index={} state={} format={} srcSelect={} ratio={}:{} current={}:{} end={}:{}",i,pb.state,pb.addr.format,pb.srcSelect,pb.src.ratioHi,pb.src.ratioLo,pb.addr.currentAddressHi,pb.addr.currentAddressLo,pb.addr.endAddressHi,pb.addr.endAddressLo);
-      const auto& cursor=next[i].sample.cursor;
-      uint8_t header=0;const bool readable=aurora::audio::read_aram_sample_bytes(nullptr,(cursor.current&~15u)/2,&header,1);
-      Log.error("AX rejected cursor: current={} end={} loop={} running={} looping={} predictor={} loopPredictor={} frameHeader={} readable={} phase={}",cursor.current,cursor.end,cursor.loop,cursor.running,cursor.looping,cursor.predictorScale,cursor.loopPredictorScale,header,readable,next[i].sample.phase);
-      return 0;
-    }
-    if(effects)for(unsigned bus=0;bus<2;bus++)if(rings[bus].callback){
-      auto& ring=rings[bus];const auto& values=bus?sends.b:sends.a;
-      for(unsigned channel=0;channel<3;channel++)ring.blocks[ring.write][channel][frame]=static_cast<long>(values[channel]);
-      left+=ring.blocks[ring.read][0][frame];right+=ring.blocks[ring.read][1][frame];
-    }
-    output[frame*2]=aurora::audio::clamp_sample(left);output[frame*2+1]=aurora::audio::clamp_sample(right);
+  const auto result=aurora::audio::ax_mix_block(pool.voices,next,pool.used,pool.reserved,
+      auxRings,aurora::audio::read_aram_sample_bytes,nullptr,samples,frames,outputLayout.channels,renderingEffects,stereoUpmix);
+  if(result!=aurora::audio::AxBlockResult::ok){
+    if(result==aurora::audio::AxBlockResult::surround_return_rejected)serviceFailed=true;
+    Log.error("AX output block rejected: reason={} channels={} frames={} effects={}",
+              static_cast<int>(result),outputLayout.channels,frames,effects);
+    return 0;
   }
-  if(effects){
-    renderingEffects=true;
-    for(auto& ring:rings)if(ring.callback){
-      const auto slot=ring.cpu;ring.process();
-      for(auto sample:ring.blocks[slot][2])if(sample){renderingEffects=false;serviceFailed=true;return 0;}
-    }
-    renderingEffects=false;auxRings=rings;
-  }
-  pool.voices=voices;mixers=next;generations=tags;std::copy_n(output.data(),frames*2,stereo);return 1;
+  mixers=next;generations=tags;return 1;
+}
+int aurora_ax_render_frames(int16_t* stereo,uint32_t frames){
+  return outputLayout.channels==2?aurora_ax_render_output_frames(stereo,frames,frames<=240?frames*2:0):0;
 }
 int aurora_ax_submit_frames(uint32_t frames){
   if(!stream || !pool.on_owner() || !frames || frames>240)return 0;
-  const int queued=SDL_GetAudioStreamQueued(stream);if(queued<0 || queued+frames*4>sourceRate*4/10)return 0;
-  const auto voices=pool.voices;const auto previous=mixers;const auto tags=generations;std::array<int16_t,480> output;
+  const unsigned bytes=aurora::audio::ax_frame_bytes(outputLayout.channels);
+  const int queued=SDL_GetAudioStreamQueued(stream);if(outputLayout.pending || queued<0 || queued+frames*bytes>sourceRate*bytes/10)return 0;
+  const auto voices=pool.voices;const auto previous=mixers;const auto tags=generations;std::array<int16_t,240*6> output;
   const uint64_t mixStart=SDL_GetTicksNS();
-  if(!aurora_ax_render_frames(output.data(),frames))return 0;
+  if(!aurora_ax_render_output_frames(output.data(),frames,output.size()))return 0;
   const uint64_t deviceStart=SDL_GetTicksNS();if(servicing)serviceMixNs+=deviceStart-mixStart;
-  const bool submitted=SDL_PutAudioStreamData(stream,output.data(),frames*4);
+  const bool submitted=SDL_PutAudioStreamData(stream,output.data(),frames*bytes);
   if(servicing)serviceDeviceNs+=SDL_GetTicksNS()-deviceStart;
   if(!submitted){
     // Effect contexts cannot be rolled back. A failed device submission after
@@ -210,6 +247,12 @@ void AXRegisterAuxACallback(void (*callback)(void*,void*),void* context){registe
 void AXRegisterAuxBCallback(void (*callback)(void*,void*),void* context){register_aux(1,callback,context);}
 int aurora_ax_service(){
   if(!stream || !pool.on_owner() || servicing || renderingEffects || serviceFailed)return 0;
+  // A device changing away from six-channel output must not remain advertised
+  // as surround. Drain and revert to stereo, retaining the session request.
+  if(outputLayout.channels==6)outputLayout.device_changed(device_channels());
+  const int outputReady=apply_output_request();
+  if(outputReady<0)return 0;
+  if(!outputReady)return 1;
   // Masked work remains pending, including its clock ticks.
   if((userCallback || has_aux()) && (!callbackGate || !callbackGate())){++maskedServiceCalls;return 1;}
   const uint64_t now=SDL_GetTicksNS();
@@ -233,7 +276,8 @@ int aurora_ax_service(){
     const int queued=SDL_GetAudioStreamQueued(stream);
     if(queued<0){Log.error("AX device queue query failed: {}",SDL_GetError());serviceFailed=true;break;}
     const uint32_t blockFrames=sourceRate/200;
-    if(queued+blockFrames*4>sourceRate*4/10){++queuePressureStops;break;}
+    const unsigned bytes=aurora::audio::ax_frame_bytes(outputLayout.channels);
+    if(queued+blockFrames*bytes>sourceRate*bytes/10){++queuePressureStops;break;}
     if(userCallback){const uint64_t callbackStart=SDL_GetTicksNS();userCallback();serviceCallbackNs+=SDL_GetTicksNS()-callbackStart;}
     // A failed callback-configured render is terminal for this AX lifetime:
     // never retry its already-observed game callback as if it had not run.
@@ -249,14 +293,14 @@ int aurora_ax_service(){
   servicing=false;return !serviceFailed;
 }
 void AISetDSPSampleRate(u32 rate){
-  AURORA_ASSERT(stream && pool.on_owner() && !servicing && !renderingEffects && rate<=AI_SAMPLERATE_48KHZ,"AI DSP rate requires live idle audio owner");
+  AURORA_ASSERT(stream && pool.on_owner() && !servicing && !renderingEffects && !outputLayout.pending && rate<=AI_SAMPLERATE_48KHZ,"AI DSP rate requires live idle audio owner");
   const uint32_t hz=rate==AI_SAMPLERATE_32KHZ?32000:48000;if(hz==sourceRate)return;
   AURORA_ASSERT(!has_aux(),"AI DSP rate change requires unregistered 32kHz effects");
   AURORA_ASSERT(SDL_GetAudioStreamQueued(stream)==0,"AI DSP rate change requires drained queue");
   for(unsigned i=0;i<AX_MAX_VOICES;i++)AURORA_ASSERT(!pool.used[i] || !pool.voices[i].pb.state,"AI DSP rate change requires stopped voices");
-  SDL_AudioSpec spec{SDL_AUDIO_S16,2,static_cast<int>(hz)};
+  SDL_AudioSpec spec{SDL_AUDIO_S16,static_cast<int>(outputLayout.channels),static_cast<int>(hz)};
   AURORA_ASSERT(SDL_SetAudioStreamFormat(stream,&spec,nullptr),"AI DSP stream rate change failed");
-  SDL_AudioSpec actual;AURORA_ASSERT(SDL_GetAudioStreamFormat(stream,&actual,nullptr) && actual.freq==static_cast<int>(hz),"AI DSP stream rate did not change");
+  SDL_AudioSpec actual;AURORA_ASSERT(SDL_GetAudioStreamFormat(stream,&actual,nullptr) && actual.freq==static_cast<int>(hz) && actual.channels==static_cast<int>(outputLayout.channels),"AI DSP stream format did not change");
   sourceRate=hz;mixers={};generations={};AURORA_ASSERT(schedule.initialize(SDL_GetTicksNS()),"AI DSP rate clock reset failed");
 }
 u32 AIGetDSPSampleRate(){return sourceRate==32000?AI_SAMPLERATE_32KHZ:AI_SAMPLERATE_48KHZ;}

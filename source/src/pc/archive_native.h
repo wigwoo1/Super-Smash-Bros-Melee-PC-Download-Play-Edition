@@ -184,6 +184,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "stage_target_drmario_archive_plan.h"
 #include "stage_figure_get_archive_plan.h"
 #include "stage_pushon_archive_plan.h"
+#include "stage_kinoko_route_archive_plan.h"
 #include "stage_kongo_archive_plan.h"
 #include "item_common_archive.h"
 #include "fighter_common_archive.h"
@@ -9495,6 +9496,15 @@ static int MeleePc_DatDecode(void* data,size_t length){
        MeleePc_StageStadiumFireKnown(bytes,length) ||
        MeleePc_StageStadiumRockKnown(bytes,length)){
         int result=MeleePc_StageStadiumVariantBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
+    /* Original Adventure Mushroom Kingdom: exact roots and source-typed
+     * stage, packed spawn records and four Koopa/shell articles. */
+    if(MeleePc_IsKinokoRouteProfile(bytes,length,body,relocs,publics,roots,strings)){
+        int result=MeleePc_StageKinokoRouteBody(bytes,length,body,relocs,publics,roots,strings);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);

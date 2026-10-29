@@ -3,15 +3,42 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* AX owner-thread service, configured 32/48 kHz stereo. Up to 240 frames.
+/* AX owner-thread service, configured 32/48 kHz with stereo or six-channel
+ * output. This compatibility entry point requires stereo. Up to240 frames.
  * Preflight/render refusal leaves output and voice state unchanged. Effects
  * require exactly160 frames at32kHz and an enabled owner interrupt gate.
  * A callback/device failure after effect processing faults the AX lifetime;
  * effect contexts cannot be rolled back or replayed. Unsupported DSP
  * features are refused. No game callbacks run from the device thread.
- * Explicit host service: call aurora_ax_service from the owner loop. Full
- * game startup/loop integration is still pending. */
+ * Explicit host service: the game owner loop calls aurora_ax_service. */
 int aurora_ax_render_frames(int16_t* stereo,uint32_t frames);
+/* Render the configured output layout into a caller-sized buffer. Six-channel
+ * order is FL FR FC LFE BL BR. Original L/R/S maps to fronts and a -3dB rear
+ * pair; FC/LFE remain silent. This does not invent six independent sources. */
+int aurora_ax_render_output_frames(int16_t* samples,uint32_t frames,uint32_t capacity_samples);
+enum AuroraAudioOutputStatus {
+  AURORA_AUDIO_OUTPUT_STEREO = 0,
+  AURORA_AUDIO_OUTPUT_SURROUND = 1,
+  AURORA_AUDIO_OUTPUT_UNAVAILABLE = 2,
+  AURORA_AUDIO_OUTPUT_PENDING = 3,
+  AURORA_AUDIO_OUTPUT_ERROR = 4
+};
+/* Owner only, session-only. Accepts 2 or 6; acceptance records a REQUEST, not
+ * successful surround playback. Service drains the old format before changing
+ * source layout. A stereo physical endpoint retains stereo with UNAVAILABLE.
+ * Only an effective six-channel device is accepted for discrete 5.1 here;
+ * SDL's ability to downmix a six-channel input is not capability evidence. */
+int aurora_ax_request_output_channels(uint32_t channels);
+uint32_t aurora_ax_requested_output_channels(void);
+uint32_t aurora_ax_output_channels(void);
+int aurora_ax_output_status(void);
+int aurora_ax_surround_available(void);
+/* Optional stereo-to-five-speaker matrix, disabled by default. Ignored for
+ * stereo output/fallback, which remains bit-identical. Source L/R is expanded
+ * to FL/FR/FC/BL/BR; LFE stays silent. This is not authored 3D positional audio.
+ * Owner only, outside callbacks; preference is retained during a format drain. */
+int aurora_ax_set_stereo_upmix(int enabled);
+int aurora_ax_stereo_upmix_enabled(void);
 /* Render and queue a bounded block to the real playback stream; queue is
  * bounded to100ms. Queue-pressure refusal does not advance voices. Device
  * failure after effect callbacks is terminal until AXQuit/reinitialization. */

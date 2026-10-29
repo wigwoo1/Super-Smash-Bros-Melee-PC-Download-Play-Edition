@@ -7,6 +7,7 @@
 #include "trophy_model_profile.h"
 #include "ending_scene_profile.h"
 #include "credits_scene_profile.h"
+#include "adventure_intro_scene_profile.h"
 /* Original offsets remain immutable until every typed claim is validated.
  * Packed GX/animation streams are byte payloads, never scalar arrays. */
 typedef struct { uint32_t at; unsigned type; } MeleePc_TitleNode;
@@ -458,6 +459,8 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(!strcmp(name,"ScTitle_scene_lights")){title_array(&p,at,TITLE_LightList,0,1);continue;}
         else if(!strcmp(name,"TitleMark_sobjdesc"))type=TITLE_HSD_SObjDesc;
         else if(!strcmp(name,"ScItrAllstar_scene_data"))type=TITLE_SceneDesc;
+        else if(MeleePc_IsAdventureIntroProfile(bytes,body,relocs,publics,roots,strings))
+            type=i==0?TITLE_SceneDesc:TITLE_SceneCameraDesc;
         else if(MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_SceneDesc;
         else if(MeleePc_IsEndingSceneProfile(bytes,body,relocs,publics,roots,strings)){
             if(i<4)type=TITLE_SceneDesc;

@@ -1,4 +1,9 @@
 #include "itoldkuri.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <melee/gm/gmvs.h>
+#include <melee/gm/gm_unsplit.h>
+#endif
 
 #include <Runtime/platform.h>
 
@@ -408,6 +413,10 @@ bool it_2725_Logic0_DmgReceived(Item_GObj* gobj)
     Item* ip = GET_ITEM(gobj);
     itOldkuriAttributes* attr = ip->xC4_article_data->x4_specialAttributes;
 
+#ifdef TARGET_PC
+    s32 native_before_damage=ip->xC9C;
+    s32 native_before_motion=ip->msid;
+#endif
     ip->xC9C += it_8027CBFC(gobj);
     if (ip->xC9C > *attr->x0 || ip->msid == 6) {
         it_8027C9D8(ip);
@@ -424,6 +433,12 @@ bool it_2725_Logic0_DmgReceived(Item_GObj* gobj)
     } else {
         it_2725_Logic0_DmgReceived_inline(gobj);
     }
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_GOOMBA") && ip->kind==It_Kind_Kuriboh)
+        OSReport("NATIVE_GOOMBA_DAMAGE_RESULT frame=%u target=%p source_player=%d before_damage=%d after_damage=%d threshold=%d before_motion=%d after_motion=%d x=%f y=%f\n",
+                 gm_GetFrameCount(),gobj,ip->xCB0_source_ply,native_before_damage,ip->xC9C,*attr->x0,
+                 native_before_motion,ip->msid,ip->pos.x,ip->pos.y);
+#endif
     return false;
 }
 

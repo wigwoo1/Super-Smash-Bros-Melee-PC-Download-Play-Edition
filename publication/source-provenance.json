@@ -5708,7 +5708,7 @@
     },
     {
       "path": "source/src/melee/ft/types.h",
-      "sha256": "40888de252ae986bad778fb30365d29f2853b615857a29eaa1beb276f0e2ab7e"
+      "sha256": "12451f9ecdb3d4cbad6832a34a6d82c00b40ab37dd855f9f36ba20cdefae0322"
     },
     {
       "path": "source/src/melee/gm/forward.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "03a31153b41d4000e35b8cede8e4e894917f9fdb19e13098d937622492f40e64"
+      "sha256": "8612d7eb5bbc45a14f6cd7e3c242c75b1e7860a3ff7ecb49b3535da973da2aa1"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -7240,7 +7240,7 @@
     },
     {
       "path": "source/src/melee/it/itcoll.c",
-      "sha256": "7fcf71233c3d316a7f702ab0f822cefe85d7799235dc05a1bf1d3230ca52a556"
+      "sha256": "029632c4270f58c98e1a06124f9d517aa740ae4287023074464c711662b11bd8"
     },
     {
       "path": "source/src/melee/it/itcoll.h",
@@ -8192,7 +8192,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itnokonoko.c",
-      "sha256": "9b770d8e06d6283ae9f4cb1add4b7aa737be1407c3913510e60162e3de2db68e"
+      "sha256": "b4dc84c0bffff9311b16d3003dc8ca51da8451760c8d74c1be89f280d86d2d2f"
     },
     {
       "path": "source/src/melee/it/kinds/itnokonoko.h",
@@ -8216,7 +8216,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itoldkuri.c",
-      "sha256": "eb5a35ec98f2e10b47c3fac8eab98b56ae57324e2f4e67d000a6c476b2be78b0"
+      "sha256": "bc8f5b935e5c13a903a29e419ee1a3f15e6120f56c2ee9b6dece6b920a900cdf"
     },
     {
       "path": "source/src/melee/it/kinds/itoldkuri.h",
@@ -8648,7 +8648,7 @@
     },
     {
       "path": "source/src/melee/it/kinds/itzgshell.c",
-      "sha256": "88bc4fb90ee440152e1841e8d5cf63d1e3409404bc3657f1c481de4ba03a4d67"
+      "sha256": "919bd29c12cab33e88ed04f7b55e638bf5afc7594fb90120e5f33c5b758a428d"
     },
     {
       "path": "source/src/melee/it/kinds/itzgshell.h",
@@ -9120,7 +9120,7 @@
     },
     {
       "path": "source/src/melee/mn/mnsound.c",
-      "sha256": "07d4b61431dc7f99d8b9354c658cd790c8cfba5104802a155be8426c315d67a3"
+      "sha256": "f47a037c385e23cb171d7ef702143bd9541b5488892d1785482e04bc51d0f551"
     },
     {
       "path": "source/src/melee/mn/mnsound.h",
@@ -9443,6 +9443,18 @@
       "sha256": "c6a3b09ecde708206377fd0cf470165bded9e91f44846d8cad4c598c18440533"
     },
     {
+      "path": "source/src/pc/adventure_goomba_diagnostic.h",
+      "sha256": "3a3bb27b775c9cdb6024e2ec255652db82a3b2cc2062ae7751d21401c06e7130"
+    },
+    {
+      "path": "source/src/pc/adventure_intro_scene_profile.h",
+      "sha256": "7dd76d19105131268fdcb71dd7c40f1cd23cc90f73119dc947808a5df49e31bf"
+    },
+    {
+      "path": "source/src/pc/adventure_koopa_diagnostic.h",
+      "sha256": "c195a010df1e843ce625922292d47a605ecbb2dfa6c60c571598fdef22f6bf05"
+    },
+    {
       "path": "source/src/pc/alarm_clock.c",
       "sha256": "5ff2ee5c52b9fa04ecce9d5abedbf8835dc48d0878d6915569110ca06a586d88"
     },
@@ -9480,7 +9492,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "0ad9a4d3f632ef1ad9ead9e2b82a0793268807a2da4223c718bfa4028d66be22"
+      "sha256": "2b1d1a840a06a6dd5c187831304ec1bfbab9d322eb5b13a77b03f9234b2dbaf1"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10772,7 +10784,7 @@
     },
     {
       "path": "source/src/pc/item_attribute_dispatch.h",
-      "sha256": "e46c82c2313a6ccda5399d7dcc721ecbb3d489357725631cabced4abdfabc3f2"
+      "sha256": "1d10a210192c22bb269c11fd65a3bef505b49a67629a6691f7c9059bb0f362d1"
     },
     {
       "path": "source/src/pc/item_color_commands.h",
@@ -10821,6 +10833,10 @@
     {
       "path": "source/src/pc/item_ice_climbers_attributes.h",
       "sha256": "caf9402ab8ad493eb872188800e599333cf7cf6f2e5664a31f0b0785e2b7bbe1"
+    },
+    {
+      "path": "source/src/pc/item_kinoko_route_attributes.h",
+      "sha256": "29dc4d117a610d4dbeeef1a3fbdea1a335da277a74bb6bfde2ff7e26751d4597"
     },
     {
       "path": "source/src/pc/item_kyasarin_attributes.h",
@@ -11527,6 +11543,10 @@
       "sha256": "dcea90f9a0c2a5f33e902582a64c98766e725fd04e1620928aa69827808d8ed5"
     },
     {
+      "path": "source/src/pc/stage_kinoko_route_archive_plan.h",
+      "sha256": "ef4eb16e253aa4b4f0ae226e3c921495ed2222a0f2c425f9ffbf96a6034dd910"
+    },
+    {
       "path": "source/src/pc/stage_kongo_archive_plan.h",
       "sha256": "2a0bc2f8255552a08cd70d8e09be474d0555ede3586e492e3e5a5a1fad885ccb"
     },
@@ -11768,7 +11788,7 @@
     },
     {
       "path": "source/src/pc/title_archive.h",
-      "sha256": "0f0f40e7948f9f6248485407d408cd14f83208c1eae37424c45fc0350c702cf6"
+      "sha256": "f46d17a5ce57e5aa5a2aa0f4843a8a51979af1c1d567548c8747a60fcedea525"
     },
     {
       "path": "source/src/pc/title_layouts.h",
@@ -12992,7 +13012,7 @@
     },
     {
       "path": "dependencies/aurora/include/aurora/audio.h",
-      "sha256": "19f8a8d59ae75cfcc9cc5d59da6b6fb5644bf76d14bca5675352d0719fc01728"
+      "sha256": "6ed5c807888db795f34ba64688d29a3f1635d8b414f28284b71c88837a27496a"
     },
     {
       "path": "dependencies/aurora/include/aurora/aurora.h",
@@ -13455,8 +13475,16 @@
       "sha256": "e06eae37b2b4ddfa496d9d7c0a083e18ce3fbf90c051cfcbb6ca6479ce6e3649"
     },
     {
+      "path": "dependencies/aurora/lib/audio/ax_block_mixer.hpp",
+      "sha256": "f2e561c404a970cc44e5b681bc3cdb850f3bf3cdc25e422fb7209004329dfc2f"
+    },
+    {
       "path": "dependencies/aurora/lib/audio/ax_fir_resampler.hpp",
       "sha256": "fb8a338bb4a11af0ae1671441343c49b9b5673310047369acc774fb66c74b007"
+    },
+    {
+      "path": "dependencies/aurora/lib/audio/ax_output_layout.hpp",
+      "sha256": "0fa0577e46e655f27074862d760a1330be661350ef0e300aa181bcc5f7342838"
     },
     {
       "path": "dependencies/aurora/lib/audio/ax_sample_cursor.hpp",
@@ -13636,7 +13664,7 @@
     },
     {
       "path": "dependencies/aurora/lib/dolphin/AX.cpp",
-      "sha256": "68768d4df6131ba12eb9a5639e9052b2361fab404545fb0c8eb5f690144f03d5"
+      "sha256": "318b42a38cb6532ab8278b62b72dbdcebf60238686aad65793e2dc19b64e275c"
     },
     {
       "path": "dependencies/aurora/lib/dolphin/AXFX.cpp",
@@ -14513,6 +14541,18 @@
     {
       "path": "dependencies/aurora/tests/CMakeLists.txt",
       "sha256": "bce244251c37b392c93420b11134bc743a9219b9a2d38af136411b83162cee8c"
+    },
+    {
+      "path": "dependencies/aurora/tests/ax_output_block_test.cpp",
+      "sha256": "a87a0380eba5ea1d566ef0cb7fd2fb24ed1342b817fe1b2c3340de74ccbecbc7"
+    },
+    {
+      "path": "dependencies/aurora/tests/ax_output_layout_test.cpp",
+      "sha256": "a5c515355e230701aba74c6857fea3b92bbfd66e91d9721f56bc865e8b119feb"
+    },
+    {
+      "path": "dependencies/aurora/tests/ax_stereo_upmix_test.cpp",
+      "sha256": "ede9e67281357f5131988d4e0d326481a1b5504fb5d1c259ec8a2c7f59f89f46"
     },
     {
       "path": "dependencies/aurora/tests/ax_surround_bus_test.cpp",

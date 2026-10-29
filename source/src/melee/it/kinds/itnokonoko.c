@@ -1,4 +1,9 @@
 #include "itnokonoko.h"
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <melee/gm/gmvs.h>
+#include <melee/gm/gm_unsplit.h>
+#endif
 
 #include "itzgshell.h"
 #include "itzrshell.h"
@@ -73,6 +78,9 @@ bool itNokonoko_Logic3_DmgReceived(Item_GObj* gobj)
     Item* ip = GET_ITEM(gobj);
     itNokoNoko_DatAttrs* da = ip->xC4_article_data->x4_specialAttributes;
     PAD_STACK(4);
+#ifdef TARGET_PC
+    const s32 native_before_damage=ip->xC9C, native_before_motion=ip->msid;
+#endif
     ip->init_facing_dir = ip->facing_dir;
     ip->xC9C = (s32) ((f32) ip->xC9C + it_8027CBFC(gobj));
     if (ip->msid == 0xA) {
@@ -82,6 +90,10 @@ bool itNokonoko_Logic3_DmgReceived(Item_GObj* gobj)
     } else {
         it_802DCCCC(gobj);
     }
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA"))
+        OSReport("NATIVE_KOOPA_DAMAGE_RESULT frame=%u target=%p source_player=%d before_damage=%d after_damage=%d threshold=%d before_motion=%d after_motion=%d x=%f y=%f\n",gm_GetFrameCount(),gobj,ip->xCB0_source_ply,native_before_damage,ip->xC9C,da->x0->x0,native_before_motion,ip->msid,ip->pos.x,ip->pos.y);
+#endif
     return 0;
 }
 
@@ -91,6 +103,10 @@ bool it_802DC83C(Item_GObj* gobj)
     ip->init_facing_dir = ip->facing_dir;
     it_80274C88(gobj);
     it_802DCFBC(gobj);
+#ifdef TARGET_PC
+    if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA"))
+        OSReport("NATIVE_KOOPA_STOMP frame=%u target=%p stomper=%p source_player=%d damage=%d motion=%d x=%f y=%f\n",gm_GetFrameCount(),gobj,ip->xCFC,ip->xCFC && ftLib_IsFighter(ip->xCFC)?ftLib_GetPlayerIndex(ip->xCFC):-1,ip->xC9C,ip->msid,ip->pos.x,ip->pos.y);
+#endif
     Camera_RequestQuake(QuakeKind_Small, &ip->pos);
     Item_8026AE84(ip, 0x12E, 0x7F, 0x40);
     ftLib_StartItemRumble(ip->xCFC, 0xC, 0);
@@ -333,9 +349,16 @@ bool itNokonoko_UnkMotion5_Anim(Item_GObj* gobj)
             ip_2 = it_802E0488(ip->xDD4_itemVar.nokonoko.x40, &pos, var_f2);
         }
         if (ip_2 != NULL) {
+#ifdef TARGET_PC
+            const s32 native_original_link=ip->xDD4_itemVar.nokonoko.x4;
+#endif
             GET_ITEM(ip_2)->xDD4_itemVar.nokonoko.x4 =
                 ip->xDD4_itemVar.nokonoko.x4;
             ip->xDD4_itemVar.nokonoko.x4 = -1;
+#ifdef TARGET_PC
+            if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA"))
+                OSReport("NATIVE_KOOPA_SHELL_SUCCESSOR frame=%u target=%p source_player=%d damage=%d original_link=%d old_link=%d shell=%p shell_kind=%d shell_link=%d x=%f y=%f\n",gm_GetFrameCount(),gobj,ip->xCB0_source_ply,ip->xC9C,native_original_link,ip->xDD4_itemVar.nokonoko.x4,ip_2,GET_ITEM(ip_2)->kind,GET_ITEM(ip_2)->xDD4_itemVar.nokonoko.x4,GET_ITEM(ip_2)->pos.x,GET_ITEM(ip_2)->pos.y);
+#endif
         }
         return 1;
     }

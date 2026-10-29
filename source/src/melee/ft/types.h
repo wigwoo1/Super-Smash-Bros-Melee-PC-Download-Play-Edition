@@ -1993,8 +1993,16 @@ struct ftData_80085FD4_ret {
     /* +4 */ UNK_T x4;
     /* +8 */ size_t x8;
     /* +C */ UNK_T xC;
+#ifdef TARGET_PC
+    /* Alias of Fighter_WaitAnimData.x10_animCurrFlags: converted numeric
+     * archive flags keep the loop bit at bit 30, not in the kind byte. */
+    u32 x10_pad : 30;
+    u32 x10_b1 : 1;
+    u32 x10_b0 : 1;
+#else
     /* +10:0 */ u8 x10_b0 : 1;
     /* +10:1 */ u8 x10_b1 : 1;
+#endif
     /* +14 */ uintptr_t x14;
 };
 

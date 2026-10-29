@@ -17,10 +17,12 @@
 #include "item_pikachu_attributes.h"
 #include "item_ice_climbers_attributes.h"
 #include "item_sheik_chain_attributes.h"
+#include "item_kinoko_route_attributes.h"
 /* This dispatch covers source-required fields only, not full allocation extents.
  * Unknown payloads remain unsupported pending archive-wide preservation policy. */
 static void MeleePc_ItemAttributePlan(MeleePc_TitlePlan* p,uint32_t root,unsigned kind){
  switch(kind){
+ case 211:case 212:case 219:case 220:MeleePc_ItemKinokoRouteAttributesPlan(p,root,kind);break;
  case 34:MeleePc_ItemMBallAttributesPlan(p,root);break;
  case 97:MeleePc_ItemSheikChainAttributesPlan(p,root);break;
  case It_Kind_IceClimber_Ice:case It_Kind_IceClimber_Blizzard:case It_Kind_IceClimber_GumStrings:

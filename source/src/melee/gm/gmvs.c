@@ -70,6 +70,8 @@ extern unsigned int HSD_JObjDiagnosticMatchFrame;
 #ifdef TARGET_PC
 #include <pc/target_route_diagnostic.h>
 #include <pc/figure_catch_diagnostic.h>
+#include <pc/adventure_goomba_diagnostic.h>
+#include <pc/adventure_koopa_diagnostic.h>
 #endif
 
 static u32 lbl_803D5620[] = {
@@ -3284,6 +3286,10 @@ void gm_Scene_Vs_OnFrame(void)
                 if (frame >= 300 && frame < 360) input.stickX = -45;
             }
         }
+        if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_GOOMBA"))
+            MeleePc_AdventureGoombaInput(Player_GetEntity(0),&input,frame);
+        if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA"))
+            MeleePc_AdventureKoopaInput(Player_GetEntity(0),&input,frame);
         /* This opt-in probe runs after the current PAD latch. Use the SDL
          * virtual-device path when requested; otherwise stage the sample for
          * the next native PAD latch. Retail input remains unchanged. */

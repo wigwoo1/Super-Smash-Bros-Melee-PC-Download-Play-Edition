@@ -867,6 +867,14 @@ void it_80270E30(Item_GObj* arg_item_gobj)
             arg_item->xCEC_fighterGObj = fighter->gobj;
             arg_item->xCF0_itemGObj = NULL;
 #ifdef TARGET_PC
+            if (getenv("MELEE_DIAGNOSTIC_ADVENTURE_GOOMBA") && arg_item->kind==It_Kind_Kuriboh)
+                OSReport("NATIVE_GOOMBA_ACCEPTED_HIT frame=%u target=%p source_player=%d source_type=fighter motion=%d damage=%f target_x=%f target_y=%f\n",
+                         gm_GetFrameCount(),arg_item->entity,fighter->player_idx,fighter->motion_id,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
+            if (getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA") && arg_item->kind==It_Kind_Nokonoko)
+                OSReport("NATIVE_KOOPA_ACCEPTED_HIT frame=%u target=%p source_player=%d source_type=fighter motion=%d damage=%f target_x=%f target_y=%f\n",
+                         gm_GetFrameCount(),arg_item->entity,fighter->player_idx,fighter->motion_id,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
             if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT") && arg_item->kind==It_Kind_Mato)
                 OSReport("NATIVE_TARGET_ACCEPTED_HIT frame=%u target=%p source_player=%d motion=%d damage=%f target_x=%f target_y=%f\n",
                          gm_GetFrameCount(),arg_item->entity,fighter->player_idx,fighter->motion_id,
@@ -897,6 +905,14 @@ void it_80270E30(Item_GObj* arg_item_gobj)
             arg_item->xCB4 = item->kind;
             arg_item->xCE0 = item->pos;
 #ifdef TARGET_PC
+            if (getenv("MELEE_DIAGNOSTIC_ADVENTURE_GOOMBA") && arg_item->kind==It_Kind_Kuriboh)
+                OSReport("NATIVE_GOOMBA_ACCEPTED_HIT frame=%u target=%p source_player=%d source_type=item source_kind=%d damage=%f target_x=%f target_y=%f\n",
+                         gm_GetFrameCount(),arg_item->entity,arg_item->xCB0_source_ply,item->kind,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
+            if (getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA") && arg_item->kind==It_Kind_Nokonoko)
+                OSReport("NATIVE_KOOPA_ACCEPTED_HIT frame=%u target=%p source_player=%d source_type=item source_kind=%d damage=%f target_x=%f target_y=%f\n",
+                         gm_GetFrameCount(),arg_item->entity,arg_item->xCB0_source_ply,item->kind,
+                         temp_r29->x8->damage,arg_item->pos.x,arg_item->pos.y);
             if (getenv("MELEE_DIAGNOSTIC_TARGET_HIT") && arg_item->kind==It_Kind_Mato)
                 OSReport("NATIVE_TARGET_ACCEPTED_ITEM_HIT frame=%u target=%p source_player=%d source_kind=%d damage=%f target_x=%f target_y=%f\n",
                          gm_GetFrameCount(),arg_item->entity,arg_item->xCB0_source_ply,item->kind,
