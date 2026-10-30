@@ -3116,7 +3116,7 @@
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Dash.c",
-      "sha256": "3393b98bdce98d874e04318b95d1a27eb9d99cc9c0361c197cfd2e4f388b40be"
+      "sha256": "b1598e0abcf17a0ea4cc5ab6ff48ff4ba696042ffe5ab43c230126ec99ade39f"
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Dash.h",
@@ -3376,7 +3376,7 @@
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Jump.c",
-      "sha256": "166d325a889073d365b9dd11b6e5cddfd7e3fe7fc614e9acfd68ad8e73cb0a3d"
+      "sha256": "740f9450a724f8b9883b9cba85b407593bf7bbb97c0757f7505dc6a8b128db50"
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Jump.h",
@@ -6144,7 +6144,7 @@
     },
     {
       "path": "source/src/melee/gm/gmregclear.c",
-      "sha256": "de095f958a28e6065e38d28c3a41468ba4a4ef23154f0a1f35d810542d0b6b3d"
+      "sha256": "306162b15c4ff3163d8b2136e8c42801b92234f2f7bb78227da368034bbac63b"
     },
     {
       "path": "source/src/melee/gm/gmregclear.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "8612d7eb5bbc45a14f6cd7e3c242c75b1e7860a3ff7ecb49b3535da973da2aa1"
+      "sha256": "89ef437fa38dc581e0ef4ab68a4231f7f4146117e3c07860f0a82f262a6300bf"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -7272,7 +7272,7 @@
     },
     {
       "path": "source/src/melee/it/item.c",
-      "sha256": "1bcec3ebace8a337fe4050d049f7ad8f732b0a4f257c8c5b1e81b5da0afb9281"
+      "sha256": "728c7c966554ddf4a1da880ebd81799be535130e6b8f6618cedad35ca3e5e6e9"
     },
     {
       "path": "source/src/melee/it/item.h",
@@ -9448,11 +9448,11 @@
     },
     {
       "path": "source/src/pc/adventure_intro_scene_profile.h",
-      "sha256": "7dd76d19105131268fdcb71dd7c40f1cd23cc90f73119dc947808a5df49e31bf"
+      "sha256": "9fd55d529de68d22e1ce2de7b9de03346fabaa0d2a4c557d6c4ff8625e5b0e4b"
     },
     {
       "path": "source/src/pc/adventure_koopa_diagnostic.h",
-      "sha256": "c195a010df1e843ce625922292d47a605ecbb2dfa6c60c571598fdef22f6bf05"
+      "sha256": "3341f6daa89b2fa90d551f8dca4ab67c71c4cefc9e995fc622cdac520009548e"
     },
     {
       "path": "source/src/pc/alarm_clock.c",
@@ -9492,7 +9492,7 @@
     },
     {
       "path": "source/src/pc/archive_native.h",
-      "sha256": "2b1d1a840a06a6dd5c187831304ec1bfbab9d322eb5b13a77b03f9234b2dbaf1"
+      "sha256": "b9c09ddf89cb707c6d1d07a98b521718377c23d74b89584668a767822a3deae4"
     },
     {
       "path": "source/src/pc/archive_relocate.c",
@@ -10784,7 +10784,7 @@
     },
     {
       "path": "source/src/pc/item_attribute_dispatch.h",
-      "sha256": "1d10a210192c22bb269c11fd65a3bef505b49a67629a6691f7c9059bb0f362d1"
+      "sha256": "ad700254911cc26739fdfcd4cf2fadec8e72767e3fc0855d32d01e5d796f1064"
     },
     {
       "path": "source/src/pc/item_color_commands.h",
@@ -11671,6 +11671,10 @@
       "sha256": "608f5460728963457aec15d737d4652409558a1263c019b5eb902b7cc00f6ae0"
     },
     {
+      "path": "source/src/pc/stage_shrine_route_archive_plan.h",
+      "sha256": "2c5653981dcbaa352996557a3f85e981a4438181f41f47dd2ccda6b91b1a2825"
+    },
+    {
       "path": "source/src/pc/stage_stadium_parameters.h",
       "sha256": "541bc21d18a557ae566548e213d7c60c648f630d45bd3022104b38742dd1a427"
     },
@@ -11788,7 +11792,7 @@
     },
     {
       "path": "source/src/pc/title_archive.h",
-      "sha256": "f46d17a5ce57e5aa5a2aa0f4843a8a51979af1c1d567548c8747a60fcedea525"
+      "sha256": "757382d182c6c7d50dfa073b76c38963e8994778aecb39bf4de07a251c6be967"
     },
     {
       "path": "source/src/pc/title_layouts.h",
@@ -11904,7 +11908,7 @@
     },
     {
       "path": "source/src/sysdolphin/baselib/controller.c",
-      "sha256": "ff0c390ac55ada0fcb77b7acd1d586ea7f19147553650328a419009dd7ff5948"
+      "sha256": "8883643abd216e8e64963076868d58a284d0d72bd3900fabc7f8522b393e0825"
     },
     {
       "path": "source/src/sysdolphin/baselib/controller.h",

@@ -743,6 +743,20 @@ void fn_8017FF1C(HSD_GObj* gobj)
         }
     }
 
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CLEAR_INPUT")) {
+        for (i = 0; i < 6; i++) {
+            int port = Player_GetPadPort(i);
+            if (port >= 0 && port < 4 &&
+                (data.state->x110 % 60 == 0 || HSD_PadMasterStatus[port].trigger)) {
+                OSReport("NATIVE_CLEAR_INPUT frame=%u slot=%d type=%d port=%d trigger=%x ready=%d accepted=%d\n",
+                         data.state->x110, i, Player_GetPlayerSlotType(i), port,
+                         HSD_PadMasterStatus[port].trigger,
+                         data.state->x110 > 0x3EU, data.state->x116);
+            }
+        }
+    }
+#endif
     if (data.state->x110 > 0x3EU) {
         for (i = 0; i < 6; i++) {
             if (Player_GetPlayerSlotType(i) == Gm_PKind_Human &&

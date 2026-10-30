@@ -2572,7 +2572,9 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
-    if (getenv("MELEE_DIAGNOSTIC_MATCH_INPUT")) {
+    /* This callback also owns the original in-match clear screen (state 2).
+     * Script only active gameplay; physical confirmation must survive there. */
+    if (getenv("MELEE_DIAGNOSTIC_MATCH_INPUT") && controller.state.unk_0 == 0) {
         PADStatus input = { 0 };
         unsigned frame = controller.state.frame_count;
         HSD_JObjDiagnosticMatchFrame = frame;

@@ -1,5 +1,10 @@
 #include "ftCo_Dash.h"
 
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
+
 #include <melee/ft/forward.h>
 
 #include <placeholder.h>
@@ -80,6 +85,17 @@ void ftCo_Dash_Anim(Fighter_GObj* gobj)
 void ftCo_Dash_IASA(Fighter_GObj* gobj)
 {
     Fighter* fp = GET_FIGHTER(gobj);
+
+#ifdef TARGET_PC
+    /* Observe the actual consumer, not only the earlier PAD sample. */
+    if (getenv("MELEE_DIAGNOSTIC_DASH_JUMP") &&
+        (fp->input.held_buttons[0] & HSD_PAD_XY)) {
+        OSReport("NATIVE_DASH_JUMP held=%u previous=%u pressed=%u anim=%f dash=%d x=%f y=%f\n",
+                 fp->input.held_buttons[0], fp->input.held_buttons[1],
+                 fp->input.pressed_buttons, fp->cur_anim_frame,
+                 fp->mv.co.dash.x4, fp->cur_pos.x, fp->cur_pos.y);
+    }
+#endif
 
     if ((fp->mv.co.dash.x4 != 0) &&
         (fp->cur_anim_frame <= p_ftCommonData->x44))

@@ -1306,6 +1306,15 @@ static void Item_80269528(HSD_GObj* gobj)
     Item* item_data = GET_ITEM(gobj);
     if (item_data->xDC8_word.flags.x9 == 0) {
         Item_802694CC(gobj);
+#ifdef TARGET_PC
+        /* Opt-in provenance for a fault after the original animation callback.
+         * Log before dispatch; do not dereference an item after its callback
+         * merely for diagnostics, since the callback may remove the object. */
+        if (getenv("MELEE_DIAGNOSTIC_ITEM_ANIM_CALLBACK")) {
+            OSReport("NATIVE_ITEM_ANIM_DISPATCH gobj=%p item=%p kind=%d callback=%p\n",
+                     gobj, item_data, item_data->kind, item_data->animated);
+        }
+#endif
         if (item_data->animated != NULL && item_data->animated(gobj)) {
             item_data->destroy_type = 0;
             Item_8026A8EC(gobj);

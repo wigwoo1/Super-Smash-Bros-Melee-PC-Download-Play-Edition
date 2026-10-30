@@ -21,4 +21,14 @@ static int MeleePc_IsAdventureIntroProfile(const unsigned char* bytes,uint32_t b
  }
  return 1;
 }
+/* vi0102.c consumes visual0102Scene as SceneDesc; fighter demo roots
+ * contain independent archives whose packed animation data stays original. */
+static int MeleePc_IsLuigiIntroProfile(const unsigned char* bytes,uint32_t body,
+ uint32_t nr,uint32_t np,size_t roots,size_t strings){
+ if(MeleePc_DatBe32(bytes)!=32928 || body!=32640 || nr!=40 || np!=3 || MeleePc_DatBe32(bytes+16))return 0;
+ static const char* names[]={"ftDemoVi0102MotionFileLuigi","ftDemoVi0102MotionFileMario","visual0102Scene"};
+ static const uint32_t offsets[]={21280,896,852};
+ for(unsigned i=0;i<3;i++)if(MeleePc_DatBe32(bytes+roots+i*8)!=offsets[i] || strcmp((const char*)bytes+strings+MeleePc_DatBe32(bytes+roots+i*8+4),names[i]))return 0;
+ return 1;
+}
 #endif

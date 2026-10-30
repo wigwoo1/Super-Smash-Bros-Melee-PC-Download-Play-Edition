@@ -1,5 +1,10 @@
 #include "ftCo_Jump.h"
 
+#ifdef TARGET_PC
+#include <stdlib.h>
+#include <dolphin/os.h>
+#endif
+
 #include <melee/ft/forward.h>
 
 #include "forward.h"
@@ -62,6 +67,15 @@ bool ftCo_Jump_CheckInput(Fighter_GObj* gobj)
 bool fn_800CAF78(Fighter_GObj* gobj)
 {
     Fighter* fp = GET_FIGHTER(gobj);
+
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_DASH_JUMP") &&
+        (fp->input.held_buttons[0] & HSD_PAD_XY)) {
+        OSReport("NATIVE_DASH_JUMP_CHECK motion=%d pressed=%u item=%p x=%f y=%f\n",
+                 fp->motion_id, fp->input.pressed_buttons, fp->item_gobj,
+                 fp->cur_pos.x, fp->cur_pos.y);
+    }
+#endif
 
     if (ftCo_800C5240(gobj)) {
         return ftCo_800C5A50(gobj);

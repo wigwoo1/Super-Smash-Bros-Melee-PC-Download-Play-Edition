@@ -10783,3 +10783,5 @@ Verified native shell throw recovery on muted D3D12 and Vulkan. Corrected ftData
 Next: Sol Medium bounded Adventure progression. No full-stage or port-completion claim.
 
 Next bounded Adventure task: inspect original stage collision/transition geometry at second gap near x440-507. Preserve input-only route and two-attempt stop; validate muted after source-derived change. Recommended Sol High.
+
+2026-10-29 NEXT ADVENTURE ROUTE GATE: Original exit marker189 resolved live to x571.521/y167.637. A normal jump correctly launched in the second focused muted D3D12 test but did not produce landing on GrNKr archive floor107 x383..460/y90; stock was lost before the exit. Treat raw floor coordinates as unproven world/active collision. Before another runtime route attempt, inspect MapJoint ownership/enabled state and transforms for floor107 in phase1, then choose input from live collision. Two-attempt stop applies; current source and Desktop candidate remain the verified shell recovery build. No next-stage or full-port claim. Astra Low recommended for this collision/transform investigation. See adventure-shell-20261028/EXIT_ROUTE_VERIFICATION.json.

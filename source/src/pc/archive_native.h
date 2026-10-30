@@ -186,6 +186,7 @@ static void MeleePc_DatSwap32(unsigned char* p){uint32_t value=MeleePc_DatBe32(p
 #include "stage_pushon_archive_plan.h"
 #include "stage_kinoko_route_archive_plan.h"
 #include "stage_kongo_archive_plan.h"
+#include "stage_shrine_route_archive_plan.h"
 #include "item_common_archive.h"
 #include "fighter_common_archive.h"
 #include "fighter_kirby_archive.h"
@@ -9510,6 +9511,13 @@ static int MeleePc_DatDecode(void* data,size_t length){
         for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
         return 0;
     }
+    if(MeleePc_IsShrineRouteProfile(bytes,length,body,relocs,publics,roots,strings)){
+        int result=MeleePc_StageShrineRouteBody(bytes,length,body,relocs,publics,roots,strings);
+        if(result)return result;
+        for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);
+        for(size_t pos=table;pos<strings;pos+=4)MeleePc_DatSwap32(bytes+pos);
+        return 0;
+    }
     /* Original GrNPo bonus stage, source-typed mixed hazard parameters. */
     if(length==644176 && body==635872 && relocs==1728 && publics==45 && !externs){
         static const char* names[]={"ALDYakuAll","GrdPushonBlue_RGB565_image","GrdPushonBord1_C4_image","GrdPushonBord1_tlut","GrdPushonBord1_tlut_desc","GrdPushonGridA_RGB565_image","GrdPushonGridAa_CMPR_image","GrdPushonGridAa_MIPMAP_CMPR_image","GrdPushonGridC_RGB565_image","GrdPushonHariB_C8_image","GrdPushonHariB_tlut","GrdPushonHariB_tlut_desc","GrdPushonHari_C8_image","GrdPushonHari_tlut","GrdPushonHari_tlut_desc","GrdPushonKoushi_C8_image","GrdPushonKoushi_tlut","GrdPushonKoushi_tlut_desc","GrdPushonLighiR_C8_image","GrdPushonLighiR_tlut","GrdPushonLighiR_tlut_desc","GrdPushonLightB_I8_image","GrdPushonLightO_C4_image","GrdPushonLightO_tlut","GrdPushonLightO_tlut_desc","GrdPushonLine1_C8_image","GrdPushonLine1_tlut","GrdPushonLine1_tlut_desc","GrdPushonLine2_C8_image","GrdPushonLine2_tlut","GrdPushonLine2_tlut_desc","GrdPushonNeon1_C8_image","GrdPushonNeon1_tlut","GrdPushonNeon1_tlut_desc","GrdPushonNoizi1_I8_image","GrdPushonT047_RGB565_image","GrdPushonYerrowB_RGB565_image","GrdPushonYerrow_RGB565_image","coll_data","grGroundParam","itemdata","map_head","map_plit","quake_model_set","yakumono_param"};
@@ -9620,7 +9628,8 @@ static int MeleePc_DatDecode(void* data,size_t length){
     }
     if(!externs && (MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings) ||
                    MeleePc_IsEndingSceneProfile(bytes,body,relocs,publics,roots,strings) ||
-                   MeleePc_IsCreditsSceneProfile(bytes,body,relocs,publics,roots,strings))){
+                   MeleePc_IsCreditsSceneProfile(bytes,body,relocs,publics,roots,strings) ||
+                   MeleePc_IsLuigiIntroProfile(bytes,body,relocs,publics,roots,strings))){
         int result=MeleePc_TitleBody(bytes,body,relocs,publics,roots,strings);
         if(result)return result;
         for(unsigned word=0;word<5;++word)MeleePc_DatSwap32(bytes+word*4);

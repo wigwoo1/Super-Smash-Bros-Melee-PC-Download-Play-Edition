@@ -22,6 +22,16 @@
  * Unknown payloads remain unsupported pending archive-wide preservation policy. */
 static void MeleePc_ItemAttributePlan(MeleePc_TitlePlan* p,uint32_t root,unsigned kind){
  switch(kind){
+ case 213: /* itCommonItems.h itLikelikeAttributes: pointer, words, byte flags, two collision records. */
+  {uint32_t shared=item_dynamics_pointer(p,root);
+   if(shared==UINT32_MAX){p->error=-1;return;}
+   item_dynamics_scalars(p,shared,8,4);
+   item_dynamics_scalars(p,root+4,12,4);
+   item_monster_bytes(p,root+0x10,8);
+   item_dynamics_scalars(p,root+0x18,0x24,4);
+   item_monster_bytes(p,root+0x3c,4);
+   item_dynamics_scalars(p,root+0x40,72,4);break;}
+
  case 211:case 212:case 219:case 220:MeleePc_ItemKinokoRouteAttributesPlan(p,root,kind);break;
  case 34:MeleePc_ItemMBallAttributesPlan(p,root);break;
  case 97:MeleePc_ItemSheikChainAttributesPlan(p,root);break;

@@ -1,5 +1,6 @@
 #include "controller.h"
 #ifdef TARGET_PC
+#include <stdlib.h>
 #include <pc/frame_input.h>
 #include <pc/input_packet.h>
 #include <pc/input_buffer.h>
@@ -157,6 +158,11 @@ void HSD_PadRenewRawStatus(bool err_check)
         }
     }
 
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_CLEAR_INPUT") && now.stat[0].button)
+        OSReport("NATIVE_CLEAR_RAW button=%x err=%d count=%u capacity=%u policy=%u\n",
+                 now.stat[0].button, now.stat[0].err, p->qcount, p->qnum, p->qtype);
+#endif
     qwrite = &p->queue[p->qwrite];
     if (p->qcount == p->qnum) {
         switch (p->qtype) {
@@ -506,6 +512,13 @@ void HSD_PadRenewMasterStatus(void)
                 mp->nml_analogL = 0.0;
             }
             mp->trigger = mp->button & (mp->last_button ^ mp->button);
+#ifdef TARGET_PC
+            if (i == 0 && getenv("MELEE_DIAGNOSTIC_CLEAR_INPUT") &&
+                (queued->button || mp->button || mp->last_button))
+                OSReport("NATIVE_CLEAR_MASTER raw=%x selected=%x previous=%x current=%x trigger=%x err=%d count=%u\n",
+                         queued->button, qread->button, mp->last_button,
+                         mp->button, mp->trigger, mp->err, p->qcount);
+#endif
             mp->release = mp->last_button & (mp->last_button ^ mp->button);
 #ifdef TARGET_PC
             if (i == 0 && PADDiagnosticPrizeTraceActive() &&

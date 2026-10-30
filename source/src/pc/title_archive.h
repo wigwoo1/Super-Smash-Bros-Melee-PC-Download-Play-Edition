@@ -459,6 +459,10 @@ static int MeleePc_TitleBody(unsigned char* bytes,uint32_t body,uint32_t relocs,
         else if(!strcmp(name,"ScTitle_scene_lights")){title_array(&p,at,TITLE_LightList,0,1);continue;}
         else if(!strcmp(name,"TitleMark_sobjdesc"))type=TITLE_HSD_SObjDesc;
         else if(!strcmp(name,"ScItrAllstar_scene_data"))type=TITLE_SceneDesc;
+        else if(MeleePc_IsLuigiIntroProfile(bytes,body,relocs,publics,roots,strings)){
+            if(i<2){title_nested_archive(&p,at);continue;}
+            type=TITLE_SceneDesc;
+        }
         else if(MeleePc_IsAdventureIntroProfile(bytes,body,relocs,publics,roots,strings))
             type=i==0?TITLE_SceneDesc:TITLE_SceneCameraDesc;
         else if(MeleePc_IsGameOverSceneProfile(bytes,body,relocs,publics,roots,strings))type=TITLE_SceneDesc;
