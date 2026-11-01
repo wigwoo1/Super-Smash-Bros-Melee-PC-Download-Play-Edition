@@ -17,7 +17,163 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
  if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_ROUTE") &&
     Stage_8022519C(Stage_80225194())==Gr_Kind_ShrineRoute){
   Fighter* fp=self->user_data;
+  static int bypass_done;
+  HSD_GObj* maze_controller=Ground_GetMapGObj(4);
+  if(maze_controller && maze_controller->user_data){
+   Ground* maze=maze_controller->user_data;
+   static int previous_encounter_state=-1;
+   static int encounter_seen,encounter_returned;
+   int state=maze->u.shrineroute.xC4;
+   if(state!=previous_encounter_state){
+    OSReport("NATIVE_MAZE_ENCOUNTER_STATE frame=%u state=%d marker=%u\n",frame,state,maze->u.shrineroute.xC8);
+    previous_encounter_state=state;
+   }
+   if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_COMBAT")){
+    if(state==3)encounter_seen=1;
+    if(state==0 && encounter_seen && !encounter_returned){
+     encounter_returned=1;
+     OSReport("NATIVE_MAZE_ENCOUNTER_RETURN frame=%u marker=%u cleared=%u stocks=%d damage=%d x=%f y=%f\n",frame,maze->u.shrineroute.xC8,maze->u.shrineroute.xC6,Player_GetStocks(0),Player_GetDamage(0),fp->cur_pos.x,fp->cur_pos.y);
+    }
+    if(encounter_returned || bypass_done){
+     if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_EAST_CORRIDOR") && state==0){
+      static unsigned east_start;
+      static int east_stocks,east_done,east_aborted;
+      static unsigned east_landed,upper_jump;
+      static int upper_done;
+      static unsigned upper_landed_frame;
+      if(!east_start && fp->ground_or_air==GA_Ground && fp->motion_id==14){
+       east_start=frame;east_stocks=Player_GetStocks(0);
+       OSReport("NATIVE_MAZE_EAST_START frame=%u x=%f y=%f floor=%d stocks=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,east_stocks);
+      }
+      if(east_start && !east_done && !east_aborted){
+       if(Player_GetStocks(0)!=east_stocks || fp->cur_pos.y<70 || frame-east_start>360){
+        east_aborted=1;
+        OSReport("NATIVE_MAZE_EAST_ABORT frame=%u x=%f y=%f floor=%d stocks=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0));
+       }else if(frame-east_start>=30){
+        input->stickX=(fp->motion_id==245 || fp->motion_id==246)?80:45;
+        if(fp->cur_pos.x>=715 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==121){
+         east_done=1;east_landed=frame;input->stickX=0;
+         OSReport("NATIVE_MAZE_EAST_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+        }
+       }
+      }
+      if(east_done && getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_UPPER_CLIMB") && !east_aborted && !upper_done){
+       if(Player_GetStocks(0)!=east_stocks || fp->cur_pos.y<70 || frame-east_landed>900){
+        east_aborted=1;memset(input,0,sizeof(*input));
+        OSReport("NATIVE_MAZE_UPPER_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+       }else if(frame-east_landed>=30){
+        Item* obstacle=NULL;float obstacle_distance=60.0f;
+        for(HSD_GObj* g=HSD_GObjPLinkHead[HSD_GOBJ_PLINK_ITEM];g;g=g->next){
+         Item* item=g->user_data;
+         if(!item || item->kind!=It_Kind_Leadead)continue;
+         /* Retail downed states7/8: pass while the enemy recovers. */
+         if(item->msid==7 || item->msid==8)continue;
+         /* Travel east: a passed enemy must not pull the route backward. */
+         float dx=item->pos.x-fp->cur_pos.x;
+         if(dx<0)continue;
+         if(dx<obstacle_distance && MeleePc_KoopaAbs(item->pos.y-fp->cur_pos.y)<35){obstacle=item;obstacle_distance=dx;}
+        }
+        /* A captured/damaged fighter cannot honor the old jump schedule.
+         * Rearm only after landing and idle on the connected lower corridor.
+         * Like Like ejection can land on117..126 before the takeoff ramp127. */
+        if(upper_jump && frame-upper_jump>90 && fp->ground_or_air==GA_Ground &&
+           fp->coll_data.floor.index>=117 && fp->coll_data.floor.index<=127 && fp->motion_id==14){
+         OSReport("NATIVE_MAZE_UPPER_REARM frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+         upper_jump=0;
+        }
+        if(!upper_jump){
+         input->stickX=45;
+         if(obstacle && fp->ground_or_air==GA_Ground){
+          int direction=1;unsigned phase=frame%60;
+          input->stickX=obstacle_distance>28?(s8)(direction*45):0;
+          if(phase>=6 && phase<12)input->stickX=0;
+          if(phase>=12 && phase<15){input->stickX=(s8)(direction*80);input->button=PAD_BUTTON_A;}
+          if(frame%15==0)OSReport("NATIVE_MAZE_UPPER_ENEMY frame=%u kind=%d msid=%d x=%f y=%f distance=%f self_motion=%d requested_x=%d button=%u\n",frame,obstacle->kind,obstacle->msid,obstacle->pos.x,obstacle->pos.y,obstacle_distance,fp->motion_id,input->stickX,input->button);
+         }
+         if(!obstacle && fp->cur_pos.x>=842 && fp->ground_or_air==GA_Ground &&
+            (fp->motion_id==14 || fp->motion_id==15 || fp->motion_id==16 || fp->motion_id==17) && !(fp->input.held_buttons[0]&PAD_BUTTON_X)){
+          upper_jump=frame;input->stickX=0;
+          OSReport("NATIVE_MAZE_UPPER_JUMP frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+         }
+        }
+        /* Retail capture consumes button edges through ftCommon_GrabMash.
+         * Only emit ordinary taps; never alter the timer or captor. */
+        if(fp->motion_id==ftCo_MS_CaptureLeadead || fp->motion_id==ftCo_MS_CaptureLikelike){
+         HSD_GObj* captor=fp->motion_id==ftCo_MS_CaptureLikelike?fp->mv.co.capturelikelike.x0:fp->mv.co.captureleadead.x0;
+         Item* grabbing=captor?captor->user_data:NULL;
+         if(frame%10==0)OSReport("NATIVE_MAZE_UPPER_CAPTURE motion=%d frame=%u self_x=%f self_y=%f timer=%f enemy=%p kind=%d msid=%d enemy_x=%f enemy_y=%f\n",fp->motion_id,frame,fp->cur_pos.x,fp->cur_pos.y,fp->grab_timer,captor,grabbing?grabbing->kind:-1,grabbing?grabbing->msid:-1,grabbing?grabbing->pos.x:0,grabbing?grabbing->pos.y:0);
+         input->stickX=0;input->button=(frame%8<2)?PAD_BUTTON_A:0;
+         return;
+        }
+        if(upper_jump){
+         unsigned elapsed=frame-upper_jump;
+         if(elapsed<20 || (elapsed>=30 && elapsed<34))input->button=PAD_BUTTON_X;
+         /* Rise in the opening right of the ceiling, then steer onto136. */
+         if(fp->cur_pos.y>=185){
+          float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+          input->stickX=projected_x<816?65:projected_x>820?-65:0;
+         }
+         if(elapsed>30 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==136){
+          upper_done=1;upper_landed_frame=frame;memset(input,0,sizeof(*input));
+          OSReport("NATIVE_MAZE_UPPER_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+         }
+        }
+       }
+      }
+      if(upper_done && getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_UPPER_PASSAGE") && !east_aborted){
+       /* Connected authored floors136 ->135 ->134 ->133 ->132 ->3.
+        * Original proximity owns the next randomized sword/exit transition. */
+       if(Player_GetStocks(0)!=east_stocks || fp->cur_pos.y<140 || frame-upper_landed_frame>720){
+        east_aborted=1;memset(input,0,sizeof(*input));
+        OSReport("NATIVE_MAZE_UPPER_PASSAGE_ABORT frame=%u x=%f y=%f floor=%d stocks=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0));
+       }else if(frame-upper_landed_frame>=20){
+        input->stickX=fp->cur_pos.x>560?-45:0;
+        if((fp->motion_id==245 || fp->motion_id==246) && fp->cur_pos.x>560)input->stickX=-80;
+        if(fp->motion_id==ftCo_MS_CaptureLeadead || fp->motion_id==ftCo_MS_CaptureLikelike){
+         input->stickX=0;input->button=frame%8<2?PAD_BUTTON_A:0;
+        }
+        if(frame%10==0)OSReport("NATIVE_MAZE_UPPER_PASSAGE frame=%u x=%f y=%f floor=%d motion=%d air=%d requested_x=%d button=%u stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,fp->motion_id,fp->ground_or_air,input->stickX,input->button,Player_GetStocks(0),Player_GetDamage(0));
+       }
+      }
+      if(east_done && getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_UPPER_CLIMB") && frame%5==0 && frame-east_landed<=930)OSReport("NATIVE_MAZE_UPPER frame=%u x=%f y=%f floor=%d air=%d motion=%d requested_x=%d button=%u done=%d aborted=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,fp->ground_or_air,fp->motion_id,input->stickX,input->button,upper_done,east_aborted);
+      if(east_start && frame%5==0 && frame-east_start<=420)OSReport("NATIVE_MAZE_EAST frame=%u x=%f y=%f floor=%d air=%d motion=%d stocks=%d damage=%d requested_x=%d done=%d aborted=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,fp->ground_or_air,fp->motion_id,Player_GetStocks(0),Player_GetDamage(0),input->stickX,east_done,east_aborted);
+     }
+     return;
+    }
+    if(state==3){
+     Fighter* foe=NULL;int slot=-1;
+     for(int i=1;i<6;i++){
+      HSD_GObj* other=Player_GetEntity(i);
+      if(!other || Player_GetStocks(i)<=0)continue;
+      Fighter* candidate=other->user_data;
+      if(candidate && candidate->kind==Ft_Kind_Link){foe=candidate;slot=i;break;}
+     }
+     if(foe){
+      float dx=foe->cur_pos.x-fp->cur_pos.x,dy=foe->cur_pos.y-fp->cur_pos.y;
+      int direction=dx>=0?1:-1;unsigned phase=frame%60;
+      if(MeleePc_KoopaAbs(dx)>18)input->stickX=(s8)(direction*55);
+      /* Avoid walking off the original arena while chasing an airborne foe. */
+      if(fp->ground_or_air==GA_Ground && ((fp->cur_pos.x<558 && direction<0)||(fp->cur_pos.x>640 && direction>0)))input->stickX=0;
+      if(phase<4 && fp->ground_or_air==GA_Ground && dy>15)input->button=PAD_BUTTON_X;
+      else if(phase>=30 && phase<34 && fp->ground_or_air!=GA_Ground && dy>25)input->button=PAD_BUTTON_X;
+      if(MeleePc_KoopaAbs(dx)<=35 && dy>-28 && dy<28){
+       if((phase>=6 && phase<12)||(phase>=36 && phase<42))input->stickX=0;
+       if((phase>=12 && phase<15)||(phase>=42 && phase<45)){input->stickX=(s8)(direction*80);input->button=PAD_BUTTON_A;}
+      }
+     }
+     if(frame%30==0)OSReport("NATIVE_MAZE_LINK_COMBAT frame=%u slot=%d self_stocks=%d self_damage=%d target_stocks=%d target_damage=%d x=%f y=%f motion=%d air=%d target_x=%f target_y=%f requested_x=%d button=%u\n",frame,slot,Player_GetStocks(0),Player_GetDamage(0),slot>=0?Player_GetStocks(slot):-1,slot>=0?Player_GetDamage(slot):-1,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,fp->ground_or_air,foe?foe->cur_pos.x:0,foe?foe->cur_pos.y:0,input->stickX,input->button);
+     return;
+    }
+   }
+   /* Original marker proximity owns the encounter and exit transitions. */
+   if(state!=0)return;
+  }
   static unsigned jump_frame,gap_landed_frame,raised_jump_frame,raised_second_jump;
+  static unsigned raised_landed_frame,slope_jump_frame,slope_landed_frame;
+  static int slope_done,passage_done,ledge_done,shelf_done;
+  static unsigned passage_landed_frame,ledge_landed_frame,shelf_jump_frame;
+  static unsigned climb_jump_frame;
+  static int climb_done;
   static int route_started,route_done,route_aborted,start_stocks;
   if(!route_started && frame>=180){route_started=1;start_stocks=Player_GetStocks(0);}
   if(route_started && !route_done && !route_aborted){
@@ -46,6 +202,12 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
      if(raised_jump_frame){
       unsigned elapsed=frame-raised_jump_frame;
       if(fp->cur_pos.x<268)input->stickX=80;
+      if(raised_second_jump && fp->ground_or_air!=GA_Ground){
+       /* Aim for the center of floor 27. Lead the stick by several frames
+        * so releasing it cannot carry Falco over the far edge. */
+       float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+       input->stickX=projected_x<268.0f ? 65 : projected_x>272.0f ? -65 : 0;
+      }
       /* The hanging block spans x233.58..250.58 above y85.46.
        * Stay below it on the first arc, then jump again after clearing its
        * right wall with body margin. No collision or velocity writes. */
@@ -57,11 +219,139 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
        route_aborted=1;memset(input,0,sizeof(*input));OSReport("NATIVE_MAZE_ROUTE_ABORT unexpected_floor=%d frame=%u x=%f y=%f\n",fp->coll_data.floor.index,frame,fp->cur_pos.x,fp->cur_pos.y);
       }
       if(elapsed>=30 && fp->cur_pos.x>=255 && fp->cur_pos.x<=285 &&
-         fp->cur_pos.y>40 && fp->cur_pos.y<47 && fp->ground_or_air==GA_Ground){
-       route_done=1;memset(input,0,sizeof(*input));OSReport("NATIVE_MAZE_RAISED_LANDED frame=%u x=%f y=%f motion=%d floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+         fp->cur_pos.y>40 && fp->cur_pos.y<47 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==27){
+       route_done=1;raised_landed_frame=frame;memset(input,0,sizeof(*input));OSReport("NATIVE_MAZE_RAISED_LANDED frame=%u x=%f y=%f motion=%d floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
       }
      }
     }
+   }
+  }
+  if(route_done && !route_aborted && !slope_done){
+   if(Player_GetStocks(0)!=start_stocks || fp->cur_pos.y<0 || frame-raised_landed_frame>240){
+    route_aborted=1;
+    OSReport("NATIVE_MAZE_SLOPE_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+   }else{
+    if(!slope_jump_frame && frame-raised_landed_frame>=20 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==27){
+     slope_jump_frame=frame;
+     OSReport("NATIVE_MAZE_SLOPE_JUMP frame=%u x=%f y=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y);
+    }
+    if(slope_jump_frame){
+     unsigned elapsed=frame-slope_jump_frame;
+     float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+     input->stickX=projected_x<308.0f ? 65 : projected_x>312.0f ? -65 : 0;
+     if(elapsed<20)input->button=PAD_BUTTON_X;
+     if(elapsed>12 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==29){
+      slope_done=1;slope_landed_frame=frame;memset(input,0,sizeof(*input));
+      OSReport("NATIVE_MAZE_SLOPE_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+     }
+    }
+   }
+  }
+  if(slope_done && !passage_done && !route_aborted && frame-slope_landed_frame>=30){
+   /* The wall at x343 extends down to y35.7. Normal movement off the
+    * slope lets gravity bring Falco below it onto floors 76/106. */
+   if(Player_GetStocks(0)!=start_stocks || fp->cur_pos.y<-80 || frame-slope_landed_frame>240){
+    route_aborted=1;
+    OSReport("NATIVE_MAZE_PASSAGE_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+   }else{
+    input->stickX=(fp->motion_id==245 || fp->motion_id==246) ? 80 : 45;
+    if(fp->ground_or_air==GA_Ground && fp->cur_pos.x>=360 && fp->cur_pos.x<=380 && fp->coll_data.floor.index==106){
+     passage_done=1;passage_landed_frame=frame;memset(input,0,sizeof(*input));
+     OSReport("NATIVE_MAZE_PASSAGE_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+    }
+   }
+  }
+  if(passage_done && !ledge_done && !route_aborted && frame-passage_landed_frame>=30){
+   /* Follow the low corridor to its end, then drop onto floor 95.
+    * The solid wall above this exit makes an early jump unsuitable. */
+   if(Player_GetStocks(0)!=start_stocks || fp->cur_pos.y<-80 || frame-passage_landed_frame>280){
+    route_aborted=1;
+    OSReport("NATIVE_MAZE_EXIT_LEDGE_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+   }else{
+    input->stickX=(fp->motion_id==245 || fp->motion_id==246) ? 80 : 45;
+    if(fp->ground_or_air!=GA_Ground && fp->cur_pos.x>=425){
+     float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+     input->stickX=projected_x<427 ? 45 : projected_x>430 ? -45 : 0;
+    }
+    if(fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==95){
+     ledge_done=1;ledge_landed_frame=frame;memset(input,0,sizeof(*input));
+     OSReport("NATIVE_MAZE_EXIT_LEDGE_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+    }
+   }
+  }
+  if(ledge_done && !shelf_done && !route_aborted){
+   if(Player_GetStocks(0)!=start_stocks || fp->cur_pos.y<-85 || frame-ledge_landed_frame>300){
+    route_aborted=1;
+    OSReport("NATIVE_MAZE_SHELF_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+   }else{
+    if(!shelf_jump_frame && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==95 && fp->motion_id==14){
+     shelf_jump_frame=frame;
+     OSReport("NATIVE_MAZE_SHELF_JUMP frame=%u x=%f y=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y);
+    }
+    if(shelf_jump_frame){
+     unsigned elapsed=frame-shelf_jump_frame;
+     float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+     input->stickX=projected_x<444 ? 65 : projected_x>448 ? -65 : 0;
+     /* Floor 111 is about 68 units above floor 95. Release X before
+      * requesting a normal aerial jump near the first arc's apex. */
+     if(elapsed<20 || (elapsed>=30 && elapsed<34))input->button=PAD_BUTTON_X;
+     if(elapsed>30 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==111){
+      shelf_done=1;memset(input,0,sizeof(*input));
+      OSReport("NATIVE_MAZE_SHELF_LANDED frame=%u x=%f y=%f floor=%d stocks=%d damage=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0));
+     }
+    }
+   }
+  }
+  if(shelf_done && !route_aborted){
+   if(Player_GetStocks(0)!=start_stocks || fp->cur_pos.y<-85 || frame>1700){
+    route_aborted=1;
+    OSReport("NATIVE_MAZE_SWORD_APPROACH_ABORT frame=%u x=%f y=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y);
+   }else if(!climb_done){
+    if(!climb_jump_frame && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==111 && fp->motion_id==14){
+     climb_jump_frame=frame;
+     OSReport("NATIVE_MAZE_CLIMB_JUMP frame=%u x=%f y=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y);
+    }
+    if(climb_jump_frame){
+     float projected_x=fp->cur_pos.x+8.0f*fp->self_vel.x;
+     input->stickX=projected_x<469 ? 65 : projected_x>472 ? -65 : 0;
+     if(frame-climb_jump_frame<20)input->button=PAD_BUTTON_X;
+     if(frame-climb_jump_frame>12 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==112){
+      climb_done=1;memset(input,0,sizeof(*input));
+      OSReport("NATIVE_MAZE_CLIMB_LANDED frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+     }
+    }
+   }else{
+    if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_BYPASS_FIRST")){
+     static unsigned bypass_jump;
+     static int bypass_airborne, bypass_second;
+     /* The authored sword trigger is +/-35 about (600.832,95.280).
+      * Clear it vertically with ordinary jumps; never inspect exit identity. */
+     if(!bypass_jump){
+      input->stickX=fp->cur_pos.x<550?45:0;
+      if(fp->cur_pos.x>=550 && fp->ground_or_air==GA_Ground &&
+         (fp->motion_id==14 || fp->motion_id==15 || fp->motion_id==16 || fp->motion_id==17)){
+       bypass_jump=frame;
+       OSReport("NATIVE_MAZE_BYPASS_JUMP frame=%u x=%f y=%f scale=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y,Ground_801C0498());
+      }
+     }
+     if(bypass_jump){
+      unsigned elapsed=frame-bypass_jump;
+      if(fp->ground_or_air!=GA_Ground)bypass_airborne=1;
+      if(elapsed<12)input->button=PAD_BUTTON_X;
+      if(bypass_airborne && fp->cur_pos.y>137)input->stickX=80;
+      if(elapsed>=24 && !bypass_second && fp->ground_or_air!=GA_Ground){
+       bypass_second=1;input->button=PAD_BUTTON_X;
+       OSReport("NATIVE_MAZE_BYPASS_SECOND frame=%u x=%f y=%f\n",frame,fp->cur_pos.x,fp->cur_pos.y);
+      }
+      if(fp->cur_pos.x>640)input->stickX=0;
+      if(bypass_airborne && fp->cur_pos.x>640 && fp->ground_or_air==GA_Ground && fp->coll_data.floor.index==0){
+       bypass_done=1;memset(input,0,sizeof(*input));
+       OSReport("NATIVE_MAZE_BYPASS_LANDED frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);
+      }
+      if(elapsed>180){route_aborted=1;memset(input,0,sizeof(*input));OSReport("NATIVE_MAZE_BYPASS_ABORT frame=%u x=%f y=%f floor=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index);}
+      if(frame%5==0)OSReport("NATIVE_MAZE_BYPASS frame=%u x=%f y=%f motion=%d air=%d button=%u requested_x=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,fp->ground_or_air,input->button,input->stickX);
+     }
+    }else input->stickX=fp->cur_pos.x<601 ? 45 : 0;
    }
   }
   if((frame%5==0 || (frame>=440 && frame<=480)) && frame>=175 && frame<=1800)OSReport("NATIVE_MAZE_ROUTE frame=%u x=%f y=%f motion=%d air=%d floor=%d stocks=%d damage=%d requested_x=%d button=%u done=%d aborted=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->motion_id,fp->ground_or_air,fp->coll_data.floor.index,Player_GetStocks(0),Player_GetDamage(0),input->stickX,input->button,route_done,route_aborted);
@@ -278,6 +568,12 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
   static unsigned phase,pickup_start,held_frame,release_frame;static HSD_GObj* held_shell;
   Item* held=fp->item_gobj?fp->item_gobj->user_data:NULL;
   int held_is_shell=held && (held->kind==It_Kind_ZGShell || held->kind==It_Kind_ZRShell);
+  /* If the shell despawns before pickup, keep the normal approach/attack
+   * inputs computed above until another Koopa produces a shell. */
+  if(phase<2 && !shell_item && !held){
+   pickup_start=0;
+   return;
+  }
   memset(input,0,sizeof(*input));
   /* A pickup can select a nearby ordinary item before the shell. The
    * original throw check requires A while L/R is held for usable items. */

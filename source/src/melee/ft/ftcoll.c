@@ -923,6 +923,16 @@ bool ftColl_80077C60(Item* item, HitCapsule* hit, Fighter* fp,
         }
         scaled_dmg = f3 * fp->dmg.x182c_behavior;
 
+#ifdef TARGET_PC
+        if (scaled_dmg > 500.0f && getenv("MELEE_DIAGNOSTIC_ITEM_DAMAGE")) {
+            OSReport("NATIVE_ITEM_DAMAGE_RANGE item=%p kind=%d hit=%p base=%f raw=%f adjusted=%f behavior=%f scaled=%f velocity=(%f,%f,%f) player=%d motion=%d\n",
+                     item->entity, item->kind, hit, hit->damage, raw_dmg,
+                     f3, fp->dmg.x182c_behavior, scaled_dmg,
+                     item->x40_vel.x, item->x40_vel.y, item->x40_vel.z,
+                     fp->player_idx, fp->motion_id);
+        }
+#endif
+
         if (inlineB1(hit)) {
             if (dmg_log0_idx == 0 && !fp->dmg.x189C_unk_num_frames) {
                 HitCapsuleState state = checkTipLog(fp, hit);

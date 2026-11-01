@@ -644,7 +644,13 @@ Item_GObj* it_8027CC88(Item_GObj* item_gobj_arg)
     Item* var_item;
     u32 pad[20];
     Vec3 sp44;
+#ifdef TARGET_PC
+    /* Each trophy search may append ten IDs. Preserve both groups for the
+     * original random choice without overwriting the caller's stack. */
+    s32 sp1C[20];
+#else
     s32 sp1C[10];
+#endif
     u32 pad2[4];
 
     item_gobj_var = NULL;

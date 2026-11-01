@@ -2424,7 +2424,7 @@
     },
     {
       "path": "source/src/melee/ft/ftcoll.c",
-      "sha256": "19196f603454a2a03b6e748d1474fe4f978a632c0d4d42a87fb97c6a26d32865"
+      "sha256": "f424d165ab7d29d1c37537e0ae518300f8696caa2d92ac5cfdf9f45a3eb17974"
     },
     {
       "path": "source/src/melee/ft/ftcoll.h",
@@ -7320,7 +7320,7 @@
     },
     {
       "path": "source/src/melee/it/itzako.c",
-      "sha256": "09b5d45d56052f8866b65145626899645f6395b189f437ae696156017f1b728b"
+      "sha256": "8586f136c27807702b0a66b88768333d73295c26f3b02e32eb3c454f72aa4d31"
     },
     {
       "path": "source/src/melee/it/itzako.h",
@@ -9452,7 +9452,7 @@
     },
     {
       "path": "source/src/pc/adventure_koopa_diagnostic.h",
-      "sha256": "3341f6daa89b2fa90d551f8dca4ab67c71c4cefc9e995fc622cdac520009548e"
+      "sha256": "cd7cb99a425b9221459b7204b847fd85f1f9b6664b83cc6599f7b31f3f2cb944"
     },
     {
       "path": "source/src/pc/alarm_clock.c",
