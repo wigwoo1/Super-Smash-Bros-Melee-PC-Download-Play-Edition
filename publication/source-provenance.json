@@ -9452,7 +9452,7 @@
     },
     {
       "path": "source/src/pc/adventure_koopa_diagnostic.h",
-      "sha256": "cd7cb99a425b9221459b7204b847fd85f1f9b6664b83cc6599f7b31f3f2cb944"
+      "sha256": "b1081d3c8fd504c71a6eb241f383d282c416d7d1cfc03063879d292278eb2b21"
     },
     {
       "path": "source/src/pc/alarm_clock.c",
@@ -11185,6 +11185,10 @@
     {
       "path": "source/src/pc/match_rules_digest.h",
       "sha256": "aeaba06cf84eb0f7593dd2b8d82837d75c1e31c92733b99f427c9165745c6252"
+    },
+    {
+      "path": "source/src/pc/maze_route_deadline.h",
+      "sha256": "15c58c0ffd17a69dd851016c26b17e90a010a9c7acb63e5abe7d66f9945ef97f"
     },
     {
       "path": "source/src/pc/menu_sis_archive.h",

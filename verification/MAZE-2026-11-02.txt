@@ -1,0 +1,10 @@
+Reviewed source update: November 2, 2026
+
+Overall engineering estimate approximately30%; full port and Adventure maze remain unfinished.
+Opt-in ordinary-controller diagnostics now cover upper landing, two original Link defeats and original maze returns on muted D3D12 and Vulkan. These are scoped input-harness results, not physical-controller or full-campaign acceptance.
+
+West ledge: visually verified on D3D12. Same-binary Vulkan runtime trace confirms floor30 landing, retained stocks/damage and neutral input afterward; Vulkan visual capture missed the clean terminal process and remains pending. The standard test recipe removed the failed first-sword bypass and obsolete Luigi timing wait; original randomized exit selection remains unchanged.
+
+Current source additionally includes an opt-in floor30-to28 gap jump that compiles but has NOT been runtime-verified. Its first test ended in the opening stage because an out-of-range diagnostic close threshold fell back to360frames. The local runner correction removes automatic match close and retains a finite wall watchdog; a fresh gap test remains pending. Native game outcomes, enemies, collision and physics are not forced. Historical intermittent item-damage assertion remains unresolved.
+
+This is a source-only publication. No new public executable or runtime release is included. The immutable October18 prerelease is historical, pinned to its own exact source commit, and does not include these changes. Rebuild and mod instructions, dependency pins and notices remain in docs/ and the source tree. Original assets/fonts, private binaries, captures, logs, discs and saves are excluded.
