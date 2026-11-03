@@ -1,3 +1,15 @@
+2026-11-03 PUBLIC REPOSITORY GAME-SOURCE REBUILD AUDIT - VERIFIED SCOPE
+Fresh public-layout Release game compilation passed all1011 steps from public
+source54944c0163512a3aa3ead443b07e9cb1b5fd3c01. All1010 archive members are x86.
+Executable link against the existing configured Release runtime passed with
+zero unresolved symbols, no card backend and large-address support. Regenerated
+fonts stayed private; original disc size/mtime unchanged. New executable NOT
+launched; no cold-runtime, cross-machine or gameplay acceptance implied.
+Public-specific guide docs/PUBLIC_REBUILD.md explains source/dependencies layout,
+private build inputs, required tools and mod/rebuild limits. Existing Desktop
+packages/default/executable/disc/saves remain unchanged. Overall estimate~30%.
+Evidence: development/public-rebuild-20261103/VERIFICATION.private.json.
+
 MELEE NATIVE PORT - IMPLEMENTATION RECORD
 Updated: 2026-10-14
 

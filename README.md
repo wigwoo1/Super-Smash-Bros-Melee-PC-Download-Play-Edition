@@ -45,7 +45,7 @@ The locally restored executable contains fonts from your disc. Keep it and your 
 
 - `source/`: current Melee source, including all native PC conversion and gameplay changes.
 - `dependencies/aurora/`: current host/renderer source and dependency version declarations.
-- [SOURCE_REBUILD.txt](docs/SOURCE_REBUILD.txt): native rebuild steps and known limits. For this repository, the documents are in `docs/`; run the Python build drivers from the repository root.
+- [PUBLIC_REBUILD.md](docs/PUBLIC_REBUILD.md): rebuild commands for this repository's `source/` and `dependencies/aurora/` layout, private font generation and local testing. [SOURCE_REBUILD.txt](docs/SOURCE_REBUILD.txt) preserves the historical Desktop build's verification scope.
 - [MODDING.txt](docs/MODDING.txt): current mod installation and rebuild guidance. Easy custom character/stage installation remains planned.
 - `publication/source-provenance.json`: original upstream commits and exact source file hashes.
 - `publication/build-template.json`: template hashes, removed font regions, and source-path normalization record.

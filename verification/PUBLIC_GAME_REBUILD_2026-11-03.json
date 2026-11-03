@@ -1,0 +1,13 @@
+{
+  "status": "VERIFIED_PUBLIC_GAME_SOURCE_BUILD_AND_LINK_WITH_EXISTING_RUNTIME",
+  "public_commit": "54944c0163512a3aa3ead443b07e9cb1b5fd3c01",
+  "scope": "Fresh public-layout game library and executable link using an existing configured Release runtime. Not a cold dependency build or gameplay test.",
+  "game_launched": false,
+  "x86_archive_members": 1010,
+  "large_address_aware": true,
+  "no_card_link": true,
+  "unlock_all": true,
+  "original_disc_size_mtime_unchanged": true,
+  "cold_runtime_rebuild_verified": false,
+  "gameplay_verified": false
+}
