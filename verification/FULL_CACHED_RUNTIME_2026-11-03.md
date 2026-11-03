@@ -15,3 +15,9 @@ See [the artifact record](FULL_CACHED_RUNTIME_2026-11-03.json) and the preceding
 ## Static integration staging follow-up
 
 The newly linked executable was staged privately with its exact runtime DLLs and matching source at source commit `1dcb13ebcef9b013e914f28eb0cb9eb779c7ee8c`. All seven PE files are x86; normal imports resolve to bundled files or this PC's Windows x86 system libraries. API-set imports are delegated to Windows; delay loads and dynamic library loading remain unverified. The source ZIP contains 3,777 hash-verified entries, including 34 compiled game inputs and all 3,665 current native source files. Rebuild/mod instructions and dependency notices are included. No executable was launched, no Desktop build was replaced, and no binary was published. See the [static staging record](CACHED_RUNTIME_STAGING_2026-11-03.json). This is preparation for muted integration testing, not runtime acceptance.
+
+## Muted menu integration follow-up
+
+The same newly linked executable `5de259c9f813dc4800e029b73684b8d72282720ee73de7096a1ef44fa7241e33` subsequently passed bounded muted startup/menu checks on D3D12 and Vulkan. The opening movie, title and original menus were visually inspected. Normal OS Return skipped the movie and started the title; J entered 1-P Mode and K returned to the main menu. Both processes closed normally with exit 0, no timeout and no session storage (62.5 seconds D3D12, 72.1 seconds Vulkan). Runtime and source hashes matched the staged candidate.
+
+These checks used the diagnostic title hold. They do not establish ordinary unheld startup, physical controller acceptance, gameplay, performance, cold builds or a finished release. No Adventure route was retried and no Desktop build was replaced. See the [scoped menu record](CACHED_RUNTIME_MENU_2026-11-03.json). Earlier static-staging statements describe that earlier checkpoint.

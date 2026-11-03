@@ -1,0 +1,44 @@
+{
+  "status": "VERIFIED_SCOPED_NEW_RUNTIME_MUTED_MENUS_BOTH_RENDERERS",
+  "executable_sha256": "5de259c9f813dc4800e029b73684b8d72282720ee73de7096a1ef44fa7241e33",
+  "observations": {
+    "d3d12": {
+      "process": {
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_seconds": 62.5,
+        "clean_shutdown": true,
+        "muted": true,
+        "title_start_accepted": true,
+        "session_storage_created": false,
+        "renderer": "d3d12",
+        "executable_sha256": "5de259c9f813dc4800e029b73684b8d72282720ee73de7096a1ef44fa7241e33",
+        "scope": "Held-title diagnostic startup and normal OS-key menus only; visual/interaction observations recorded separately. No scripted campaign route."
+      },
+      "max_logged_simulation_frame": 1796,
+      "log_sha256": "77d633a8147832ecdfe1879e72353202e2ca93409d4857376cd84e5779190fcf",
+      "visual": "Opening movie and title inspected; Return skips movie/starts title; main menu, J into 1-P Mode and K back to main menu visually inspected, then Alt-F4 normal close. No campaign entered."
+    },
+    "vulkan": {
+      "process": {
+        "exit_code": 0,
+        "timed_out": false,
+        "elapsed_seconds": 72.1,
+        "clean_shutdown": true,
+        "muted": true,
+        "title_start_accepted": true,
+        "session_storage_created": false,
+        "renderer": "vulkan",
+        "executable_sha256": "5de259c9f813dc4800e029b73684b8d72282720ee73de7096a1ef44fa7241e33",
+        "scope": "Held-title diagnostic startup and normal OS-key menus only; visual/interaction observations recorded separately. No scripted campaign route."
+      },
+      "max_logged_simulation_frame": 2502,
+      "log_sha256": "c1cb57823767846e8a9ba55ffd2e17b731928708a6f0d8599fc97e4d62983534",
+      "visual": "Opening movie and title inspected; Return skips movie/starts title; main menu, J into 1-P Mode and K back to main menu visually inspected, then Alt-F4 normal close. No campaign entered."
+    }
+  },
+  "scope": "Held-title diagnostic startup; normal OS-key menu interaction on this PC. No ordinary unheld-startup, physical-device, gameplay, performance, cold-build or full-release acceptance.",
+  "source_stage_commit": "1dcb13ebcef9b013e914f28eb0cb9eb779c7ee8c",
+  "desktop_delivery_changed": false,
+  "overall_estimate": "~30%"
+}
