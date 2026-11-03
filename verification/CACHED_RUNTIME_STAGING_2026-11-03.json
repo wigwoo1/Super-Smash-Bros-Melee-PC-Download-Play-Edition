@@ -1,0 +1,18 @@
+{
+  "status": "VERIFIED_STATIC_INTEGRATION_STAGING_ONLY",
+  "source_commit": "1dcb13ebcef9b013e914f28eb0cb9eb779c7ee8c",
+  "executable_sha256": "5de259c9f813dc4800e029b73684b8d72282720ee73de7096a1ef44fa7241e33",
+  "source_zip_sha256": "48a1104436748be77c65a19b14b686497cd128d2f676556c8d537d3ff56a070c",
+  "source_entries": 3777,
+  "runtime_files": 7,
+  "x86_files_verified": 7,
+  "direct_imports_resolved_on_this_pc": true,
+  "imports_scope": "Normal PE imports only; API sets delegated to Windows. Delay loads and dynamic LoadLibrary paths not runtime-verified.",
+  "game_launched": false,
+  "desktop_delivery_changed": false,
+  "gameplay_verified": false,
+  "scope": "Private source-matched staging and static import audit. No runtime, cold-build, cross-machine or playable-release acceptance.",
+  "overall_estimate": "~30%",
+  "game_receipt_inputs_matched_in_zip": 34,
+  "current_native_source_files_matched": 3665
+}
