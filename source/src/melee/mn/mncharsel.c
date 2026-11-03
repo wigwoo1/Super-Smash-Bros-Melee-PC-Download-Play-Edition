@@ -5394,8 +5394,23 @@ void mnCharSel_Scene_OnFrame(void)
         if (return_frames == 1 || return_frames % 60 == 0)
             OSReport("NATIVE_SESSION_CSS_BACK frame=%u pending=%u\n",
                      return_frames, mnCharSel_804D6CF6);
+    } else if (getenv("MELEE_DIAGNOSTIC_CSS_SELECT") &&
+               getenv("MELEE_DIAGNOSTIC_EXPECT_ADVENTURE") &&
+               gm_GetCurrentGameMode() != GM_ADVENTURE) {
+        static int campaign_refused;
+        PADStatus neutral = { 0 };
+        PADSetVirtualStatus(0, &neutral);
+        PADSetVirtualStatus(1, &neutral);
+        if (!campaign_refused) {
+            campaign_refused = 1;
+            OSReport("NATIVE_CSS_CAMPAIGN_GUARD allowed=0 actual=%d expected=%d scripted_input=0\n",
+                     gm_GetCurrentGameMode(), GM_ADVENTURE);
+        }
     } else if (getenv("MELEE_DIAGNOSTIC_CSS_SELECT")) {
         static unsigned frames;
+        if (frames == 0 && getenv("MELEE_DIAGNOSTIC_EXPECT_ADVENTURE"))
+            OSReport("NATIVE_CSS_CAMPAIGN_GUARD allowed=1 actual=%d expected=%d\n",
+                     gm_GetCurrentGameMode(), GM_ADVENTURE);
         PADStatus status = { 0 };
         ++frames;
         if ((frames >= 30 && frames < 40) || (frames >= 120 && frames < 130)) status.button = PAD_BUTTON_A;

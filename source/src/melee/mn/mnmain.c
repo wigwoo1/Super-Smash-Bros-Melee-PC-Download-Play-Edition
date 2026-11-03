@@ -2280,6 +2280,11 @@ void mn_8022CC28(HSD_GObj* gp)
 
     buttons = mn_80229624(4);
     mn_804A04F0.buttons = buttons;
+#ifdef TARGET_PC
+    if (getenv("MELEE_DIAGNOSTIC_EXPECT_ADVENTURE") && buttons)
+        OSReport("NATIVE_REG_MENU_INPUT selection=%d buttons=%u\n",
+                 mn_804A04F0.hovered_selection, buttons);
+#endif
     if (buttons & MenuInput_Confirm) {
         mn_804D6BC8.cooldown = 5;
         mn_804A04F0.entering_menu = 1;
