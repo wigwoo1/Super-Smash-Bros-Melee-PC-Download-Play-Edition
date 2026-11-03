@@ -1,0 +1,79 @@
+{
+  "status": "VERIFIED_FULL_CACHED_RUNTIME_BUILD_ARTIFACTS",
+  "exit_code": 0,
+  "elapsed_seconds": 732.8,
+  "artifacts": {
+    "aurora_ax.lib": {
+      "sha256": "47fad83f5cdbce7ac6a84eb4a47816862fad2edb273bedb4fbf2e1202b7d3434",
+      "x86_members": 5
+    },
+    "aurora_core.lib": {
+      "sha256": "6ebb6666b697560341595c791d3bf86f233b5f22e653a8947a3b4839ede2b064",
+      "x86_members": 14
+    },
+    "aurora_dvd.lib": {
+      "sha256": "9a2bf39abac6ab263730035a54c6540ebc477afd5fd3a2dd2f16f07c0bc72691",
+      "x86_members": 2
+    },
+    "aurora_gd.lib": {
+      "sha256": "0a9fc6ab29c4f6d41d1e12e29ecef7b9959058a4eef43bca36493f5cb7f303cc",
+      "x86_members": 9
+    },
+    "aurora_gx.lib": {
+      "sha256": "67f9710f77fb56dd43b488b320688c2701e90504c0f8726c82b3767e9c69138e",
+      "x86_members": 46
+    },
+    "aurora_main.lib": {
+      "sha256": "81d65dd8740421bc663ec10f4de489672a3cf447e16892e961d6c6863ffc29da",
+      "x86_members": 1
+    },
+    "aurora_ms.lib": {
+      "sha256": "fbb1df3b12ced558bb3c2551ccc7760007593920a9013e71f8ab068185c72fdd",
+      "x86_members": 1
+    },
+    "aurora_mtx.lib": {
+      "sha256": "6f6133237f389f35df4e56f2a415502e6fe6fcdf5f2f0624ac3153963baeb461",
+      "x86_members": 6
+    },
+    "aurora_os.lib": {
+      "sha256": "98be68ee92b8209a96a0cb585e262e207fb67ca481bf962530ecd8d6b08ae986",
+      "x86_members": 10
+    },
+    "aurora_pad.lib": {
+      "sha256": "4bca6d193e959ceb6698d59ee5d6dc2a4fee88b077353c542282f059dadc1cb1",
+      "x86_members": 1
+    },
+    "aurora_si.lib": {
+      "sha256": "91c069d7fda601b814c8548caa313f96f51fcac18c25cd75dab51865da50251d",
+      "x86_members": 1
+    },
+    "aurora_vi.lib": {
+      "sha256": "1f51c1199ff1eae45998453c4839f2e8d70a6683e555dcd3b47a2139e86034c8",
+      "x86_members": 1
+    },
+    "_deps/dawn-build/webgpu_dawn.dll": {
+      "sha256": "945b9ae55f487825e870318c8941a57607a790a50084a80fc6c73262a224dba8",
+      "x86_pe": true
+    },
+    "_deps/aurora_nod-build/nod.dll": {
+      "sha256": "5eacfa889c463d3002cc161937e4194df12d560141013400f20d7d77fc8cde3e",
+      "x86_pe": true
+    },
+    "examples/SDL3.dll": {
+      "sha256": "f729a73da90c015a95ce7825736a7295363f47530a6cd8927704b66a5246f80f",
+      "x86_pe": true
+    },
+    "examples/simple.exe": {
+      "sha256": "9c67b05ce5a31710cde1bc5306a467767f9dbd2efd01d5adf4148ed53820dffb",
+      "x86_pe": true
+    }
+  },
+  "aurora_archives": 12,
+  "game_launched": false,
+  "card_library_absent": true,
+  "cold_download_verified": false,
+  "scope": "Complete default cached-source runtime build, x86 artifact inspection and link with existing Release game library. Not gameplay, cold downloads or another-machine acceptance.",
+  "overall_estimate": "~30%",
+  "game_link_with_existing_game_library_verified": true,
+  "game_link_undefined_symbols": 0
+}
