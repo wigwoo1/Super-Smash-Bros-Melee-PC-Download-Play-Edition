@@ -7,6 +7,7 @@
 #include <melee/mp/mplib.h>
 #include <sysdolphin/baselib/aobj.h>
 #include <sysdolphin/baselib/jobj.h>
+#include "maze_lower_chute_diagnostic.h"
 /* Opt-in controller-only grounded-Koopa probe. All actors, damage, stage,
  * stocks and outcomes are read-only. Main stick+A respects 1P input rules. */
 static float MeleePc_KoopaAbs(float value){return value<0?-value:value;}
@@ -57,7 +58,11 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
      third_returned=1;
      OSReport("NATIVE_MAZE_THIRD_RETURN frame=%u marker=%u cleared=%u stocks=%d damage=%d x=%f y=%f\n",frame,maze->u.shrineroute.xC8,maze->u.shrineroute.xC6,Player_GetStocks(0),Player_GetDamage(0),fp->cur_pos.x,fp->cur_pos.y);
     }
-    if(third_returned)return;
+    if(third_returned){
+     if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_LOWER_CHUTE") && state==0)
+      MeleePc_MazeLowerChuteInput(fp,input,frame);
+     return;
+    }
     if((second_returned || west_direct_ready) && !(third_combat && state==3)){
      if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_WEST_PASSAGE") && state==0){
       static unsigned west_start;
@@ -67,7 +72,16 @@ static void MeleePc_AdventureKoopaInput(HSD_GObj* self,PADStatus* input,unsigned
        OSReport("NATIVE_MAZE_WEST_START frame=%u x=%f y=%f floor=%d stocks=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,west_stocks);
       }
       if(west_start && !west_done && !west_aborted){
-       if(Player_GetStocks(0)!=west_stocks || fp->cur_pos.y<175 || frame-west_start>500){
+       /* A lower-chute test reached x347/floor128 at tick500 after enemy
+        * interruptions, seven units short of the existing landing target.
+        * Allow only a near-target arrival window, capped at620 total ticks. */
+       unsigned west_ticks=frame-west_start;
+       int west_near=getenv("MELEE_DIAGNOSTIC_ADVENTURE_MAZE_LOWER_CHUTE") &&
+           fp->cur_pos.x>=330 && fp->cur_pos.x<=370 &&
+           fp->ground_or_air==GA_Ground &&
+           (fp->coll_data.floor.index==128 || fp->coll_data.floor.index==30);
+       if(Player_GetStocks(0)!=west_stocks || fp->cur_pos.y<175 ||
+          west_ticks>620 || (west_ticks>500 && !west_near)){
         west_aborted=1;
         OSReport("NATIVE_MAZE_WEST_ABORT frame=%u x=%f y=%f floor=%d stocks=%d\n",frame,fp->cur_pos.x,fp->cur_pos.y,fp->coll_data.floor.index,Player_GetStocks(0));
        }else if(frame-west_start>=30){

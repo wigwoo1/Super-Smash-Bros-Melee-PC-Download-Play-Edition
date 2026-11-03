@@ -14428,3 +14428,37 @@ Kongo v2 build completed PASS no-card0undefined exe1cbc9bde897d7bfb99fca8b640aa8
 
 2026-11-03 THREE-LINK CHECKPOINT DELIVERED - VERIFIED ON MUTED D3D12 AND VULKAN
 Same863ffb8e Vulkan third return6342 cleared35 stocks3 damage65; sampled opponent damage45. Full original encounter states1/2/3/4/5/0; restored maze visually verified, later enemy contact HUD90%. Clean0/no storage893.7s. One earlier new attempt was refused by the actual campaign guard in Classic; no false gameplay acceptance. Original Continue used after Giant Donkey loss in the accepted run; RNG/exits/physics/damage/stocks remain game-controlled. Private Desktop development/adventure-maze-third-link-20261103: source ZIP c418f51d9973bc62450839566741eea1086b40e18f3cd0cbd14a64d21e1101d6, 3473 current code files/4097 source entries; 35 delivery files hash-verified. Rebuild/mod instructions, scripts, dependency notices included. Manual muted launchers leave scripted inputs off. Older packages/default/discs/saves preserved. Full maze/Adventure/port unfinished; estimate~30%. Next: selected Sol High for remaining collision-aware maze route.
+
+2026-11-03 LOWER WESTERN CHUTE CONTROLLER - BUILT, RUNTIME PENDING
+Added optional normal-PAD descent after the original third Link return:
+connected west floor walk, down-stick edges on one-way platforms31/32/47/48,
+height-aware drift, original grab escape/get-up input,1200-tick deadline and
+stock-loss stop. Goal is original floor46 landing; no fourth fight claim.
+New maze_lower_chute_diagnostic.h keeps route state separate from game state.
+Prior32 build inputs and original stage source unchanged. New candidatee069b2da
+incremental build/no-card link zero undefined;244 warnings;34 inputs and six
+unchanged runtime DLLs hash-verified. Both renderer launch plans pass.
+Muted D3D12 runtime active, no landing acceptance yet. Existing Desktop
+three-Link delivery remains the accepted build. Full project~30%, active.
+
+2026-11-03 LOWER CHUTE FIRST RUN / FOCUSED ARRIVAL CORRECTION
+First e069b2da muted D3D12 run: original first return1952, second4170,
+cleared3 stocks2 damage58. Existing west deadline aborted4671 on floor128
+atx347.049 y191.653, seven units short of landing criterion; enemy interruptions.
+Clean0/no storage911.7s. Third fight and lower chute UNEXERCISED, not passed.
+Added only LOWER_CHUTE opt-in near-target arrival window: ticks501..620 while
+grounded floor128/30 x330..370; outside that region original500 limit remains.
+All stock/height guards preserved. New86da401e incremental build/no-card link
+zero undefined,245 warnings. Lower-chute helper and33 other inputs unchanged.
+Both renderer launch plans pass; second focused muted D3D12 test active.
+Stop after this run if still unexercised/failed. Overall~30%, full maze incomplete.
+
+2026-11-03 LOWER CHUTE SECOND RUN TERMINAL - NO LANDING ACCEPTANCE
+86da401e muted D3D12 lost final stock in original Yoshi fight before maze;
+frame3810 Falco x655.288 y115.716 after outward opponent chase. Original
+Continue screen visually inspected. Closed clean0/no storage484.5s, no timeout.
+New arrival window and chute unexercised. Both focused runtime attempts are
+stopped under two-attempt rule. No lower landing receipt/new Desktop delivery.
+Accepted three-Link package remains untouched. Sol High sufficient for next
+edge-aware Yoshi test-controller repair; explicit continuation required before
+runtime retries. Goal active, overall~30%, not a model-capability escalation.
