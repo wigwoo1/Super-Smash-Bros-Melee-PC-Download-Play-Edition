@@ -12912,7 +12912,7 @@
     },
     {
       "path": "dependencies/aurora/cmake/AuroraDawnProvider.cmake",
-      "sha256": "dfe4a844b78d43074e144b99cc0702326049fd338ddd6788ddb473eef5fff432"
+      "sha256": "b829d5cd3e684ecd56c36a3c5a6c7072f8d97cb71d01ba21e0e7e12ff17abd35"
     },
     {
       "path": "dependencies/aurora/cmake/AuroraDependencyVersions.cmake",
@@ -14552,7 +14552,7 @@
     },
     {
       "path": "dependencies/aurora/tests/CMakeLists.txt",
-      "sha256": "bce244251c37b392c93420b11134bc743a9219b9a2d38af136411b83162cee8c"
+      "sha256": "468a9e0e4144bb96ea5b28531c018db1c0a0988eb5bd4eb55eb309051a6bf81f"
     },
     {
       "path": "dependencies/aurora/tests/ax_output_block_test.cpp",
@@ -14573,6 +14573,18 @@
     {
       "path": "dependencies/aurora/tests/bounded_state_cache_test.cpp",
       "sha256": "f502afb8294b35ec6202a0dfd8d371888f48fcca7eae77d66dc8fd4e2c48e81c"
+    },
+    {
+      "path": "dependencies/aurora/tests/cmake/dawn_fetch_option/CMakeLists.txt",
+      "sha256": "4adfd374ae125f713b732e23c697811abd66f0dd2bb0d576b4026a43f5815f0d"
+    },
+    {
+      "path": "dependencies/aurora/tests/cmake/dawn_fetch_option/modules/FetchContent.cmake",
+      "sha256": "884c9a7086d31dc8fcfbd000ab2041be1ee86d4cc8fe677286be3d1a383fec62"
+    },
+    {
+      "path": "dependencies/aurora/tests/cmake/dawn_fetch_option/run.cmake",
+      "sha256": "5a486c6720abdbf77e5fdcca076f80c7222d38fde8e941f5ccd1861428b160bf"
     },
     {
       "path": "dependencies/aurora/tests/dvd_test_stubs.cpp",

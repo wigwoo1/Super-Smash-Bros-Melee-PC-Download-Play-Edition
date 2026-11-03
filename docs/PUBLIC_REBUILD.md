@@ -33,6 +33,8 @@ python rebuild-native-runtime.py --build-dir "%MELEE_BUILD_ROOT%\runtime"
 
 The runtime driver selects `dependencies/aurora/` automatically. Keep `execute-target-for-cmake.py` beside it. Without a dependency source map, it needs upstream downloads; the complete cold-download path remains unverified. For an existing, complete set of dependency sources, see [RUNTIME_REBUILD.txt](RUNTIME_REBUILD.txt) for `--dependency-source-map` and tool overrides. That mode reuses source folders and must not be described as a cold download.
 
+Current source fixes the Dawn provider overwriting the source-map driver's explicit `DAWN_FETCH_DEPENDENCIES=OFF`. A fresh cached-source configuration now retains OFF; the normal default without that override remains ON. See the [configuration repair and scoped verification](../verification/DAWN_FETCH_OPTION_2026-11-03.md). A complete cached-source set is still required, and the full cold build remains unverified.
+
 Build the game library in **Release**, matching the runtime configuration:
 
 ```bat

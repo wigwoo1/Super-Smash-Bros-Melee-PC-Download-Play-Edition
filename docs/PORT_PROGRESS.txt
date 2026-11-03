@@ -14462,3 +14462,6 @@ stopped under two-attempt rule. No lower landing receipt/new Desktop delivery.
 Accepted three-Link package remains untouched. Sol High sufficient for next
 edge-aware Yoshi test-controller repair; explicit continuation required before
 runtime retries. Goal active, overall~30%, not a model-capability escalation.
+
+2026-11-03 DAWN CACHED-SOURCE FETCH OPTION REPAIR - SCOPED VERIFIED
+Found provider INTERNAL assignment overwrote explicit DAWN_FETCH_DEPENDENCIES=OFF withON; existing development cache and real-provider fixture reproduce mismatch. Changed to BOOL default preserving explicitOFF and normal defaultON. Seven configuration cases pass twice, registered CTest dawn_dependency_fetch_option. Fresh x86 Release runtime configure using15 source keys/14 existing folders and offlineCargo passed; generated cache OFF/disconnectedON/cardOFF. Fresh aurora_mtx build passed7steps,6x86 COFF objects. No game/audio launch or installed/default/immutableDesktop/disc/save changes. Not cold downloads or full new Dawn/runtime build. Evidence development/dawn-fetch-option-20261103/VERIFICATION.json. Lower-chute runtime retry gate unchanged. Overall~30%, goalactive. SolMedium sufficient for next full cached-runtime compile; LunaMedium sufficient for read-only nested input audit.

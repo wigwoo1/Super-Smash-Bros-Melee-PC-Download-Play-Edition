@@ -1,0 +1,37 @@
+{
+  "status": "VERIFIED_PROVIDER_CONFIGURATION_REGRESSION",
+  "baseline_explicit_off_rejected": true,
+  "baseline_observed": "ON",
+  "fixed_cases": [
+    {
+      "label": "fixed",
+      "exit_code": 0,
+      "cases_passed": 7
+    },
+    {
+      "label": "repeat",
+      "exit_code": 0,
+      "cases_passed": 7
+    }
+  ],
+  "dependency_population_stubbed": true,
+  "game_launched": false,
+  "full_runtime_configure_verified": true,
+  "cold_build_verified": false,
+  "provider_sha256": "b829d5cd3e684ecd56c36a3c5a6c7072f8d97cb71d01ba21e0e7e12ff17abd35",
+  "scope": "Real provider configured against an intercepted FetchContent implementation. Default ON, explicit OFF/ON, cache toggles and legacy INTERNAL OFF covered; no actual downloads or renderer build.",
+  "configuration_scope": "Fresh cached-source x86 Release configuration, 15 override keys/14 existing folders, offline Cargo. Not cold downloads.",
+  "dawn_fetch_dependencies": "OFF",
+  "fetchcontent_fully_disconnected": true,
+  "no_card": true,
+  "fresh_library": {
+    "status": "VERIFIED_FRESH_X86_LIBRARY_BUILD",
+    "target": "aurora_mtx",
+    "exit_code": 0,
+    "x86_archive_members": 6,
+    "game_launched": false,
+    "scope": "Fresh six-object matrix library build from the new cached-source runtime configuration. Not a full Dawn/runtime build or gameplay acceptance."
+  },
+  "public_layout_fixture_passed": true,
+  "full_runtime_build_verified": false
+}

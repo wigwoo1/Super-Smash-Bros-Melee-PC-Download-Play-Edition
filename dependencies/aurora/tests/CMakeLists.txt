@@ -4,6 +4,16 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/AuroraCopyRuntimeDLLs.cmake)
 
 set(CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE PRE_TEST)
 
+# Configuration-only regression: the real Dawn provider must honor the
+# embedder's fetch choice before dependency population. No GPU/game is run.
+add_test(NAME dawn_dependency_fetch_option
+  COMMAND "${CMAKE_COMMAND}"
+    "-DTEST_ROOT=${CMAKE_CURRENT_BINARY_DIR}/dawn-fetch-option"
+    "-DTEST_GENERATOR=${CMAKE_GENERATOR}"
+    "-DTEST_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
+    -P "${CMAKE_CURRENT_LIST_DIR}/cmake/dawn_fetch_option/run.cmake"
+)
+
 if (NOT TARGET gtest)
   FetchContent_Declare(googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz

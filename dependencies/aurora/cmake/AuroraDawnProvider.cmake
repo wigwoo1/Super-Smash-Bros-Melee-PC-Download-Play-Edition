@@ -119,7 +119,10 @@ if (_aurora_dawn_provider STREQUAL "vendor")
     set(DAWN_BUILD_SAMPLES OFF CACHE INTERNAL "Disable Dawn sample applications")
     set(DAWN_BUILD_BENCHMARKS OFF CACHE INTERNAL "Disable Dawn benchmarks")
     set(DAWN_SUPPORTS_GLFW_FOR_WINDOWING OFF CACHE INTERNAL "Disable Dawn GLFW windowing")
-    set(DAWN_FETCH_DEPENDENCIES ON CACHE INTERNAL
+    # Keep the normal download default, but honor an explicit OFF from an
+    # embedder using a complete dependency source cache. INTERNAL would force
+    # ON even when the rebuild driver deliberately requests disconnected mode.
+    set(DAWN_FETCH_DEPENDENCIES ON CACHE BOOL
       "Use fetch_dawn_dependencies.py as an alternative to using depot_tools")
     if (CMAKE_SYSTEM_NAME STREQUAL Linux)
       set(DAWN_USE_WAYLAND ON CACHE INTERNAL "Enable support for Wayland surface")
