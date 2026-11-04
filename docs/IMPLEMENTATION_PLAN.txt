@@ -1,5 +1,46 @@
+CURRENT READINESS RECONCILIATION (2026-11-04)
+CURRENT READINESS - 2026-11-04
+Private source-matched WIP: current-source-candidate-20261104-settings.
+Overall engineering estimate remains about 30%; playable release not accepted.
+
+VERIFIED SCOPED on executable 60ea2bcc1fbc1bef42a99ea26d6fd690b3d05940dfd9079daa10b14d0c9a2b72:
+- Muted D3D12 and Vulkan: real stage/fighters/HUD; normal keyboard movement,
+  jump and original jab response. No diagnostic keyboard bridge or gameplay PAD.
+- Muted D3D12 and Vulkan: normal keyboard approach and J jab increased
+  Mr. Game & Watch damage from 0% to 3% on Final Destination.
+- Muted D3D12: native Controls captured A from J to F; F confirmed menus and
+  triggered original Kirby idle14-to-jab44 after entering Versus; old J did not.
+  The Controls diagnostic input flag was absent. Binding is session-only.
+- Muted D3D12 timed-match run: original timer/results and results-to-CSS return.
+  That run used staged controller inputs, not normal keyboard combat.
+- All runs closed cleanly with no session files. Source/executable/runtime
+  hash verification passed. No disc or existing save modification.
+
+Evidence: NORMAL_KEYBOARD_BOTH_RENDERERS_VERIFICATION.json,
+NORMAL_KEYBOARD_CONTACT_BOTH_RENDERERS.json, KEYBOARD_REMAP_GAMEPLAY_VERIFICATION.json.
+Full timed-run evidence remains in the private work verification record.
+
+OPEN: normal Player 2 join/control, physical Xbox/controller validation,
+full standard roster/stage and long-session fidelity, audible 5.1 device checks,
+stable high-FPS/performance acceptance, FSR3, native custom-content registration,
+four-player P2P/LAN and the genuine separate browser runtime/authorized transfer.
+Keep all original scope, no-save/unlock policy and packaging requirements.
+Earlier evidence remains historical; old no-keyboard-damage/undelivered-build
+statements do not describe this candidate. Yoshi Story was previously mislabeled
+Dream Land in some records; stage8/GrSt.dat is Yoshi Story.
+
+NEXT: trace normal Player 2 keyboard setup/join before more multiplayer work.
+Do not bypass normal input, force slot state, or repeat the prior two failed
+attempts without source-derived tracing. Sol Medium recommended for this task.
+
+Historical plan and evidence follow; current readiness above supersedes older status claims.
+
 MELEE PC PORT - CURRENT IMPLEMENTATION PLAN (reviewed 2026-10-28)
 Status: development diagnostics; not a playable release. PORT_PROGRESS.txt records historical evidence; its early baseline statements are historical, not current capability claims.
+
+CURRENT READINESS UPDATE (2026-11-03, source-matched WIP recheck): The exact Desktop candidate and matching source archive passed fresh muted 600-frame Versus smoke on D3D12 and Vulkan. Both rendered the Dream Land stage, Kirby/Mr. Game & Watch, timer and damage HUD; diagnostic virtual-PAD movement/A/B inputs changed fighter position/action states. The package integrity checker passes. These runs do not prove physical controls on both backends, attack damage, long-match stability, benchmark performance or release readiness. The private WIP candidate contains original font data and must not be uploaded or redistributed. Overall project estimate remains ~30%. Evidence: `work/development/dawn-fetch-option-20261103/VERSUS_SOURCE_MATCHED_RUNTIME_RECHECK_20261103.json`.
+
+CURRENT READINESS UPDATE (2026-11-03): Overall project estimate remains about 30%; this is still not a playable release. A muted D3D12 test-only runtime now reaches the native 240 Hz selection and live gameplay presentation path. The native settings overlay reported “Next match 240 Hz; gameplay stays 60 Hz”; runtime logs confirm target=240 and simulation=60. A Computer Use capture showed stage and fighter models; diagnostic virtual-PAD inputs moved a fighter and changed attack motion states. Logs also report missed presentation deadlines, so stable 240 FPS and hardware performance are not proven. No hit/damage or physical-input test was performed, and the test EXE is not a source-matched Desktop deliverable. Evidence: `work/development/dawn-fetch-option-20261103/FRAME_RATE_240_MENU_TO_MATCH_VERIFICATION_20261103.json`.
 
 CURRENT READINESS PRIORITY (2026-10-28): Approximate overall30% (weighted29.5%, unchanged milestone estimates). Ordinary Windows graphics navigation and Show FPS On/parent/reopen/Off passed on muted Vulkan with an explicit held-title exception. Unheld physical startup remains open. Native stereo/5.1 output remains incomplete. The later native-audio-output-20261028 backend milestone adds production L/R/S block routing and requested/effective output state; software routing and real stereo fallback pass. Native Sound-menu selection and software format-transaction tests now pass; see native-audio-menu-20261028. Human selected optional stereo upmix on2026-10-28; it is now software/menu verified. Actual six-channel speakers/listening quality remain unverified; authored3D reconstruction is not claimed. Use Sol High before multichannel owner-thread/stream integration. Handoff and freshly compiled baseline evidence: development/native-readiness-audit-20261028. No new release/production build or feature completion claimed.
 
@@ -10789,3 +10830,27 @@ Next bounded Adventure task: inspect original stage collision/transition geometr
 2026-11-03 Next native Adventure check: optional lower western chute controller compiled, runtime unexercised after two early campaign stops. Preserve accepted three-Link package. Before further retries, honor two-attempt continuation gate and investigate edge-aware Yoshi normal-input control; then verify original third return and floor46 landing, followed by raised floor49 approach to sword193. Keep original RNG/exit selection and all actor/stage/stock/damage/physics state game-controlled. Full maze and project remain unfinished (~30%).
 
 2026-11-03 Build reproducibility follow-up: Dawn source-map OFF override repair verified by7configuration cases repeated, fresh cached-source configuration and small x86 matrix-library compilation. Next build milestone is full cached-source runtime compilation in mcfg1103-off; then nested Dawn/Rust provenance and cold dependency downloads. Do not equate configure or small-target success with full runtime/gameplay/cold rebuild acceptance. Gameplay retry gate remains pending explicit continuation.
+
+
+
+
+Latest verified source-build checkpoint (2026-11-04): the matching-source offline runtime and game library now build, the fresh no-save link has zero unresolved symbols and excludes Aurora card storage, and the same new executable passes muted 600-frame Versus smoke on D3D12 and Vulkan. This remains scoped synthetic-input/rendering evidence; ordinary keyboard input on this fresh link is not yet auditable, damage is unverified, and no new exe has been delivered to Desktop. See development/dawn-fetch-option-20261103/rebuild-from-package-source-20261103/FRESH_PACKAGE_SOURCE_VERSUS_2026-11-04.json.
+2026-11-04 runtime verification note: fresh package-source D3D12 build now has a scoped ordinary-key Versus check in addition to the separate synthetic PAD renderer smokes. D moved Kirby visibly and J reached the sampled A-button input. Attack action animation/hit/damage and ordinary-key Vulkan remain unverified; do not label Versus/gameplay complete. Current fresh exe remains private work-only; do not replace Desktop candidate without the package provenance/review workflow. Overall estimate ~30%, goal active.
+
+Controls test gate (added 2026-11-04): separate normal menu-navigation checks from AURORA_DIAGNOSTIC_KEY_TAPS. Accept keyboard controls/rebinding in gameplay only after starting with diagnostic key-tap mode unset, selecting/assigning through the shipped Controls UI, then verifying a movement bind and attack bind via the actual platform input path. Synthetic PAD and diagnostic keyboard bridge evidence cannot satisfy this gate. Keep muted; record renderer, input route, action animation, hit/damage separately.
+
+Keyboard binding audit (2026-11-04): current matching source's Aurora GameController mapping is gamepad-only and diagnostic keyboard-to-PAD taps are not the normal user controls path. Before accepting or adding keyboard controls, trace actual SDL/nod input polling and PADRead ownership. If absent, implement a configurable native keyboard mapping to PADStatus with session-only preferences and capture suppression, then test a movement and attack bind in muted Versus with diagnostic injection disabled. See KEYBOARD_BINDING_SOURCE_AUDIT_2026-11-04.json. Sol Medium recommended for the runtime ownership/implementation trace; goal remains active.
+
+Correction 2026-11-04: production keyboard support is present in the matching source, not absent: Aurora PADRead consumes SDL keyboard state via active mappings; host_startup installs a session-only standard keyboard preset; mnDeflicker includes the native Controls preset/binding-capture UI. Next validation is a muted manual Versus check with diagnostic key taps off. Previous conclusion 'keyboard binding path may be unimplemented' is withdrawn. The Computer Use helper timed out twice plus its reset/reinitialize retry, so stop UI actions until helper is responsive. Current muted run uses no scripted match input and is still open; do not force close. See FRESH_PRODUCTION_KEY_VERSUS_2026-11-04.json.
+
+Keyboard input milestone update (2026-11-04): source confirms Aurora PADRead, startup preset, and Controls binding capture; existing keyboard press-latch and diagnostic-isolation standalone unit tests both pass when directly compiled/run. Still pending: visual production-keyboard movement and attack in muted Versus with AURORA_DIAGNOSTIC_KEY_TAPS unset. The CUA helper's repeated Statsig timeouts stopped UI testing; do not retry until that state changes. See KEYBOARD_BINDING_SOURCE_AUDIT_2026-11-04.json and KEYBOARD_BINDINGS_UNIT_TESTS_2026-11-04.json.
+
+2026-11-04 acceptance update: fresh package-source D3D12 build enters a real Versus match and renders the stage/fighters/HUD. In a muted run with diagnostic key bridging and synthetic PAD absent, ordinary D moved P1 and I jumped. J-to-A was sent twice, but attack action-state proof remains ambiguous and no opponent hit/damage was established. New evidence: development/dawn-fetch-option-20261103/rebuild-from-package-source-20261103/FRESH_PRODUCTION_KEY_VERSUS_LIVE_2026-11-04.json. Next verification must instrument actual keyboard PAD delivery and fighter action-state consumption without changing gameplay behavior, then repeat muted. No Desktop delivery or source changes in this check. Sol Medium is recommended for this specific cross-module trace; Luna Medium remains suitable for routine tasks.
+
+2026-11-04 attack-input path now VERIFIED on a muted native Release D3D12 trace build: normal keyboard J reaches P1's ordinary A-attack handler and causes the original motion transition 14→44; D movement and I jump visibly affect Kirby in the same Versus match. This is action-state verification only, not hit/damage. The observer is TARGET_PC-only and env-gated; all original input/gameplay behavior remains unchanged when unset. Build/link passed, card storage omitted, clean exit. Evidence development/dawn-fetch-option-20261103/rebuild-from-package-source-20261103/ATTACK_STATE_TRACE_VERIFICATION_2026-11-04.json. Current artifact is a work-only diagnostic build; the full source archive/Desktop binary was not updated. No disc/save/public change. Luna Medium is adequate for the next bounded acceptance test; Sol can wait for later optimization or a new difficult debug blocker.
+
+2026-11-04 verification update: Vulkan joins the already-verified D3D12 renderer for muted fresh-source Versus startup and ordinary keyboard input evidence. Dream Land, Kirby/Mr. Game & Watch, HUD render; D moves Kirby and J reaches the original attack action (motion14→44). No hit/damage verified. Diagnostic artifact remains work-only and is not a release/package candidate. Project estimate ~30%, active. Next model: Luna Low is adequate for routine work.
+
+2026-11-04 gameplay acceptance follow-up: production keyboard can visibly move Kirby on muted Vulkan, but a new opponent-contact check was interrupted by detected user input before attack/contact. Stop manual input on detection; current run is left open. No damage evidence. Continue from observed/current window state after user activity ends; don't infer contact from the separate motion14→44 attack test.
+
+2026-11-04 release-integrity gate confirmed: Desktop preview source/archive/executable are internally pinned to the earlier source snapshot, but current work/melee has230 dirty status entries and mnDeflicker source hash differs from that snapshot. Preserve the matched candidate. Do not deliver copied WIP edits as a build. Review/build a current source snapshot first, then package exact matching source, dependency pins/notices and verified binary provenance.

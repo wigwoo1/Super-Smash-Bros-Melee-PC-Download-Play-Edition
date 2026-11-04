@@ -6,6 +6,10 @@ typedef struct {
     uint64_t simulation_phase;
     uint64_t presentation_phase;
 } MeleePc_FrameClock;
+/* Session-only native menu preference. It selects how often the game scene
+ * may be presented; gameplay simulation remains fixed at 60 Hz. */
+int MeleePc_SetGameplayPresentationRate(uint32_t hz);
+uint32_t MeleePc_GetGameplayPresentationRate(void);
 /* Counts due steps without sleeping, invoking callbacks or discarding debt.
  * Caller supplies monotonic elapsed nanoseconds and processes all simulation steps.
  * Native presentation uses this phase arithmetic; gameplay steps remain owned

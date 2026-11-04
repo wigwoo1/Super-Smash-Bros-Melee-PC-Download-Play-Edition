@@ -131,6 +131,23 @@ static int test_rejections_and_extreme_elapsed(void)
 
 int main(void)
 {
+    if (!check(MeleePc_GetGameplayPresentationRate() == 60,
+               "session presentation rate defaults to 60 Hz") ||
+        !check(!MeleePc_SetGameplayPresentationRate(90),
+               "unsupported session presentation rate rejected") ||
+        !check(MeleePc_GetGameplayPresentationRate() == 60,
+               "rejected setting leaves current rate unchanged") ||
+        !check(MeleePc_SetGameplayPresentationRate(120) &&
+               MeleePc_GetGameplayPresentationRate() == 120,
+               "120 Hz session presentation setting accepted") ||
+        !check(MeleePc_SetGameplayPresentationRate(240) &&
+               MeleePc_GetGameplayPresentationRate() == 240,
+               "240 Hz session presentation setting accepted") ||
+        !check(MeleePc_SetGameplayPresentationRate(60) &&
+               MeleePc_GetGameplayPresentationRate() == 60,
+               "60 Hz session presentation setting restores default")) {
+        return EXIT_FAILURE;
+    }
     if (!test_supported_rates() || !test_partition_invariance() ||
         !test_rejections_and_extreme_elapsed()) {
         return EXIT_FAILURE;

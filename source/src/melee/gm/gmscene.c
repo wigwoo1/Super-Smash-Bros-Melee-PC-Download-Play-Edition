@@ -464,9 +464,10 @@ static unsigned native_gameplay_presentation_hz(unsigned scene_kind,
     /* Native gameplay presents its GPU scene directly at60Hz. Original VI
      * remains responsible for bootstrap, menus and genuine VI/black changes.
      * An explicit0 retains the legacy path for compatibility diagnostics. */
-    if (!value) {
-        return repeat_hz || getenv("MELEE_DIAGNOSTIC_REPEAT_PRESENT_ONLY") ? 0 : 60;
-    }
+    if (!value)
+        return repeat_hz || getenv("MELEE_DIAGNOSTIC_REPEAT_PRESENT_ONLY")
+                   ? 0
+                   : MeleePc_GetGameplayPresentationRate();
     if (!strcmp(value, "0")) return 0;
     if (!strcmp(value, "60")) return 60;
     if (!strcmp(value, "120")) return 120;

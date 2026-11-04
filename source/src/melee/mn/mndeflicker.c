@@ -7,6 +7,7 @@
 #if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
 #include <aurora/aurora.h>
 #include <dolphin/pad.h>
+#include <pc/frame_clock.h>
 #include "../../pc/renderer_restart.h"
 #endif
 
@@ -46,7 +47,7 @@ extern HSD_GObj* mnDeflicker_804D6C38;
  * The values below are session-only renderer preferences; none are written
  * to the memory-card backend. Keep this UI in SIS so it is drawn by the game
  * scene rather than Aurora's separate host-side ImGui dock. */
-#define MN_PC_GRAPHICS_ROW_COUNT 11
+#define MN_PC_GRAPHICS_ROW_COUNT 12
 #define MN_PC_GRAPHICS_LINE_COUNT (3 + 2 * MN_PC_GRAPHICS_ROW_COUNT + 3)
 static HSD_Text* mnDeflicker_pc_graphics_lines[MN_PC_GRAPHICS_LINE_COUNT];
 static HSD_Text* mnDeflicker_pc_graphics_text;
@@ -109,7 +110,7 @@ static void mnControls_labels(char labels[10][32], char values[10][32])
     snprintf(values[1], 32, "%s", mnControls_controller ? "Controller" : "Keyboard");
     snprintf(labels[2], 32, "%s", mnControls_controller ? "Assigned controller" : "Keyboard layout");
     name = PADGetName(mnControls_port);
-    snprintf(values[2], 32, "%s", mnControls_controller ? (name ? name : "None") : "A: reset and enable");
+    snprintf(values[2], 32, "%s", mnControls_controller ? (name ? name : "None") : "A: reset preset");
     snprintf(labels[3], 32, "Bindings page");
     snprintf(values[3], 32, "%u of %u", mnControls_page + 1, (mnControls_count() + 4) / 5);
     for (i = 0; i < 5; ++i) {
@@ -316,6 +317,9 @@ static void mnDeflicker_pc_graphics_draw(void)
     static const GXColor panel_color = { 0x05, 0x0A, 0x17, 0xFC };
     u32 height;
     u32 i;
+    f32 row_spacing;
+    u32 selected_row, first_row, total_rows;
+    char page_subtitle[64];
     char labels[MN_PC_GRAPHICS_ROW_COUNT][32] = { 0 };
     char values[MN_PC_GRAPHICS_ROW_COUNT][32] = { 0 };
     char row_label[40];
@@ -363,11 +367,15 @@ static void mnDeflicker_pc_graphics_draw(void)
     snprintf(labels[9], sizeof(labels[9]), "Show FPS");
     snprintf(values[9], sizeof(values[9]), "%s",
              enabled[aurora_get_fps_counter_enabled() != 0]);
-    snprintf(labels[10], sizeof(labels[10]), "Controls");
-    snprintf(values[10], sizeof(values[10]), "A: keyboard / controller");
+    snprintf(labels[10], sizeof(labels[10]), "Gameplay frame rate");
+    snprintf(values[10], sizeof(values[10]), "%u Hz",
+             MeleePc_GetGameplayPresentationRate());
+    snprintf(labels[11], sizeof(labels[11]), "Controls");
+    snprintf(values[11], sizeof(values[11]), "A: open");
     if (mnControls_open) {
         mnControls_labels(labels, values);
         labels[10][0] = values[10][0] = '\0';
+        labels[11][0] = values[11][0] = '\0';
         snprintf(feedback, sizeof(feedback), "%s", mnControls_feedback);
     }
 
@@ -375,6 +383,16 @@ static void mnDeflicker_pc_graphics_draw(void)
      * side of the Screen Display card so it does not collide with its authored
      * Deflicker tab. A gold selected row and caret mirror the menu's existing
      * focus treatment; the hint lines follow the native navigation model. */
+    /* Six visible rows keep the original SIS font readable at 480p.
+     * Selection remains an absolute index, so input/binding behavior is
+     * unchanged when Up/Down moves between pages. */
+    selected_row = mnControls_open ? mnControls_selection : mnDeflicker_pc_graphics_selection;
+    total_rows = mnControls_open ? 10 : MN_PC_GRAPHICS_ROW_COUNT;
+    first_row = (selected_row / 6) * 6;
+    snprintf(page_subtitle, sizeof(page_subtitle), "%s - page %u of %u",
+             mnControls_open ? "Session bindings" : "Display and performance",
+             first_row / 6 + 1, (total_rows + 5) / 6);
+    row_spacing = 1.05F;
     for (i = 0; i < MN_PC_GRAPHICS_LINE_COUNT; ++i) {
         HSD_Text* line = mnDeflicker_pc_graphics_lines[i];
         const char* content;
@@ -409,15 +427,22 @@ static void mnDeflicker_pc_graphics_draw(void)
             line->font_size.x = line->font_size.y = 0.030F;
             color = selected_color;
         } else if (i == 2) {
-            content = mnControls_open ? "Bindings last for this session" : "Display and performance";
+            content = page_subtitle;
             line->pos_x = -2.8F;
             line->pos_y = -4.55F;
             line->font_size.x = line->font_size.y = 0.021F;
             color = help_color;
+        } else if (i < 3 + 2 * MN_PC_GRAPHICS_ROW_COUNT &&
+                   (row < first_row || row >= first_row + 6 || row >= total_rows)) {
+            content = "";
+            line->pos_x = -2.8F;
+            line->pos_y = -3.45F;
+            line->font_size.x = line->font_size.y = 0.026F;
+            color = normal_color;
         } else if (i < 3 + 2 * MN_PC_GRAPHICS_ROW_COUNT) {
-            f32 y = -3.45F + ((mnControls_open ? 0.73F : 0.66F) * (f32) row);
+            f32 y = -3.45F + (row_spacing * (f32) (row - first_row));
             line->pos_y = y;
-            line->font_size.x = line->font_size.y = mnControls_open ? 0.023F : 0.021F;
+            line->font_size.x = line->font_size.y = 0.026F;
             color = row == (mnControls_open ? mnControls_selection : mnDeflicker_pc_graphics_selection)
                         ? selected_color
                         : normal_color;
@@ -431,10 +456,10 @@ static void mnDeflicker_pc_graphics_draw(void)
                 line->pos_x = -3.15F;
             } else {
                 content = values[row];
-                line->pos_x = 6.7F;
+                line->pos_x = 8.8F;
             }
         } else if (i == 3 + 2 * MN_PC_GRAPHICS_ROW_COUNT) {
-            content = "Up and down select    Left and right adjust";
+            content = "Up / Down select and scroll   Left / Right adjust";
             line->pos_x = -2.8F;
             line->pos_y = 4.3F;
             line->font_size.x = line->font_size.y = 0.019F;
@@ -462,13 +487,14 @@ static void mnDeflicker_pc_graphics_draw(void)
     if (mnControls_open && getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE"))
         OSReport("NATIVE_CONTROLS_FIRST_BINDING label=%s value=%s\n", labels[4], values[4]);
     if (getenv("MELEE_DIAGNOSTIC_GRAPHICS_MENU_TRACE")) {
-        OSReport("NATIVE_PC_GRAPHICS_MENU selection=%u aspect=%u render_height=%u shadows=%u shadow_size=%u texture_quality=%u lighting=%u low_poly=%u renderer_choice=%u renderer=%s active=%s texture_pack=%u pack_available=%d pack_pending=%d\n",
+        OSReport("NATIVE_PC_GRAPHICS_MENU selection=%u aspect=%u render_height=%u shadows=%u shadow_size=%u texture_quality=%u lighting=%u low_poly=%u presentation_hz=%u renderer_choice=%u renderer=%s active=%s texture_pack=%u pack_available=%d pack_pending=%d\n",
                  mnDeflicker_pc_graphics_selection,
                  aurora_get_display_preset(), aurora_get_render_height(),
                  aurora_get_fighter_shadows(),
                  aurora_get_fighter_shadow_resolution(),
                  aurora_get_texture_quality(), aurora_get_lighting_enabled(),
                  aurora_get_low_poly_fighters(),
+                 MeleePc_GetGameplayPresentationRate(),
                  mnDeflicker_pc_renderer_choice,
                  mnDeflicker_pc_renderer_label(
                      mnDeflicker_pc_renderer_choices[
@@ -497,6 +523,7 @@ static void mnDeflicker_pc_graphics_adjust(int direction)
 {
     static const u32 texture_values[] = { 100, 50, 25 };
     static const u32 shadow_values[] = { 64, 128, 256 };
+    static const u32 presentation_values[] = { 60, 120, 240 };
     u32 next;
     int applied = 0;
     mnDeflicker_pc_graphics_feedback[0] = '\0';
@@ -571,20 +598,34 @@ static void mnDeflicker_pc_graphics_adjust(int direction)
     case 9:
         applied = aurora_set_fps_counter_enabled(!aurora_get_fps_counter_enabled());
         break;
+    case 10:
+        if (mnDeflicker_pc_cycle(MeleePc_GetGameplayPresentationRate(),
+                                 presentation_values,
+                                 ARRAY_SIZE(presentation_values), direction,
+                                 &next)) {
+            applied = MeleePc_SetGameplayPresentationRate(next);
+            if (applied)
+                snprintf(mnDeflicker_pc_graphics_feedback,
+                         sizeof(mnDeflicker_pc_graphics_feedback),
+                         "Next match %u Hz; gameplay stays 60 Hz", next);
+        }
+        break;
     }
     if ((mnDeflicker_pc_graphics_selection != 7 &&
-         mnDeflicker_pc_graphics_selection != 8) || !applied)
+         mnDeflicker_pc_graphics_selection != 8 &&
+         mnDeflicker_pc_graphics_selection != 10) || !applied)
         snprintf(mnDeflicker_pc_graphics_feedback,
                  sizeof(mnDeflicker_pc_graphics_feedback), "%s",
                  applied ? "Setting changed" : "Setting could not be changed");
     if (getenv("MELEE_DIAGNOSTIC_GRAPHICS_MENU_TRACE")) {
-        OSReport("NATIVE_PC_GRAPHICS_ADJUST selection=%u applied=%d direction=%d aspect=%u render_height=%u shadows=%u shadow_size=%u texture_quality=%u lighting=%u low_poly=%u\n",
+        OSReport("NATIVE_PC_GRAPHICS_ADJUST selection=%u applied=%d direction=%d aspect=%u render_height=%u shadows=%u shadow_size=%u texture_quality=%u lighting=%u low_poly=%u presentation_hz=%u\n",
                  mnDeflicker_pc_graphics_selection, applied, direction,
                  aurora_get_display_preset(), aurora_get_render_height(),
                  aurora_get_fighter_shadows(),
                  aurora_get_fighter_shadow_resolution(),
                  aurora_get_texture_quality(), aurora_get_lighting_enabled(),
-                 aurora_get_low_poly_fighters());
+                 aurora_get_low_poly_fighters(),
+                 MeleePc_GetGameplayPresentationRate());
     }
     if (applied) sfxMove();
 }
@@ -712,7 +753,7 @@ void mnDeflicker_8024A168(HSD_GObj* gobj)
         } else if (events & (MenuInput_Left | MenuInput_Right |
                              MenuInput_Confirm | MenuInput_AButton)) {
             int direction = (events & MenuInput_Left) ? -1 : 1;
-            if (mnDeflicker_pc_graphics_selection == 10) {
+            if (mnDeflicker_pc_graphics_selection == 11) {
                 if (events & (MenuInput_Confirm | MenuInput_AButton)) {
                     mnControls_open = true;
                     PADSetControlsPageActive(true);

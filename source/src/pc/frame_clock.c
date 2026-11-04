@@ -1,6 +1,17 @@
 #include "frame_clock.h"
 #define NS_PER_SECOND UINT64_C(1000000000)
+static uint32_t gameplay_presentation_rate = 60;
 static int valid_rate(uint32_t rate) { return rate == 60 || rate == 120 || rate == 240; }
+int MeleePc_SetGameplayPresentationRate(uint32_t hz)
+{
+    if (!valid_rate(hz)) return 0;
+    gameplay_presentation_rate = hz;
+    return 1;
+}
+uint32_t MeleePc_GetGameplayPresentationRate(void)
+{
+    return gameplay_presentation_rate;
+}
 int MeleePc_FrameClockInit(MeleePc_FrameClock* clock, uint32_t hz)
 {
     if (!clock || !valid_rate(hz)) return 0;

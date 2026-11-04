@@ -1,6 +1,10 @@
 #include "ftCo_Attack1.h"
 
 #include <Runtime/platform.h>
+#ifdef TARGET_PC
+#include <stdio.h>
+#include <stdlib.h>
+#endif
 
 #include "ftCo_Attack100.h"
 #include "ftCo_AttackHi3.h"
@@ -41,6 +45,19 @@
 bool ftCo_Attack1_CheckInput(Fighter_GObj* gobj)
 {
     Fighter* fp = GET_FIGHTER(gobj);
+#ifdef TARGET_PC
+    const bool traceAttack = fp->player_idx == 0 &&
+                             (fp->input.pressed_buttons & HSD_PAD_A) &&
+                             getenv("MELEE_DIAGNOSTIC_ATTACK_STATE") != NULL;
+    const int traceMotionBefore = fp->motion_id;
+    if (traceAttack) {
+        fprintf(stderr,
+                "NATIVE_ATTACK_INPUT_CONSUMED player=%d kind=%d port=%d motion_before=%d held=%08x pressed=%08x item=%d\n",
+                fp->player_idx, fp->kind, fp->pad_port, fp->motion_id,
+                fp->input.held_buttons[0], fp->input.pressed_buttons,
+                fp->item_gobj != NULL);
+    }
+#endif
     if (fp->input.pressed_buttons & HSD_PAD_A) {
         if (fp->item_gobj != NULL) {
             if (it_8026B30C(fp->item_gobj) == 0) {
@@ -71,6 +88,14 @@ bool ftCo_Attack1_CheckInput(Fighter_GObj* gobj)
             }
         } else {
             decideAttack11(gobj);
+#ifdef TARGET_PC
+            if (traceAttack) {
+                fprintf(stderr,
+                        "NATIVE_ATTACK_ACTION_ACCEPTED player=%d kind=%d motion_before=%d motion_after=%d\n",
+                        fp->player_idx, fp->kind, traceMotionBefore,
+                        fp->motion_id);
+            }
+#endif
             return true;
         }
     }
