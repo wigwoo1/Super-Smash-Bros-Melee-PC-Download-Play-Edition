@@ -13,11 +13,11 @@ static int has_arg(int argc, char** argv, const char* value)
     return 0;
 }
 
-static int run_parent(int expect_child_failure)
+static int run_parent(const char* backend, int expect_child_failure)
 {
     ULONGLONG started = GetTickCount64();
     MeleePc_RendererRestartPoll state;
-    if (MeleePc_RendererRestartStart("d3d11")) {
+    if (MeleePc_RendererRestartStart(backend)) {
         do {
             state = MeleePc_RendererRestartPollChild();
             if (state == MELEE_PC_RENDERER_RESTART_READY) {
@@ -25,7 +25,8 @@ static int run_parent(int expect_child_failure)
                     puts("FAIL: child failure was reported ready");
                     return 0;
                 }
-                puts("PASS: ready child acknowledged before parent handoff");
+                printf("PASS: %s child acknowledged before parent handoff\n",
+                       backend);
                 return 1;
             }
             if (state == MELEE_PC_RENDERER_RESTART_FAILED) {
@@ -33,7 +34,8 @@ static int run_parent(int expect_child_failure)
                     puts("FAIL: ready child was rejected");
                     return 0;
                 }
-                puts("PASS: failed child kept parent alive and was rejected");
+                printf("PASS: failed %s child kept parent alive and was rejected\n",
+                       backend);
                 return 1;
             }
             Sleep(2);
@@ -80,6 +82,15 @@ static int test_repeated_arguments(void)
     return passed;
 }
 
+static int test_renderer_handoffs(void)
+{
+    static const char* backends[] = { "auto", "d3d11", "d3d12", "vulkan" };
+    size_t i;
+    for (i = 0; i < sizeof(backends) / sizeof(backends[0]); ++i)
+        if (!run_parent(backends[i], 0)) return 0;
+    return 1;
+}
+
 int main(int argc, char** argv)
 {
     const char* requested = NULL;
@@ -92,7 +103,11 @@ int main(int argc, char** argv)
     }
     if (attached == 2) {
         if (has_arg(argc, argv, "--test-child-fail")) return 42;
-        if (!requested || strcmp(requested, "d3d11") != 0) return 43;
+        if (!requested ||
+            (strcmp(requested, "auto") != 0 &&
+             strcmp(requested, "d3d11") != 0 &&
+             strcmp(requested, "d3d12") != 0 &&
+             strcmp(requested, "vulkan") != 0)) return 43;
         return MeleePc_RendererRestartChildReady() ? EXIT_SUCCESS : 44;
     }
     if (has_arg(argc, argv, "--test-invalid-backend")) {
@@ -100,7 +115,7 @@ int main(int argc, char** argv)
         puts("PASS: invalid renderer rejected without spawning a child");
         return EXIT_SUCCESS;
     }
-    return run_parent(has_arg(argc, argv, "--test-child-fail"))
-               ? EXIT_SUCCESS
-               : EXIT_FAILURE;
+    if (has_arg(argc, argv, "--test-child-fail"))
+        return run_parent("d3d11", 1) ? EXIT_SUCCESS : EXIT_FAILURE;
+    return test_renderer_handoffs() ? EXIT_SUCCESS : EXIT_FAILURE;
 }

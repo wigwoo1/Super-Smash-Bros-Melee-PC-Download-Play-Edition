@@ -1,3 +1,20 @@
+CURRENT READINESS UPDATE (2026-11-04, renderer handoff test coverage): The Windows process-handoff test now covers Auto, D3D11, D3D12, and Vulkan request strings, plus invalid input, latest-argument precedence, and child-start failure. MSVC /W4 /WX and all seven test checks passed. Source review confirms the menu lists compiled Aurora candidates; startup actually attempts the requested backend and falls through the compiled preferred order if window/device startup fails. The API candidate list alone is not a device capability probe. This is protocol test coverage only: forced-unavailable-device fallback and a live menu-triggered renderer switch still need source-matched runtime acceptance. The Desktop candidate, disc, and user saves were not changed. P2 local join/match entry remains separately verified; the latest P2 damage test stopped at menu navigation and proves no damage behavior. Overall remains about 30%; the port is not release-ready. Evidence: development/renderer-handoff-matrix-20261104/VERIFICATION.json and development/player2-input-20261104/P2_DAMAGE_MENU_NAVIGATION_BLOCKER_20261104.json.
+CURRENT READINESS UPDATE (2026-11-04, normal Player 2 join): The exact Desktop WIP candidate 60ea2bcc1fbc1bef42a99ea26d6fd690b3d05940dfd9079daa10b14d0c9a2b72 was verified before and after a muted D3D12 live run. Through native Options > Screen Display > Controls, the test selected Player 2 keyboard, applied the standard preset, and assigned P2 A to F while P1 kept J. Normal CSS input activated the blue P2 slot, selected Pikachu for P2 and Link for P1, showed Ready to Fight, entered Battlefield, and rendered both fighters. Shutdown returned code 0; the per-run session and cache directories were empty; the original D: image and Desktop copy still have identical SHA-256 1018b65a58ca654056be1611a43e753de5dd5f842ce5266581b29c6a12ce7c67. No production source/executable changed. P2 hit/damage, independent movement, physical controller, network/P2P, full-match and release acceptance remain unverified. Overall project estimate remains 30%; the port is not accepted as playable/release-ready. Evidence: development/player2-input-20261104/DELIVERED_CANDIDATE_VERIFICATION.json and native-settings-pages-20261104/candidate/NORMAL_PLAYER2_JOIN_VERIFICATION.json.
+
+PLAYER 2 INPUT TRACE UPDATE (2026-11-04)
+Muted D3D12 work-only read-only observation build verified normal Player2 keyboard
+setup, joining, Pikachu selection, Falco/Pikachu Battlefield entry, Player2 F jab
+animation and shared-WASD movement. F reaches PAD -> raw queue -> master trigger ->
+CSS with no staged input. At the starting bottom cursor position it does not join;
+normal slot-header activation and subsequent roster selection work. Source also
+contains original roster-region auto-join. No dropped input/queue defect established;
+the earlier N/A result was insufficient UI/setup evidence. All three observer edits
+restored byte-for-byte and baseline libraries rebuilt; Desktop unchanged. Current
+source-matched Desktop acceptance still needs the normal P2 repeat. No P2 damage,
+independent movement binds, physical Xbox/Vulkan/network acceptance claimed.
+Evidence: development/player2-input-20261104/VERIFICATION.json. Overall about30%.
+Next bounded check can use Luna Medium; model-confirmation blocker is resolved.
+
 CURRENT READINESS RECONCILIATION (2026-11-04)
 CURRENT READINESS - 2026-11-04
 Private source-matched WIP: current-source-candidate-20261104-settings.
