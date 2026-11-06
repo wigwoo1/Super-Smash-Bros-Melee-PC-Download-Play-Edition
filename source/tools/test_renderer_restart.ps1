@@ -31,9 +31,21 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "Successful handoff test failed (exit $LASTEXITCODE)." }
         & $exe --test-child-fail
         if ($LASTEXITCODE -ne 0) { throw "Failed-child fallback test failed (exit $LASTEXITCODE)." }
+        & $exe --test-session
+        if ($LASTEXITCODE -ne 0) { throw "Session transfer test failed (exit $LASTEXITCODE)." }
+        & $exe --test-session-reject
+        if ($LASTEXITCODE -ne 0) { throw "Session rejection test failed (exit $LASTEXITCODE)." }
     }
     finally { Pop-Location }
 }
 finally {
-    Remove-Item -LiteralPath $testDir -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $testDir) {
+        $resolvedTest = (Resolve-Path -LiteralPath $testDir).ProviderPath
+        $resolvedTemp = (Resolve-Path -LiteralPath $env:TEMP).ProviderPath.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+        if (-not $resolvedTest.StartsWith($resolvedTemp, [StringComparison]::OrdinalIgnoreCase) -or
+            -not (Split-Path -Leaf $resolvedTest).StartsWith('melee-renderer-restart-test-')) {
+            throw 'Refusing test cleanup outside the generated temporary directory.'
+        }
+        Remove-Item -LiteralPath $resolvedTest -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }

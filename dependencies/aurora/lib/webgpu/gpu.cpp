@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <memory>
 #include <span>
 #include <string>
 #include <string_view>
@@ -759,7 +760,49 @@ static bool create_surface() {
   return true;
 }
 
+// Startup can fail after creating an adapter or device. Release that attempt
+// before Aurora destroys its window and tries another graphics API. Full
+// shutdown is inappropriate here: the render worker/profiler do not exist yet.
+static void reset_failed_initialization() {
+  g_surfaceCapabilities = {};
+  {
+    window::SurfaceLock surfaceLock;
+    // Failure returns precede swapchain configuration. Unconfigure on this
+    // surface would itself emit a validation error during fallback.
+    g_surface = {};
+  }
+  g_queue = {};
+  g_device = {};
+  g_adapterInfo = {};
+  g_adapter = {};
+  g_instance = {};
+  g_backendType = wgpu::BackendType::Null;
+  g_graphicsConfig = {};
+  g_hasCoreFeatures = false;
+  g_bcTexturesSupported = false;
+  g_astcTexturesSupported = false;
+  g_textureComponentSwizzleSupported = false;
+  if (std::getenv("AURORA_DIAGNOSTIC_GPU_INIT_FAIL"))
+    std::fprintf(stderr, "GPU_INIT_FAILED_STATE_RELEASED adapter=%d device=%d surface=%d instance=%d\n",
+                 bool(g_adapter), bool(g_device), bool(g_surface), bool(g_instance));
+}
+
+static bool diagnostic_initialization_failure(wgpu::BackendType backend, const char* stage) {
+  const char* requested = std::getenv("AURORA_DIAGNOSTIC_GPU_INIT_FAIL");
+  if (!requested || std::string_view(requested) !=
+                        std::string(magic_enum::enum_name(backend)) + ":" + stage)
+    return false;
+  Log.warn("Diagnostic initialization failure after {} for {}", stage, magic_enum::enum_name(backend));
+  return true;
+}
+
 bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
+  AURORA_ASSERT(!g_initialized, "Cannot initialize a running graphics device");
+  struct AttemptCleanup {
+    bool committed = false;
+    ~AttemptCleanup() { if (!committed) reset_failed_initialization(); }
+  } cleanup;
+  auto attemptActive = std::make_shared<std::atomic_bool>(false);
   if (!g_instance) {
     Log.info("Creating WebGPU instance");
     const std::array requiredInstanceFeatures{
@@ -804,42 +847,51 @@ bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
     Log.info("Requesting adapter\n  Feature level: {}\n  Power preference: {}\n  Backend: {}\n  Compatible surface: {}",
              magic_enum::enum_name(options.featureLevel), magic_enum::enum_name(options.powerPreference),
              magic_enum::enum_name(options.backendType), static_cast<bool>(options.compatibleSurface));
-    bool requestAdapterCallbackCompleted = false;
-    wgpu::RequestAdapterStatus requestAdapterStatus = wgpu::RequestAdapterStatus::CallbackCancelled;
-    std::string requestAdapterMessage;
+    // A timed-out request can still be cancelled while its instance is being
+    // released. Own callback data until Dawn releases it; do not capture stack
+    // references or let a late callback overwrite the next attempt's globals.
+    struct AdapterRequest {
+      bool completed = false;
+      wgpu::RequestAdapterStatus status = wgpu::RequestAdapterStatus::CallbackCancelled;
+      std::string message;
+      wgpu::Adapter adapter;
+    };
+    auto request = std::make_shared<AdapterRequest>();
     const auto future = g_instance.RequestAdapter(
         &options, wgpu::CallbackMode::WaitAnyOnly,
-        [&](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) {
-          requestAdapterCallbackCompleted = true;
-          requestAdapterStatus = status;
-          requestAdapterMessage = std::string{std::string_view{message}};
+        [request](wgpu::RequestAdapterStatus status, wgpu::Adapter adapter, wgpu::StringView message) {
+          request->completed = true;
+          request->status = status;
+          request->message = std::string{std::string_view{message}};
           if (status == wgpu::RequestAdapterStatus::Success) {
-            g_adapter = std::move(adapter);
+            request->adapter = std::move(adapter);
           } else {
             Log.warn("Adapter request failed: {}: {}", magic_enum::enum_name(status), message);
           }
         });
     const auto status = g_instance.WaitAny(future, 5000000000);
     if (status != wgpu::WaitStatus::Success) {
-      if (requestAdapterCallbackCompleted) {
+      if (request->completed) {
         Log.error("Failed to create adapter: wait status {}, request status {}, message: {}",
-                  magic_enum::enum_name(status), magic_enum::enum_name(requestAdapterStatus), requestAdapterMessage);
+                  magic_enum::enum_name(status), magic_enum::enum_name(request->status), request->message);
       } else {
         Log.error("Failed to create adapter: wait status {}, request callback did not complete",
                   magic_enum::enum_name(status));
       }
       return false;
     }
+    g_adapter = std::move(request->adapter);
     if (!g_adapter) {
-      if (requestAdapterCallbackCompleted) {
+      if (request->completed) {
         Log.error("Failed to create adapter: request status {}, message: {}",
-                  magic_enum::enum_name(requestAdapterStatus), requestAdapterMessage);
+                  magic_enum::enum_name(request->status), request->message);
       } else {
         Log.error("Failed to create adapter: request callback did not complete");
       }
       return false;
     }
   }
+  if (diagnostic_initialization_failure(backend, "adapter")) return false;
   g_adapter.GetInfo(&g_adapterInfo);
   auto adapterName = g_adapterInfo.device;
   if (adapterName.IsUndefined()) {
@@ -994,7 +1046,9 @@ bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
     });
     deviceDescriptor.SetUncapturedErrorCallback(
         [](const wgpu::Device& device, wgpu::ErrorType type, wgpu::StringView message) {
-          if (g_initialized) {
+          // Dawn's repeatable error callback must be stateless. An error from
+          // a discarded device must not be attributed to the active fallback.
+          if (g_initialized && device.Get() == g_device.Get()) {
             FATAL("WebGPU error {}: {}", underlying(type), message);
           } else {
             Log.warn("WebGPU error {}: {}", underlying(type), message);
@@ -1002,18 +1056,19 @@ bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
         });
     deviceDescriptor.SetDeviceLostCallback(
         wgpu::CallbackMode::AllowSpontaneous,
-        [](const wgpu::Device& device, wgpu::DeviceLostReason reason, wgpu::StringView message) {
-          if (g_initialized) {
+        [attemptActive](const wgpu::Device& device, wgpu::DeviceLostReason reason, wgpu::StringView message) {
+          if (attemptActive->load() && g_initialized) {
             FATAL("Device lost: {}", message);
           } else {
             Log.warn("Device lost: {}", message);
           }
         });
+    auto requestedDevice = std::make_shared<wgpu::Device>();
     const auto future =
         g_adapter.RequestDevice(&deviceDescriptor, wgpu::CallbackMode::WaitAnyOnly,
-                                [](wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) {
+                                [requestedDevice](wgpu::RequestDeviceStatus status, wgpu::Device device, wgpu::StringView message) {
                                   if (status == wgpu::RequestDeviceStatus::Success) {
-                                    g_device = std::move(device);
+                                    *requestedDevice = std::move(device);
                                   } else {
                                     Log.warn("Device request failed: {}", message);
                                   }
@@ -1023,11 +1078,13 @@ bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
       Log.error("Failed to create device: {}", magic_enum::enum_name(status));
       return false;
     }
+    g_device = std::move(*requestedDevice);
     if (!g_device) {
       return false;
     }
     g_device.SetLoggingCallback(wgpu_log);
   }
+  if (diagnostic_initialization_failure(backend, "device")) return false;
   g_queue = g_device.GetQueue();
 
   const wgpu::Status status = g_surface.GetCapabilities(g_adapter, &g_surfaceCapabilities);
@@ -1066,7 +1123,9 @@ bool initialize(AuroraBackend auroraBackend, bool allowCpu) {
   create_resample_pipeline();
   gpu_prof::initialize();
   resize_swapchain(size.fb_width, size.fb_height, size.native_fb_width, size.native_fb_height, true);
+  attemptActive->store(true);
   g_initialized = true;
+  cleanup.committed = true;
   return true;
 }
 

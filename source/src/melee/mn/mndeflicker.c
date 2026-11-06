@@ -118,8 +118,25 @@ static void mnControls_labels(char labels[10][32], char values[10][32])
         u16 output = mnControls_output(index);
         labels[i + 4][0] = values[i + 4][0] = '\0';
         if (index >= mnControls_count()) continue;
-        name = index < PAD_BUTTON_COUNT ? PADGetButtonName(output) : PADGetAxisDirectionLabel(output);
-        snprintf(labels[i + 4], 32, "%s", name ? name : "Unknown");
+        /* Direction-only labels made D-pad, main-stick and C-stick bindings
+         * indistinguishable, and analog triggers appeared as N/A. Keep the
+         * destination explicit while retaining the original binding order. */
+        if (index < PAD_BUTTON_COUNT) {
+            name = PADGetButtonName(output);
+            snprintf(labels[i + 4], 32, "%s%s",
+                     output == PAD_BUTTON_UP || output == PAD_BUTTON_DOWN ||
+                     output == PAD_BUTTON_LEFT || output == PAD_BUTTON_RIGHT
+                         ? "D-pad " : "",
+                     name ? name : "Unknown");
+        } else if (output == PAD_AXIS_TRIGGER_L || output == PAD_AXIS_TRIGGER_R) {
+            snprintf(labels[i + 4], 32, "%s analog",
+                     output == PAD_AXIS_TRIGGER_L ? "L" : "R");
+        } else {
+            name = PADGetAxisDirectionLabel(output);
+            snprintf(labels[i + 4], 32, "%s %s",
+                     output <= PAD_AXIS_LEFT_Y_NEG ? "Stick" : "C-stick",
+                     name ? name : "Unknown");
+        }
         if (!mnControls_controller) {
             s32 key = PAD_KEY_INVALID;
             if (index < PAD_BUTTON_COUNT) {

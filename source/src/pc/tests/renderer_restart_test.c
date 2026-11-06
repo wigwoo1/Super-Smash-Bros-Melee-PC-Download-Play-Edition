@@ -13,6 +13,23 @@ static int has_arg(int argc, char** argv, const char* value)
     return 0;
 }
 
+static int reject_session;
+static int refuse_capture;
+static unsigned session_capture(void* bytes,unsigned capacity)
+{
+    unsigned i;
+    if(refuse_capture || capacity<37) return 0;
+    for(i=0;i<37;i++) ((unsigned char*)bytes)[i]=(unsigned char)(i*13);
+    return 37;
+}
+static int session_restore(const void* bytes,unsigned size)
+{
+    unsigned i;
+    if(reject_session || size!=37) return 0;
+    for(i=0;i<37;i++) if(((const unsigned char*)bytes)[i]!=(unsigned char)(i*13)) return 0;
+    return 1;
+}
+
 static int run_parent(const char* backend, int expect_child_failure)
 {
     ULONGLONG started = GetTickCount64();
@@ -94,6 +111,9 @@ static int test_renderer_handoffs(void)
 int main(int argc, char** argv)
 {
     const char* requested = NULL;
+    const int session=has_arg(argc,argv,"--test-session") || has_arg(argc,argv,"--test-session-reject");
+    if(session) MeleePc_RendererRestartSetSessionTransfer(session_capture,session_restore);
+    reject_session=has_arg(argc,argv,"--test-session-reject");
     if (has_arg(argc, argv, "--test-repeated-arguments"))
         return test_repeated_arguments() ? EXIT_SUCCESS : EXIT_FAILURE;
     const int attached = MeleePc_RendererRestartAttach(argc, argv, &requested);
@@ -108,7 +128,23 @@ int main(int argc, char** argv)
              strcmp(requested, "d3d11") != 0 &&
              strcmp(requested, "d3d12") != 0 &&
              strcmp(requested, "vulkan") != 0)) return 43;
+        if(!MeleePc_RendererRestartRestoreSession()) return 45;
         return MeleePc_RendererRestartChildReady() ? EXIT_SUCCESS : 44;
+    }
+    if(session) {
+        int passed;
+        char* inherited=NULL;
+        size_t length=0;
+        if(_putenv_s("MELEE_RENDERER_SESSION","parent-value-kept")) return 46;
+        passed=run_parent("vulkan",reject_session);
+        if(_dupenv_s(&inherited,&length,"MELEE_RENDERER_SESSION")) return 47;
+        if(!inherited || strcmp(inherited,"parent-value-kept")) { free(inherited);return 47; }
+        free(inherited);
+        refuse_capture=1;
+        if(MeleePc_RendererRestartStart("vulkan")) return 48;
+        _putenv_s("MELEE_RENDERER_SESSION","");
+        if(passed) puts("PASS: session payload roundtrip/rejection, refused capture, parent environment unchanged");
+        return passed ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     if (has_arg(argc, argv, "--test-invalid-backend")) {
         if (MeleePc_RendererRestartStart("not-a-renderer")) return EXIT_FAILURE;

@@ -1,0 +1,82 @@
+{
+  "status": "VERIFIED_SCOPED_ORIGINAL_GAME_OPTIONS_HANDOFF",
+  "overall_project_estimate_percent": 30,
+  "private_candidate_sha256": "195a6a513bebbda5e91639fcb6672ce2319c8d3c1513e8cf75f06c5749badf41",
+  "new_public_binary": false,
+  "source_hashes": {
+    "source/src/pc/host_startup.c": "69f8377c3aac6ee0b7b628576db17939abcd3b330414ffd2aebda38341d2aaf4",
+    "source/src/pc/renderer_restart.c": "2e42483ea92eb08a7e143b31fd86d203c78c1b8aee3b1a4f0bffeb1f63bf6e38",
+    "source/src/pc/renderer_restart.h": "b756aec84c8ba8e3d324b8584e9014b5ef82642c7d94521b8024103e1646f534",
+    "source/src/pc/renderer_session.h": "5cba83e062c48298fe699657f67233dee7c7905d8739a6bb8544abb4fe3b5d5b",
+    "dependencies/aurora/lib/aurora.cpp": "84da42ee48e4bce8449c7b82dfdb27612ea84f511031f6c90314cea8b6f6fdbf",
+    "dependencies/aurora/lib/webgpu/gpu.cpp": "b1a2ded022cfc9f259c58b3a7596486d6309213d30747d8ea4c6ae8b95418030",
+    "source/src/pc/game_prefs_session.c": "9ccccb3643cd12f8257e502fd2f76608ea9175a5e9e988ab8f514b3a986d3537",
+    "source/src/pc/game_prefs_session.h": "72b5e26c630959b13c458339d3be8632adfe5a3a7c0253aa7d3afc7b12b24188",
+    "source/src/melee/gm/gmmain_lib.c": "ca1f9b8eee0a8db0342d46dbf7a97de0c8bd1f7dd391a298c8d4f4c8674c952f",
+    "source/cmake/MeleeConfig.cmake": "c5848fe22a83ff1f7441a5a9951b50990e09f10db7b49d30423328a395f9f74e",
+    "source/src/pc/tests/game_prefs_session_test.c": "5e5a5565ba8aff5b2f3b16d7ec4734a49e2d61db6dd0fcb7cf1f7086b833c8d2"
+  },
+  "build": {
+    "native_x86_release": true,
+    "unresolved_symbols": 0,
+    "card_backend_linked": false
+  },
+  "unit_checks": 1613,
+  "process_protocol_passes": 11,
+  "muted_handoffs": [
+    {
+      "initial": "d3d12",
+      "all_checks_passed": true,
+      "scope": "Test-only parent option values; actual native Graphics-menu handoff, original boot resets, one-shot restore. No unlock/gameplay outcome writes."
+    },
+    {
+      "initial": "vulkan",
+      "all_checks_passed": true,
+      "scope": "Test-only parent option values; actual native Graphics-menu handoff, original boot resets, one-shot restore. No unlock/gameplay outcome writes."
+    }
+  ],
+  "preserved_options": [
+    "bit-exact stage_mask",
+    "64-bit item_mask",
+    "item frequency including None=255",
+    "per-port rumble",
+    "sound balance",
+    "deflicker",
+    "saved language"
+  ],
+  "visual_scope": [
+    "Vulkan Sound menu displayed restored balance -37 and Stereo.",
+    "D3D12 replacement main menu displayed and responded to S."
+  ],
+  "normal_start_versus": {
+    "status": "PASS",
+    "checks": {
+      "exit0": true,
+      "muted": true,
+      "backend": true,
+      "both_fighters": true,
+      "movement_consumed": true,
+      "position_changed": true,
+      "attack": true,
+      "close600": true,
+      "capture": true,
+      "clean_shutdown": true
+    },
+    "executable_sha256": "195a6a513bebbda5e91639fcb6672ce2319c8d3c1513e8cf75f06c5749badf41",
+    "scope": "Muted normal-start original-menu/PAD Versus smoke; no manual match or post-switch match acceptance."
+  },
+  "earlier_fallback": {
+    "private_candidate_sha256": "ea926fac6b18e2db25ac1cd801bfc30c554823c69df32d5cf57d02ccd1533cc1",
+    "scope": "Controlled adapter/device failures on this PC; actual game fallback in both directions and rejected switch children. Separate earlier executable.",
+    "old_hardware_verified": false
+  },
+  "limitations": [
+    "Runtime option values were set by an opt-in parent-session fixture, not individually through every original menu.",
+    "GameRules/match settings, statistics and physical-controller mapping/assignment transfer remain unfinished.",
+    "No audible-output, all-roster/all-stage, independent-controller, old-hardware or full release acceptance.",
+    "Ordinary menu-only settings/handoff repeat was interrupted; not accepted.",
+    "Physical Down arrow, independent physical controller, all-backends-unavailable and forced request-timeout delivery remain unverified.",
+    "The October18 public template remains immutable and does not contain these changes.",
+    "Game development remains paused by the user; publication upkeep does not resume it."
+  ]
+}

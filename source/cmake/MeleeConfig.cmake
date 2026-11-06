@@ -73,6 +73,7 @@ target_sources(melee PRIVATE "${_melee_root}/src/pc/movie_decode.c")
 target_sources(melee PRIVATE "${_melee_root}/src/pc/thp_native.c")
 target_sources(melee PRIVATE "${_melee_root}/src/pc/host_startup.c")
 target_sources(melee PRIVATE "${_melee_root}/src/pc/renderer_restart.c")
+target_sources(melee PRIVATE "${_melee_root}/src/pc/game_prefs_session.c")
 # Compile the original movie player against its upstream THP declarations.
 # Keep this fallback scoped to these files; the host SDK remains Aurora.
 # A real native decoder must resolve the THP entrypoints before full-game link.

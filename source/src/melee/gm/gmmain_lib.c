@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dolphin/os.h>
+#if defined(MELEE_NO_SAVES)
+#include <pc/game_prefs_session.h>
+#endif
 #endif
 
 #include <placeholder.h>
@@ -1314,6 +1317,9 @@ void gmMainLib_8015FA34(s32 arg0)
     }
 #if defined(TARGET_PC) && defined(MELEE_NO_SAVES) && defined(MELEE_UNLOCK_ALL)
     acknowledgePreUnlockedStages();
+#endif
+#if defined(TARGET_PC) && defined(MELEE_NO_SAVES)
+    MeleePc_GamePrefsAfterBootstrap();
 #endif
     setupAudioVideo();
 }

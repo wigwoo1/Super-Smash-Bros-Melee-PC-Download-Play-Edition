@@ -577,6 +577,11 @@ AuroraInfo initialize(int argc, char* argv[], const AuroraConfig& config) noexce
 
   if (!windowCreated) {
     for (const auto backendType : PreferredBackendOrder) {
+      // An explicit request was already tried above. A failed device should
+      // fall through to a different backend instead of repeating the failure.
+      if (backendType == config.desiredBackend) {
+        continue;
+      }
       selectedBackend = backendType;
       if (!window::create_window(selectedBackend)) {
         continue;

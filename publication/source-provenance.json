@@ -196,7 +196,7 @@
     },
     {
       "path": "source/cmake/MeleeConfig.cmake",
-      "sha256": "9f3c714864da5fcc757426045748bc8c1998b2ce4156d53b86f334ed939309ce"
+      "sha256": "c5848fe22a83ff1f7441a5a9951b50990e09f10db7b49d30423328a395f9f74e"
     },
     {
       "path": "source/cmake/i686-gcc.cmake",
@@ -6060,7 +6060,7 @@
     },
     {
       "path": "source/src/melee/gm/gmmain_lib.c",
-      "sha256": "40b8bfd1933e7b9c0c8163eea2c8ff39a4ebfee2d9f03aa355c500a6a0878684"
+      "sha256": "ca1f9b8eee0a8db0342d46dbf7a97de0c8bd1f7dd391a298c8d4f4c8674c952f"
     },
     {
       "path": "source/src/melee/gm/gmmain_lib.h",
@@ -8984,7 +8984,7 @@
     },
     {
       "path": "source/src/melee/mn/mndeflicker.c",
-      "sha256": "2cddd6026d5ad5292a9d49c6fc4995704f5fe6ef107088b841565ff8c81ef28b"
+      "sha256": "17da885c9068f85935797a7c5a050f240aa53fd474a6e1a907e18dfba3a9e196"
     },
     {
       "path": "source/src/melee/mn/mndeflicker.h",
@@ -10687,6 +10687,14 @@
       "sha256": "e0f5c9d93ff5c385c892fcd56d392fc300a0fe8223010078f7d8fc28ee7ba1b1"
     },
     {
+      "path": "source/src/pc/game_prefs_session.c",
+      "sha256": "9ccccb3643cd12f8257e502fd2f76608ea9175a5e9e988ab8f514b3a986d3537"
+    },
+    {
+      "path": "source/src/pc/game_prefs_session.h",
+      "sha256": "72b5e26c630959b13c458339d3be8632adfe5a3a7c0253aa7d3afc7b12b24188"
+    },
+    {
       "path": "source/src/pc/gamewatch_animation_profiles.h",
       "sha256": "decbd90279f8eeb7d61d03b036aad0a737951f11d12a015084052fafc35dad9a"
     },
@@ -10708,7 +10716,7 @@
     },
     {
       "path": "source/src/pc/host_startup.c",
-      "sha256": "9912a396b92a16d319ae4cfa6e076c0c875d30ab7f4b8ddf312ef070b50d2683"
+      "sha256": "69f8377c3aac6ee0b7b628576db17939abcd3b330414ffd2aebda38341d2aaf4"
     },
     {
       "path": "source/src/pc/hps_decode.h",
@@ -11348,11 +11356,15 @@
     },
     {
       "path": "source/src/pc/renderer_restart.c",
-      "sha256": "73485c9da93d27cfb497e9f5b1c458e5413429b405e3cdf5d4082ce63da95973"
+      "sha256": "2e42483ea92eb08a7e143b31fd86d203c78c1b8aee3b1a4f0bffeb1f63bf6e38"
     },
     {
       "path": "source/src/pc/renderer_restart.h",
-      "sha256": "6f74902fe33f6df70adbc72aaf46a88a806b3e6dccd7f2a6507b33e0a1175bc4"
+      "sha256": "b756aec84c8ba8e3d324b8584e9014b5ef82642c7d94521b8024103e1646f534"
+    },
+    {
+      "path": "source/src/pc/renderer_session.h",
+      "sha256": "5cba83e062c48298fe699657f67233dee7c7905d8739a6bb8544abb4fe3b5d5b"
     },
     {
       "path": "source/src/pc/replay_seed.h",
@@ -11763,12 +11775,16 @@
       "sha256": "18d566b3c9cbdb5e54471049b5d8ca4cd353bdc7d0cf4b525cc83bdd9791b37b"
     },
     {
+      "path": "source/src/pc/tests/game_prefs_session_test.c",
+      "sha256": "5e5a5565ba8aff5b2f3b16d7ec4734a49e2d61db6dd0fcb7cf1f7086b833c8d2"
+    },
+    {
       "path": "source/src/pc/tests/presentation_clock_test.c",
       "sha256": "2db0aa8036c21bfb5688315df4d2302d9eb4558f70f5ea8c3c8f569593eddc30"
     },
     {
       "path": "source/src/pc/tests/renderer_restart_test.c",
-      "sha256": "ceef4504219190e73535c05d6ccdb71c6f07c33fb5a546574929c48af9e4ae4b"
+      "sha256": "48b775c1aba95dce555a8f829838801c5be889e624f0a95e829295e2123f8be5"
     },
     {
       "path": "source/src/pc/third_party/STB-NOTICE.txt",
@@ -12872,7 +12888,7 @@
     },
     {
       "path": "source/tools/test_renderer_restart.ps1",
-      "sha256": "6329798a40f2e69938cb9b62e8566c8ce13289b706d3392d30d9c4f538d9ad78"
+      "sha256": "ff9b2cc55cefed94ae9e40750701569330c34445561bebd3a810d3f387d2aa02"
     },
     {
       "path": "source/tools/transform_dep.py",
@@ -13544,7 +13560,7 @@
     },
     {
       "path": "dependencies/aurora/lib/aurora.cpp",
-      "sha256": "ff280e2c1372094ecd1d69ed59a3e0e537599a163562021c39ebf6d10e182028"
+      "sha256": "84da42ee48e4bce8449c7b82dfdb27612ea84f511031f6c90314cea8b6f6fdbf"
     },
     {
       "path": "dependencies/aurora/lib/binding_diagnostics.hpp",
@@ -14520,7 +14536,7 @@
     },
     {
       "path": "dependencies/aurora/lib/webgpu/gpu.cpp",
-      "sha256": "e49c295eb3bf4427f549fc32423e98cfb05bee90c191c7388350bc2708c51068"
+      "sha256": "b1a2ded022cfc9f259c58b3a7596486d6309213d30747d8ea4c6ae8b95418030"
     },
     {
       "path": "dependencies/aurora/lib/webgpu/gpu.hpp",

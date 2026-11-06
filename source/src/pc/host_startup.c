@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "renderer_session.h"
 
 /* SDL's public type is forward-declared by Aurora. The Melee static library
  * deliberately does not depend on SDL's private include directory. */
@@ -53,6 +54,10 @@ static int host_service(void) {
     if(aurora_ax_source_rate() && !aurora_ax_service()) {
         fputs("NATIVE_HOST_SERVICE_FAILED component=audio\n",stderr);
         return 0;
+    }
+    {
+        int session_result=renderer_session_service();
+        if(session_result<0) return 0;
     }
     if(renderer_handoff_child && !renderer_handoff_ready) {
         if(!MeleePc_RendererRestartChildReady())
@@ -311,6 +316,7 @@ int main(int argc,char** argv)
         }
     }
     if(handoff<0) return 4;
+    MeleePc_RendererRestartSetSessionTransfer(renderer_session_capture,renderer_session_restore);
     if(command_renderer) {
         renderer=command_renderer;
         /* Game code reads this from the MSVC CRT environment with getenv. */
@@ -384,6 +390,28 @@ int main(int argc,char** argv)
     if(!QueryPerformanceFrequency(&counter_frequency) || counter_frequency.QuadPart<=0 ||
        !QueryPerformanceCounter(&counter_origin)) return 3;
     AuroraInfo runtime_info=aurora_initialize(argc,argv,&config);
+    /* Normal startup may use Aurora's working fallback. A renderer-switch
+     * child must satisfy the explicit selection before replacing its parent. */
+    if(runtime_info.backend==BACKEND_NULL ||
+       (renderer_handoff_child && config.desiredBackend!=BACKEND_AUTO &&
+        runtime_info.backend!=config.desiredBackend)) {
+        fprintf(stderr,"NATIVE_RENDERER_UNAVAILABLE requested=%d selected=%d handoff_child=%d\n",
+                config.desiredBackend,runtime_info.backend,renderer_handoff_child);
+        MeleePc_RendererRestartCleanup();
+        aurora_shutdown();
+        return 4;
+    }
+    if(config.desiredBackend!=BACKEND_AUTO && runtime_info.backend!=config.desiredBackend) {
+        const char* actual=runtime_info.backend==BACKEND_D3D12 ? "d3d12" :
+                           runtime_info.backend==BACKEND_VULKAN ? "vulkan" :
+                           runtime_info.backend==BACKEND_D3D11 ? "d3d11" : "auto";
+        fprintf(stderr,"NATIVE_RENDERER_FALLBACK requested=%d selected=%d active=%s\n",
+                config.desiredBackend,runtime_info.backend,actual);
+        if(_putenv_s("MELEE_STARTUP_RENDERER",actual)!=0) {
+            aurora_shutdown();
+            return 4;
+        }
+    }
     if(renderer_handoff_child) {
         renderer_handoff_window=runtime_info.window;
         if(renderer_handoff_window) SDL_HideWindow(renderer_handoff_window);
@@ -422,8 +450,6 @@ int main(int argc,char** argv)
     if(runtime_info.userPath!=NULL)
         OSPanic(__FILE__,__LINE__,"Session-only startup exposed a preference path");
     fputs("NATIVE_PREFERENCES session_only=1 user_path=none\n",stderr);
-    if(config.desiredBackend!=BACKEND_AUTO && aurora_get_backend()!=config.desiredBackend)
-        OSPanic(__FILE__,__LINE__,"Requested renderer unavailable");
     if(!aurora_set_exit_handler(host_exit) ||
        !MeleePc_InstallCallbackOwner(on_owner) ||
        !aurora_set_gx_callback_gate(MeleePc_CallbacksEnabled) ||
@@ -446,6 +472,7 @@ int main(int argc,char** argv)
     /* A normal native launch must accept input without diagnostic flags or
      * a saved profile. Users can edit/disable this session-only preset. */
     if (!PADInstallKeyboardPreset(0)) OSPanic(__FILE__,__LINE__,"Keyboard preset failed");
+    if(!MeleePc_RendererRestartRestoreSession()) host_shutdown(4);
     fputs("NATIVE_KEYBOARD port=0 session_only=1 WASD=stick J=A K=B U=X I=Y Enter=Start Q=L E=R O=Z HLYN=Cstick arrows=Dpad\n",stderr);
     printf("NATIVE_GAME_HOST renderer=%d mem1=%u aram=%u owner=1 clock=1 disc_mounted=1 entering_original_main=1 image_base=%p\n",
            aurora_get_backend(),config.mem1Size,config.mem2Size,GetModuleHandleA(NULL));

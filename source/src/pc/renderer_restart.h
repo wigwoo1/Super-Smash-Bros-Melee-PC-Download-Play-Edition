@@ -16,6 +16,13 @@ typedef enum {
  * d3d11, d3d12, or vulkan. Call Poll from the graphics menu while pending. */
 int MeleePc_RendererRestartStart(const char* backend);
 MeleePc_RendererRestartPoll MeleePc_RendererRestartPollChild(void);
+/* Ephemeral process-environment payload; no preference/save file is used.
+ * Install on both hosts. Restore before entering the game/acknowledging ready.
+ * A zero capture size or rejected restore leaves the current parent running. */
+#define MELEE_PC_RENDERER_SESSION_CAPACITY 4096
+void MeleePc_RendererRestartSetSessionTransfer(
+    unsigned (*capture)(void*, unsigned), int (*restore)(const void*, unsigned));
+int MeleePc_RendererRestartRestoreSession(void);
 
 /* Called by startup. Returns 0 for ordinary launch, 1 for a renderer request,
  * and -1 for malformed handoff arguments. The returned backend string points
