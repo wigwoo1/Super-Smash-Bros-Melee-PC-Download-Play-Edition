@@ -72,6 +72,7 @@ extern unsigned int HSD_JObjDiagnosticMatchFrame;
 #include <pc/figure_catch_diagnostic.h>
 #include <pc/adventure_goomba_diagnostic.h>
 #include <pc/adventure_koopa_diagnostic.h>
+#include <pc/p2_contact_diagnostic.h>
 #endif
 
 static u32 lbl_803D5620[] = {
@@ -2572,6 +2573,13 @@ void gm_Scene_Vs_OnFrame(void)
             }
         }
     }
+    /* Keep damage-trace timestamps current without enabling the scripted
+     * match-input diagnostics.  The latter injects test inputs and would
+     * interfere with normal Player 2 keyboard/controller verification. */
+    if (getenv("MELEE_DIAGNOSTIC_PLAYER2_DAMAGE") &&
+        controller.state.unk_0 == 0) {
+        HSD_JObjDiagnosticMatchFrame = controller.state.frame_count;
+    }
     /* This callback also owns the original in-match clear screen (state 2).
      * Script only active gameplay; physical confirmation must survive there. */
     if (getenv("MELEE_DIAGNOSTIC_MATCH_INPUT") && controller.state.unk_0 == 0) {
@@ -3292,6 +3300,8 @@ void gm_Scene_Vs_OnFrame(void)
             MeleePc_AdventureGoombaInput(Player_GetEntity(0),&input,frame);
         if(getenv("MELEE_DIAGNOSTIC_ADVENTURE_KOOPA"))
             MeleePc_AdventureKoopaInput(Player_GetEntity(0),&input,frame);
+        if(getenv("MELEE_DIAGNOSTIC_P2_CONTACT"))
+            MeleePc_Player2ContactInput(&input,frame);
         /* This opt-in probe runs after the current PAD latch. Use the SDL
          * virtual-device path when requested; otherwise stage the sample for
          * the next native PAD latch. Retail input remains unchanged. */

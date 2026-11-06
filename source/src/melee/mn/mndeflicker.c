@@ -181,6 +181,8 @@ static void mnControls_think(void)
         if (raw & PAD_BUTTON_RIGHT) events |= MenuInput_Right;
         if (raw & PAD_BUTTON_A) events |= MenuInput_Confirm;
         if (raw & PAD_BUTTON_B) events |= MenuInput_Back;
+        if (raw && getenv("MELEE_DIAGNOSTIC_CONTROLS_TRACE"))
+            OSReport("NATIVE_CONTROLS_MENU raw=%04x events=%u selection=%u port=%u\n", raw, (unsigned) events, mnControls_selection, mnControls_port);
         /* Only the explicit scripted route may supply virtual menu edges. */
         if (getenv("MELEE_DIAGNOSTIC_CONTROLS_NATIVE")) events |= Menu_GetAllInputs();
     }

@@ -2614,6 +2614,11 @@ void gm_80164A0C(u8 ckind)
 /// Are all unlockable characters unlocked?
 bool gm_80164ABC(void)
 {
+#if defined(TARGET_PC) && defined(MELEE_UNLOCK_ALL)
+    /* Every unlockable character is selectable in the PC build, so report
+     * the aggregate unlock state consistently with gm_IsCKindUnlocked. */
+    return true;
+#else
     u16* unlockable_character_bitfield =
         gmMainLib_GetUnlockedCharactersBitmaskPtr();
     int i;
@@ -2625,6 +2630,7 @@ bool gm_80164ABC(void)
         }
     }
     return true;
+#endif
 }
 
 static inline bool is_character_unlocked(u8 n, const u16* mask)

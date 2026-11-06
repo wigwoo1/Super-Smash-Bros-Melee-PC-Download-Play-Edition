@@ -797,6 +797,23 @@ u32 PADRead(PADStatus* status) {
   auto keyPresses=g_pendingKeyPresses.take();
   if(captureHeldInput)keyPresses.reset();
   g_suppressHeldOnRead = false;
+  const bool traceKeyboardPad = std::getenv("MELEE_DIAGNOSTIC_KEYBOARD_PAD") != nullptr;
+  if (traceKeyboardPad && keyPresses.test(SDL_SCANCODE_F)) {
+    const auto& p2 = g_keyboardBindings[1];
+    const auto a = std::ranges::find_if(p2.m_buttonMapping,
+      [](const auto& mapping) { return mapping.padButton == PAD_BUTTON_A; });
+    const bool heldF = aurora::input::keyboard_key_pressed(kbState, numKeys, SDL_SCANCODE_F);
+    const bool mappedEdge = a != p2.m_buttonMapping.end() &&
+      a->scancode >= 0 && size_t(a->scancode) < keyPresses.size() && keyPresses.test(size_t(a->scancode));
+    const bool mappedHeld = a != p2.m_buttonMapping.end() &&
+      aurora::input::keyboard_key_pressed(kbState, numKeys, a->scancode);
+    std::fprintf(stderr,
+      "NATIVE_P2_KEYBOARD_F_SAMPLE active=%u controls=%u editing=%u suppressed=%u f_edge=%u f_held=%u mappings=%u a_scancode=%d mapped_edge=%u mapped_held=%u\n",
+      unsigned(g_windowFocused), unsigned(g_nativeControlsPage), unsigned(g_controlsEditing),
+      unsigned(captureHeldInput), unsigned(keyPresses.test(SDL_SCANCODE_F)), unsigned(heldF),
+      unsigned(p2.m_mappingsSet), a == p2.m_buttonMapping.end() ? -999 : a->scancode,
+      unsigned(mappedEdge), unsigned(mappedHeld));
+  }
 
   uint32_t rumbleSupport = 0;
   for (uint32_t i = 0; i < PAD_CHANMAX; ++i) {
@@ -1550,6 +1567,10 @@ BOOL PADSetKeyButtonBinding(const u32 port, const PADKeyButtonBinding binding) {
     if (padButton == binding.padButton) {
       scancode = binding.scancode;
       g_pendingKeyPresses.clear();
+      if (port == 1 && padButton == PAD_BUTTON_A &&
+          std::getenv("MELEE_DIAGNOSTIC_KEYBOARD_PAD"))
+        std::fprintf(stderr, "NATIVE_P2_KEYBOARD_A_BINDING scancode=%d active=%u\n",
+                     scancode, unsigned(g_keyboardBindings[port].m_mappingsSet));
       return TRUE;
     }
   }
@@ -1641,6 +1662,14 @@ BOOL PADInstallKeyboardPreset(const u32 port) {
       {SDL_SCANCODE_Q, PAD_AXIS_TRIGGER_L, 100}, {SDL_SCANCODE_E, PAD_AXIS_TRIGGER_R, 100}};
   if (!PADSetKeyButtonBindings(port, buttons) || !PADSetKeyAxisBindings(port, axes)) return FALSE;
   PADSetKeyboardActive(port, TRUE);
+  if (port == 1 && std::getenv("MELEE_DIAGNOSTIC_KEYBOARD_PAD")) {
+    const auto& mappings = g_keyboardBindings[port].m_buttonMapping;
+    const auto a = std::ranges::find_if(mappings,
+      [](const PADKeyButtonBinding& mapping) { return mapping.padButton == PAD_BUTTON_A; });
+    std::fprintf(stderr, "NATIVE_P2_KEYBOARD_PRESET A_scancode=%d active=%u\n",
+                 a == mappings.end() ? -999 : a->scancode,
+                 unsigned(g_keyboardBindings[port].m_mappingsSet));
+  }
   return TRUE;
 }
 
@@ -1979,6 +2008,8 @@ void PADBlockInput(const bool block) {
 }
 
 void PADHandleKeyPress(const s32 scancode,const bool repeat) {
+  if (g_nativeControlsPage && std::getenv("MELEE_DIAGNOSTIC_CONTROLS_TRACE") && !repeat)
+    std::fprintf(stderr, "NATIVE_CONTROLS_KEY scan=%d ready=%u focus=%u block=%u editing=%u capture=%u\n", scancode, unsigned(g_controlsNavigationReady), unsigned(g_windowFocused), unsigned(g_blockPAD), unsigned(g_controlsEditing), unsigned(g_bindingCapture.active));
   if (g_nativeControlsPage && !g_bindingCapture.active && g_controlsNavigationReady &&
       g_windowFocused && !g_blockPAD && !g_controlsEditing)
     g_controlsNavigationKeys.press(scancode, repeat);
@@ -1989,6 +2020,20 @@ void PADHandleKeyPress(const s32 scancode,const bool repeat) {
     g_bindingCapture.key = scancode;
   const bool accepted=g_windowFocused && !g_blockPAD && !g_controlsEditing && !g_bindingCapture.active && !g_nativeControlsPage;
   if(accepted)g_pendingKeyPresses.press(scancode,repeat);
+  if (scancode == SDL_SCANCODE_F && std::getenv("MELEE_DIAGNOSTIC_KEYBOARD_PAD")) {
+    static unsigned diagnosticFEvents = 0;
+    if (diagnosticFEvents < 128) {
+      const auto& p2 = g_keyboardBindings[1];
+      const auto a = std::ranges::find_if(p2.m_buttonMapping,
+        [](const auto& mapping) { return mapping.padButton == PAD_BUTTON_A; });
+      std::fprintf(stderr,
+        "NATIVE_P2_KEYBOARD_F_EVENT seq=%u repeat=%u accepted=%u focus=%u blocked=%u editing=%u capture=%u controls=%u mappings=%u a_scancode=%d\n",
+        diagnosticFEvents++, unsigned(repeat), unsigned(accepted), unsigned(g_windowFocused),
+        unsigned(g_blockPAD), unsigned(g_controlsEditing), unsigned(g_bindingCapture.active),
+        unsigned(g_nativeControlsPage), unsigned(p2.m_mappingsSet),
+        a == p2.m_buttonMapping.end() ? -999 : a->scancode);
+    }
+  }
   if(key_tap_diagnostic() && !repeat)
     std::fprintf(stderr,"NATIVE_KEY_TAP_EVENT scancode=%d accepted=%u focus=%u block=%u editing=%u\n",
         int(scancode),unsigned(accepted),unsigned(g_windowFocused),unsigned(g_blockPAD),unsigned(g_controlsEditing));
@@ -2044,6 +2089,8 @@ u16 PADReadControlsNavigation() {
     return 0;
   }
   const u16 pressed = held & ~g_controlsNavigationLast;
+  if (pressed && std::getenv("MELEE_DIAGNOSTIC_CONTROLS_TRACE"))
+    std::fprintf(stderr, "NATIVE_CONTROLS_NAV held=%04x pressed=%04x\n", unsigned(held), unsigned(pressed));
   g_controlsNavigationFrames = held && held == g_controlsNavigationLast ? g_controlsNavigationFrames + 1 : 0;
   g_controlsNavigationLast = held;
   const u16 directions = PAD_BUTTON_UP | PAD_BUTTON_DOWN | PAD_BUTTON_LEFT | PAD_BUTTON_RIGHT;

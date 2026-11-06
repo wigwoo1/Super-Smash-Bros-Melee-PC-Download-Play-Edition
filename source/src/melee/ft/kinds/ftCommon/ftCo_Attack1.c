@@ -46,14 +46,14 @@ bool ftCo_Attack1_CheckInput(Fighter_GObj* gobj)
 {
     Fighter* fp = GET_FIGHTER(gobj);
 #ifdef TARGET_PC
-    const bool traceAttack = fp->player_idx == 0 &&
-                             (fp->input.pressed_buttons & HSD_PAD_A) &&
+    extern unsigned int HSD_JObjDiagnosticMatchFrame;
+    const bool traceAttack = (fp->input.pressed_buttons & HSD_PAD_A) &&
                              getenv("MELEE_DIAGNOSTIC_ATTACK_STATE") != NULL;
     const int traceMotionBefore = fp->motion_id;
     if (traceAttack) {
         fprintf(stderr,
-                "NATIVE_ATTACK_INPUT_CONSUMED player=%d kind=%d port=%d motion_before=%d held=%08x pressed=%08x item=%d\n",
-                fp->player_idx, fp->kind, fp->pad_port, fp->motion_id,
+                "NATIVE_ATTACK_INPUT_CONSUMED frame=%u player=%d kind=%d port=%d motion_before=%d held=%08x pressed=%08x item=%d\n",
+                HSD_JObjDiagnosticMatchFrame, fp->player_idx, fp->kind, fp->pad_port, fp->motion_id,
                 fp->input.held_buttons[0], fp->input.pressed_buttons,
                 fp->item_gobj != NULL);
     }
@@ -91,8 +91,8 @@ bool ftCo_Attack1_CheckInput(Fighter_GObj* gobj)
 #ifdef TARGET_PC
             if (traceAttack) {
                 fprintf(stderr,
-                        "NATIVE_ATTACK_ACTION_ACCEPTED player=%d kind=%d motion_before=%d motion_after=%d\n",
-                        fp->player_idx, fp->kind, traceMotionBefore,
+                        "NATIVE_ATTACK_ACTION_ACCEPTED frame=%u player=%d kind=%d motion_before=%d motion_after=%d\n",
+                        HSD_JObjDiagnosticMatchFrame, fp->player_idx, fp->kind, traceMotionBefore,
                         fp->motion_id);
             }
 #endif

@@ -1,0 +1,44 @@
+{
+  "status": "VERIFIED_SCOPED_KEYBOARD_P2_DAMAGE_BOTH_RENDERERS",
+  "date": "2026-11-06",
+  "overall_project_estimate_percent": 30,
+  "private_diagnostic_executable_sha256": "bd45b00e1b37c0f1273aa2aacc2c54e7626e3870563c91a7568bd9723476a40a",
+  "binary_published": false,
+  "source_hashes": {
+    "source/src/melee/gm/gmvs.c": "3fae03144e4e45e89d330f4c33e1ab26f4492ebb6c69cacc34f62b8f38540f6a",
+    "source/src/pc/p2_contact_diagnostic.h": "87f1165bfc15476a8f7397b60a1efd85e0dc0389b0fbd68b96ff6495839c26de",
+    "source/src/melee/ft/ftcoll.c": "f993add9462706573f208a8a4aee6fb5b99fe780d45fe42c08ea420619c31915",
+    "source/src/melee/ft/kinds/ftCommon/ftCo_Attack1.c": "d3e784c907ba28a5233e6480863f2dc482f9016f00e3edbe6e546a2b4f891f80"
+  },
+  "setup": "Original menu/CSS/PAD route, standard Final Destination, ordinary P2 approach, session preset/F binding through native API. P1 stays staged neutral. P2 virtual status cleared and pad staging disabled before OS keyboard F input.",
+  "limitations": [
+    "Not unassisted full-menu/positioning play.",
+    "Controls UI was separately checked on an earlier source-matched private candidate.",
+    "Physical controller, independent movement profiles, full roster/stage fidelity, networking/browser runtime and full release remain unverified.",
+    "No collision, damage, physics or default gameplay fix was needed."
+  ],
+  "cases": [
+    {
+      "renderer": "d3d12",
+      "muted": true,
+      "handoff_frame": 478,
+      "action_frame": 4077,
+      "hit_frame": 4078,
+      "damage_frame": 4079,
+      "damage_before": 0,
+      "damage_after": 2,
+      "clean_shutdown": true
+    },
+    {
+      "renderer": "vulkan",
+      "muted": true,
+      "handoff_frame": 478,
+      "action_frame": 4577,
+      "hit_frame": 4578,
+      "damage_frame": 4579,
+      "damage_before": 0,
+      "damage_after": 2,
+      "clean_shutdown": true
+    }
+  ]
+}

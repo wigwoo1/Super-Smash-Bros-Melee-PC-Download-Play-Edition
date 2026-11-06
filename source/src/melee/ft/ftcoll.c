@@ -13,6 +13,9 @@
 
 #include <math.h>
 #include <placeholder.h>
+#ifdef TARGET_PC
+#include <stdio.h>
+#endif
 
 #include "fighter.h"
 #include "forward.h"
@@ -505,7 +508,24 @@ bool ftColl_80076ED8(Fighter* fp0, HitCapsule* hit0, Fighter* fp1,
             }
 
             { /// @todo inline
+#ifdef TARGET_PC
+                float native_player2_damage_before = fp1->dmg.x1838_percentTemp;
+#endif
                 if (inlineB2(fp1, dmg, dmg_count.v)) {
+#ifdef TARGET_PC
+                    if (getenv("MELEE_DIAGNOSTIC_PLAYER2_DAMAGE") != NULL &&
+                        fp0->player_idx == 1 && fp1->player_idx == 0) {
+                        extern unsigned int HSD_JObjDiagnosticMatchFrame;
+                        fprintf(stderr,
+                                "NATIVE_PLAYER2_FIGHTER_HIT frame=%u attacker=%d attacker_kind=%d attacker_motion=%d victim=%d victim_kind=%d victim_motion=%d damage=%f temp_before=%f temp_after=%f victim_percent=%f element=%d\n",
+                                HSD_JObjDiagnosticMatchFrame, fp0->player_idx,
+                                fp0->kind, fp0->motion_id, fp1->player_idx,
+                                fp1->kind, fp1->motion_id, dmg,
+                                native_player2_damage_before,
+                                fp1->dmg.x1838_percentTemp,
+                                fp1->dmg.x1830_percent, hit0->element);
+                    }
+#endif
                     Fighter* fp = fp0;
                     if (fp0->x1064_thrownHitbox.x134.owner != NULL) {
                         fp = fp0->x1064_thrownHitbox.x134.owner->user_data;

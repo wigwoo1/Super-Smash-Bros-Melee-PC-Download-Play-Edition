@@ -2424,7 +2424,7 @@
     },
     {
       "path": "source/src/melee/ft/ftcoll.c",
-      "sha256": "f424d165ab7d29d1c37537e0ae518300f8696caa2d92ac5cfdf9f45a3eb17974"
+      "sha256": "f993add9462706573f208a8a4aee6fb5b99fe780d45fe42c08ea420619c31915"
     },
     {
       "path": "source/src/melee/ft/ftcoll.h",
@@ -2740,7 +2740,7 @@
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Attack1.c",
-      "sha256": "4f69219cf8f5054e1e2ea798bf017d77434c706093f8bbdcb9f9e4c75b9c0962"
+      "sha256": "d3e784c907ba28a5233e6480863f2dc482f9016f00e3edbe6e546a2b4f891f80"
     },
     {
       "path": "source/src/melee/ft/kinds/ftCommon/ftCo_Attack1.h",
@@ -5716,7 +5716,7 @@
     },
     {
       "path": "source/src/melee/gm/gm_1601.c",
-      "sha256": "6d82519578aabf2921f0b672e93d7dfe90aaa6f7f9c99563eb8ca6245ac8f007"
+      "sha256": "894bf4155a10af4622d4159cd2d65bc96db21941890959c730e2838c6ed1cf4e"
     },
     {
       "path": "source/src/melee/gm/gm_1601.h",
@@ -6348,7 +6348,7 @@
     },
     {
       "path": "source/src/melee/gm/gmvs.c",
-      "sha256": "89ef437fa38dc581e0ef4ab68a4231f7f4146117e3c07860f0a82f262a6300bf"
+      "sha256": "3fae03144e4e45e89d330f4c33e1ab26f4492ebb6c69cacc34f62b8f38540f6a"
     },
     {
       "path": "source/src/melee/gm/gmvs.h",
@@ -8984,7 +8984,7 @@
     },
     {
       "path": "source/src/melee/mn/mndeflicker.c",
-      "sha256": "0f42a580f7f614c9d037a7b658b9f5b33c4ad47be998b069bba6e96f64ac8b80"
+      "sha256": "2cddd6026d5ad5292a9d49c6fc4995704f5fe6ef107088b841565ff8c81ef28b"
     },
     {
       "path": "source/src/melee/mn/mndeflicker.h",
@@ -11261,6 +11261,10 @@
     {
       "path": "source/src/pc/overlay_manifest.h",
       "sha256": "decf2c3e8337faf97039938ce0eea83a5119f8479ac5f5f4df50fe4b2587fb82"
+    },
+    {
+      "path": "source/src/pc/p2_contact_diagnostic.h",
+      "sha256": "87f1165bfc15476a8f7397b60a1efd85e0dc0389b0fbd68b96ff6495839c26de"
     },
     {
       "path": "source/src/pc/pad_poll_backend.c",
@@ -13904,7 +13908,7 @@
     },
     {
       "path": "dependencies/aurora/lib/dolphin/pad/pad.cpp",
-      "sha256": "a02deba4889a5cb2a3094cd78d15289cb938143165379b436095917ed22b2a43"
+      "sha256": "347befc1cd35136eaa201329525231b066650c301b6d920e9a378cf1bd071c37"
     },
     {
       "path": "dependencies/aurora/lib/dolphin/si/si.cpp",
